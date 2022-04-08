@@ -55,7 +55,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// ゲームシーンの初期化
 	gameScene = new GameScene();
 	gameScene->Initialize();
-
+	
 	// メインループ
 	while (true) {
 		// メッセージ処理
