@@ -1,6 +1,7 @@
 ﻿#include "GameScene.h"
 #include "TextureManager.h"
 #include <cassert>
+#include <random>
 
 using namespace DirectX;
 
@@ -16,14 +17,58 @@ void GameScene::Initialize() {
 	debugText_ = DebugText::GetInstance();
 	textureHandle_ = TextureManager::Load("mario.jpg");
 	model_ = Model::Create();
-	worldTransform_.scale_ = {5.0f, 5.0f, 5.0f};
-	worldTransform_.rotation_ = {XM_PI / 4.0f, XM_PI / 4.0f, 0.0f};
-	worldTransform_.translation_ = {10.0f, 10.0f, 10.0f};
-	worldTransform_.Initialize();
+	// 乱数シード生成器
+	std::random_device seed_gen;
+	// メルセンヌ・ツイスタ
+	std::mt19937_64 engine(seed_gen());
+	// 乱数範囲
+	std::uniform_real_distribution<float> rotDist(0.0f, XM_2PI);
+	std::uniform_real_distribution<float> posDist(-10.0f, 10.0f);
+
+	for (size_t i = 0; i < _countof(worldTransform_); i++) {
+		worldTransform_[i].scale_ = {1.0f, 1.0f, 1.0f};
+		worldTransform_[i].rotation_ = {rotDist(engine), rotDist(engine), rotDist(engine)};
+		worldTransform_[i].translation_ = {posDist(engine), posDist(engine), posDist(engine)};
+
+		worldTransform_[i].Initialize();
+	}
+
 	viewProjection_.Initialize();
 }
 
-void GameScene::Update() {}
+void GameScene::Update() {
+	const float K_EYE_SPD = 0.2f;
+	const float K_TARGET_SPD = 0.2f;
+	const float K_UP_ROT_SPD = 0.05f;
+
+	XMFLOAT3 moveEye;
+	XMFLOAT3 moveTarget;
+
+	moveEye = {0, 0, (input_->PushKey(DIK_W) - input_->PushKey(DIK_S)) * K_EYE_SPD};
+	moveTarget = {(input_->PushKey(DIK_RIGHT) - input_->PushKey(DIK_LEFT)) * K_TARGET_SPD, 0, 0};
+	viewAngle += input_->PushKey(DIK_SPACE) * K_UP_ROT_SPD;
+	viewAngle = fmodf(viewAngle, XM_2PI);
+
+	viewProjection_.eye.x += moveEye.x;
+	viewProjection_.eye.y += moveEye.y;
+	viewProjection_.eye.z += moveEye.z;
+	viewProjection_.target.x += moveTarget.x;
+	viewProjection_.target.y += moveTarget.y;
+	viewProjection_.target.z += moveTarget.z;
+	viewProjection_.up = {cosf(viewAngle), sinf(viewAngle), 0.0f};
+	viewProjection_.UpdateMatrix();
+
+	debugText_->SetPos(50, 50);
+	debugText_->Printf(
+	  "eye:(%f,%f,%f)", viewProjection_.eye.x, viewProjection_.eye.y, viewProjection_.eye.z);
+	debugText_->SetPos(50, 70);
+	debugText_->Printf(
+	  "target:(%f,%f,%f)", viewProjection_.target.x, viewProjection_.target.y,
+	  viewProjection_.target.z);
+	debugText_->SetPos(50, 90);
+	debugText_->Printf(
+	  "up:(%f,%f,%f)", viewProjection_.up.x, viewProjection_.up.y, viewProjection_.up.z);
+}
 
 void GameScene::Draw() {
 
@@ -51,7 +96,9 @@ void GameScene::Draw() {
 	/// <summary>
 	/// ここに3Dオブジェクトの描画処理を追加できる
 	/// </summary>
-	model_->Draw(worldTransform_, viewProjection_, textureHandle_);
+	for (size_t i = 0; i < 100; i++) {
+		model_->Draw(worldTransform_[i], viewProjection_, textureHandle_);
+	}
 	// 3Dオブジェクト描画後処理
 	Model::PostDraw();
 #pragma endregion
