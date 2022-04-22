@@ -5,7 +5,7 @@
 
 using namespace DirectX;
 
-GameScene::GameScene() {}
+GameScene::GameScene() { viewAngle = 0.0f; }
 
 GameScene::~GameScene() {}
 
@@ -33,17 +33,25 @@ void GameScene::Initialize() {
 		worldTransform_[i].Initialize();
 	}
 
+	viewProjection_.nearZ = 52.0f;
+	viewProjection_.farZ = 53.0f;
 	viewProjection_.Initialize();
 }
 
 void GameScene::Update() {
+	viewProjection_.fovAngleY += (input_->PushKey(DIK_W) - input_->PushKey(DIK_S)) * 0.01f;
+	viewProjection_.fovAngleY = min(viewProjection_.fovAngleY, XM_PI);
+	viewProjection_.fovAngleY = max(viewProjection_.fovAngleY, 0.01f);
+	viewProjection_.nearZ += (input_->PushKey(DIK_UP) - input_->PushKey(DIK_DOWN)) * 0.1f;
+
+	/*
 	const float K_EYE_SPD = 0.2f;
 	const float K_TARGET_SPD = 0.2f;
 	const float K_UP_ROT_SPD = 0.05f;
 
 	XMFLOAT3 moveEye;
 	XMFLOAT3 moveTarget;
-
+	
 	moveEye = {0, 0, (input_->PushKey(DIK_W) - input_->PushKey(DIK_S)) * K_EYE_SPD};
 	moveTarget = {(input_->PushKey(DIK_RIGHT) - input_->PushKey(DIK_LEFT)) * K_TARGET_SPD, 0, 0};
 	viewAngle += input_->PushKey(DIK_SPACE) * K_UP_ROT_SPD;
@@ -56,7 +64,6 @@ void GameScene::Update() {
 	viewProjection_.target.y += moveTarget.y;
 	viewProjection_.target.z += moveTarget.z;
 	viewProjection_.up = {cosf(viewAngle), sinf(viewAngle), 0.0f};
-	viewProjection_.UpdateMatrix();
 
 	debugText_->SetPos(50, 50);
 	debugText_->Printf(
@@ -68,6 +75,13 @@ void GameScene::Update() {
 	debugText_->SetPos(50, 90);
 	debugText_->Printf(
 	  "up:(%f,%f,%f)", viewProjection_.up.x, viewProjection_.up.y, viewProjection_.up.z);
+	  */
+	viewProjection_.UpdateMatrix();
+
+	debugText_->SetPos(50, 110);
+	debugText_->Printf("fovAngleY(Degree):%f", XMConvertToDegrees(viewProjection_.fovAngleY));
+	debugText_->SetPos(50, 130);
+	debugText_->Printf("nearZ:%f", viewProjection_.nearZ);
 }
 
 void GameScene::Draw() {
@@ -79,9 +93,7 @@ void GameScene::Draw() {
 	// 背景スプライト描画前処理
 	Sprite::PreDraw(commandList);
 
-	/// <summary>
-	/// ここに背景スプライトの描画処理を追加できる
-	/// </summary>
+	// ここに背景スプライトの描画処理を追加できる
 
 	// スプライト描画後処理
 	Sprite::PostDraw();
@@ -93,9 +105,7 @@ void GameScene::Draw() {
 	// 3Dオブジェクト描画前処理
 	Model::PreDraw(commandList);
 
-	/// <summary>
-	/// ここに3Dオブジェクトの描画処理を追加できる
-	/// </summary>
+	// ここに3Dオブジェクトの描画処理を追加できる
 	for (size_t i = 0; i < 100; i++) {
 		model_->Draw(worldTransform_[i], viewProjection_, textureHandle_);
 	}
@@ -107,13 +117,11 @@ void GameScene::Draw() {
 	// 前景スプライト描画前処理
 	Sprite::PreDraw(commandList);
 
-	/// <summary>
-	/// ここに前景スプライトの描画処理を追加できる
-	/// </summary>
+	// ここに前景スプライトの描画処理を追加できる
 
 	// デバッグテキストの描画
 	debugText_->DrawAll(commandList);
-	//
+
 	// スプライト描画後処理
 	Sprite::PostDraw();
 
