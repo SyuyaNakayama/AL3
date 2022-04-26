@@ -17,38 +17,22 @@ void GameScene::Initialize() {
 	debugText_ = DebugText::GetInstance();
 	textureHandle_ = TextureManager::Load("mario.jpg");
 	model_ = Model::Create();
-	// 乱数シード生成器
-	std::random_device seed_gen;
-	// メルセンヌ・ツイスタ
-	std::mt19937_64 engine(seed_gen());
-	// 乱数範囲
-	std::uniform_real_distribution<float> posDist(-10.0f, 10.0f);
+
+	viewAngle = 0.0f;
 
 	worldTransform_.Initialize();
-
-	for (size_t i = 0; i < 3; i++) {
-		viewProjection_[i].eye = {posDist(engine), posDist(engine), posDist(engine)};
-		viewProjection_[i].Initialize();
-	}
+	viewProjection_.Initialize();
 }
 
 void GameScene::Update() {
-	if (input_->TriggerKey(DIK_SPACE)) {
-		if (++viewNum == 3) {
-			viewNum = 0;
-		}
-	}
+	viewAngle = fmodf(viewAngle += 0.02f, XM_2PI);
+
+	viewProjection_.eye = {10*cosf(viewAngle), 0.0f, 10*sinf(viewAngle)};
+	viewProjection_.UpdateMatrix();
 
 	debugText_->SetPos(50, 50);
-	debugText_->Printf("NowCamera:%d", viewNum);
-	for (size_t i = 0; i < 3; i++) {
-		debugText_->SetPos(50, 90 + 60 * i);
-		debugText_->Printf("Camera%d", i + 1);
-		debugText_->SetPos(50, 110 + 60 * i);
-		debugText_->Printf(
-		  "eye:(%f,%f,%f)", viewProjection_[i].eye.x, viewProjection_[i].eye.y,
-		  viewProjection_[i].eye.z);
-	}
+	debugText_->Printf(
+	  "eye:(%f,%f,%f)", viewProjection_.eye.x, viewProjection_.eye.y, viewProjection_.eye.z);
 }
 
 void GameScene::Draw() {
@@ -77,7 +61,7 @@ void GameScene::Draw() {
 	/// <summary>
 	/// ここに3Dオブジェクトの描画処理を追加できる
 	/// </summary>
-	model_->Draw(worldTransform_, viewProjection_[viewNum], textureHandle_);
+	model_->Draw(worldTransform_, viewProjection_, textureHandle_);
 	// 3Dオブジェクト描画後処理
 	Model::PostDraw();
 #pragma endregion

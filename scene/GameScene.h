@@ -30,7 +30,7 @@ class GameScene {
 	Model* model_ = nullptr;
 	// ゲームシーン用
 	WorldTransform worldTransform_;
-	ViewProjection viewProjection_[3];
+	ViewProjection viewProjection_;
 
-	int viewNum = 0;
+	float viewAngle;
 };
