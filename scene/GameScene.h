@@ -29,7 +29,8 @@ class GameScene {
 	uint32_t textureHandle_ = 0;
 	Model* model_ = nullptr;
 	// ゲームシーン用
-	WorldTransform worldTransform_[100];
-	ViewProjection viewProjection_;
-	float viewAngle;
+	WorldTransform worldTransform_;
+	ViewProjection viewProjection_[3];
+
+	int viewNum = 0;
 };

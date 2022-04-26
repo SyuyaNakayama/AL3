@@ -22,52 +22,33 @@ void GameScene::Initialize() {
 	// メルセンヌ・ツイスタ
 	std::mt19937_64 engine(seed_gen());
 	// 乱数範囲
-	std::uniform_real_distribution<float> rotDist(0.0f, XM_2PI);
 	std::uniform_real_distribution<float> posDist(-10.0f, 10.0f);
 
-	for (size_t i = 0; i < _countof(worldTransform_); i++) {
-		worldTransform_[i].scale_ = {1.0f, 1.0f, 1.0f};
-		worldTransform_[i].rotation_ = {rotDist(engine), rotDist(engine), rotDist(engine)};
-		worldTransform_[i].translation_ = {posDist(engine), posDist(engine), posDist(engine)};
+	worldTransform_.Initialize();
 
-		worldTransform_[i].Initialize();
+	for (size_t i = 0; i < 3; i++) {
+		viewProjection_[i].eye = {posDist(engine), posDist(engine), posDist(engine)};
+		viewProjection_[i].Initialize();
 	}
-
-	viewProjection_.Initialize();
 }
 
 void GameScene::Update() {
-	const float K_EYE_SPD = 0.2f;
-	const float K_TARGET_SPD = 0.2f;
-	const float K_UP_ROT_SPD = 0.05f;
-
-	XMFLOAT3 moveEye;
-	XMFLOAT3 moveTarget;
-
-	moveEye = {0, 0, (input_->PushKey(DIK_W) - input_->PushKey(DIK_S)) * K_EYE_SPD};
-	moveTarget = {(input_->PushKey(DIK_RIGHT) - input_->PushKey(DIK_LEFT)) * K_TARGET_SPD, 0, 0};
-	viewAngle += input_->PushKey(DIK_SPACE) * K_UP_ROT_SPD;
-	viewAngle = fmodf(viewAngle, XM_2PI);
-
-	viewProjection_.eye.x += moveEye.x;
-	viewProjection_.eye.y += moveEye.y;
-	viewProjection_.eye.z += moveEye.z;
-	viewProjection_.target.x += moveTarget.x;
-	viewProjection_.target.y += moveTarget.y;
-	viewProjection_.target.z += moveTarget.z;
-	viewProjection_.up = {cosf(viewAngle), sinf(viewAngle), 0.0f};
-	viewProjection_.UpdateMatrix();
+	if (input_->TriggerKey(DIK_SPACE)) {
+		if (++viewNum == 3) {
+			viewNum = 0;
+		}
+	}
 
 	debugText_->SetPos(50, 50);
-	debugText_->Printf(
-	  "eye:(%f,%f,%f)", viewProjection_.eye.x, viewProjection_.eye.y, viewProjection_.eye.z);
-	debugText_->SetPos(50, 70);
-	debugText_->Printf(
-	  "target:(%f,%f,%f)", viewProjection_.target.x, viewProjection_.target.y,
-	  viewProjection_.target.z);
-	debugText_->SetPos(50, 90);
-	debugText_->Printf(
-	  "up:(%f,%f,%f)", viewProjection_.up.x, viewProjection_.up.y, viewProjection_.up.z);
+	debugText_->Printf("NowCamera:%d", viewNum);
+	for (size_t i = 0; i < 3; i++) {
+		debugText_->SetPos(50, 90 + 60 * i);
+		debugText_->Printf("Camera%d", i + 1);
+		debugText_->SetPos(50, 110 + 60 * i);
+		debugText_->Printf(
+		  "eye:(%f,%f,%f)", viewProjection_[i].eye.x, viewProjection_[i].eye.y,
+		  viewProjection_[i].eye.z);
+	}
 }
 
 void GameScene::Draw() {
@@ -96,9 +77,7 @@ void GameScene::Draw() {
 	/// <summary>
 	/// ここに3Dオブジェクトの描画処理を追加できる
 	/// </summary>
-	for (size_t i = 0; i < 100; i++) {
-		model_->Draw(worldTransform_[i], viewProjection_, textureHandle_);
-	}
+	model_->Draw(worldTransform_, viewProjection_[viewNum], textureHandle_);
 	// 3Dオブジェクト描画後処理
 	Model::PostDraw();
 #pragma endregion
