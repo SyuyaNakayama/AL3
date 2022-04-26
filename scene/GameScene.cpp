@@ -18,21 +18,37 @@ void GameScene::Initialize() {
 	textureHandle_ = TextureManager::Load("mario.jpg");
 	model_ = Model::Create();
 
-	viewAngle = 0.0f;
+	targetNum = 0;
 
-	worldTransform_.Initialize();
+	for (size_t i = 0; i < 3; i++) {
+		worldTransform_[i].translation_ = {
+		  5.0f * cosf(XM_2PI / 3.0f * (float)i + XM_PI / 2.0f),
+		  5.0f * sinf(XM_2PI / 3.0f * (float)i + XM_PI / 2.0f), 0.0f};
+		worldTransform_[i].Initialize();
+	}
+
+	viewProjection_.eye.z = -25;
+	viewProjection_.target = worldTransform_[targetNum].translation_;
 	viewProjection_.Initialize();
 }
 
 void GameScene::Update() {
-	viewAngle = fmodf(viewAngle += 0.02f, XM_2PI);
+	if (input_->TriggerKey(DIK_SPACE)) {
+		if (++targetNum == 3) {
+			targetNum = 0;
+		}
+		viewProjection_.target = worldTransform_[targetNum].translation_;
+	}
 
-	viewProjection_.eye = {10*cosf(viewAngle), 0.0f, 10*sinf(viewAngle)};
 	viewProjection_.UpdateMatrix();
 
 	debugText_->SetPos(50, 50);
 	debugText_->Printf(
 	  "eye:(%f,%f,%f)", viewProjection_.eye.x, viewProjection_.eye.y, viewProjection_.eye.z);
+	debugText_->SetPos(50, 70);
+	debugText_->Printf(
+	  "target:(%f,%f,%f)", viewProjection_.target.x, viewProjection_.target.y,
+	  viewProjection_.target.z);
 }
 
 void GameScene::Draw() {
@@ -61,7 +77,9 @@ void GameScene::Draw() {
 	/// <summary>
 	/// ここに3Dオブジェクトの描画処理を追加できる
 	/// </summary>
-	model_->Draw(worldTransform_, viewProjection_, textureHandle_);
+	for (size_t i = 0; i < 3; i++) {
+		model_->Draw(worldTransform_[i], viewProjection_, textureHandle_);
+	}
 	// 3Dオブジェクト描画後処理
 	Model::PostDraw();
 #pragma endregion
