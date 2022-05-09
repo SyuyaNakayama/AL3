@@ -33,4 +33,5 @@ class GameScene {
 	ViewProjection viewProjection_;
 
 	int targetNum;
+	XMFLOAT3 vecToNext;
 };

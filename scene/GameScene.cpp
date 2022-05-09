@@ -19,6 +19,7 @@ void GameScene::Initialize() {
 	model_ = Model::Create();
 
 	targetNum = 0;
+	vecToNext = {0, 0, 0};
 
 	for (size_t i = 0; i < 3; i++) {
 		worldTransform_[i].translation_ = {
@@ -33,6 +34,9 @@ void GameScene::Initialize() {
 }
 
 void GameScene::Update() {
+	// 何Fで次のオブジェクトを注視するか
+	const int DIV_VEC = 6;
+
 	if (input_->TriggerKey(DIK_SPACE)) {
 		if (++targetNum == 3) {
 			targetNum = 0;
