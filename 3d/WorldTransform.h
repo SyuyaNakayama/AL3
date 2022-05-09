@@ -1,13 +1,13 @@
 ﻿#pragma once
 
-#include "Vector3.h"
 #include "Matrix4.h"
+#include "Vector3.h"
 #include <d3d12.h>
 #include <wrl.h>
 
 // 定数バッファ用データ構造体
 struct ConstBufferDataWorldTransform {
-	Matrix4 matWorld;           // ローカル → ワールド変換行列
+	Matrix4 matWorld; // ローカル → ワールド変換行列
 };
 
 /// <summary>
@@ -45,4 +45,16 @@ struct WorldTransform {
 	/// 行列を転送する
 	/// </summary>
 	void TransferMatrix();
+
+	void UpdateMatrix() {
+		Matrix4 matScale, matRot, matTrans;
+
+		matScale.GetScaleMat(scale_);
+		matRot.GetRotMat(rotation_);
+		matTrans.GetTransMat(translation_);
+
+		matScale *= matRot;
+		matScale *= matTrans;
+		matWorld_ = matScale;
+	}
 };
