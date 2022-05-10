@@ -4,7 +4,8 @@
 #include "TextureManager.h"
 #include <cassert>
 
-const float XM_PI = 3.1415926f;
+using namespace DirectX;
+
 const Matrix4 operator*(const Matrix4& m1, const Matrix4& m2) {
 	Matrix4 temp = m1;
 	temp *= m2;
