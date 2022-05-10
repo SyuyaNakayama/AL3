@@ -35,6 +35,6 @@ class GameScene {
 
 	uint32_t textureHandle_ = 0;
 	// ゲームシーン用
-	WorldTransform worldTransform_;
+	WorldTransform worldTransforms_[7];
 	ViewProjection viewProjection_;
 };

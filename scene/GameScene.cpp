@@ -30,26 +30,29 @@ void GameScene::Initialize() {
 	AxisIndicator::GetInstance()->SetVisible(1);
 	AxisIndicator::GetInstance()->SetTargetViewProjection(&debugCamera_->GetViewProjection());
 	PrimitiveDrawer::GetInstance()->SetViewProjection(&debugCamera_->GetViewProjection());
-	worldTransform_.Initialize();
+	worldTransforms_[0].Initialize();
 
-	Matrix4 matScale, matRot, matTrans;
-
-	worldTransform_.scale_ = {5.0f, 5.0f, 5.0f};
-	worldTransform_.rotation_ = {XM_PI / 4, XM_PI / 4, 0};
-	worldTransform_.translation_ = {10.0f, 10.0f, 10.0f};
-	
-	matScale.GetScaleMat(worldTransform_.scale_);
-	matRot.GetRotMat(worldTransform_.rotation_);
-	matTrans.GetTransMat(worldTransform_.translation_);
-	
-	worldTransform_.UpdateMatrix();
-
-	worldTransform_.TransferMatrix();
+	worldTransforms_[1].Initialize();
+	worldTransforms_[1].translation_ = {0, 4.5f, 0};
+	worldTransforms_[1].parent_ = &worldTransforms_[0];
 
 	viewProjection_.Initialize();
 }
 
-void GameScene::Update() { debugCamera_->Update(); }
+void GameScene::Update() {
+	const float MOVE_SPD = 0.2f;
+
+	worldTransforms_[0].translation_.x +=
+	  (input_->PushKey(DIK_RIGHT) - input_->PushKey(DIK_LEFT)) * MOVE_SPD;
+
+	worldTransforms_[0].UpdateMatrix();
+	worldTransforms_[0].TransferMatrix();
+
+	worldTransforms_[1].UpdateMatrix();
+	worldTransforms_[1].matWorld_ *= worldTransforms_[0].matWorld_;
+	worldTransforms_[1].TransferMatrix();
+	debugCamera_->Update();
+}
 
 void GameScene::Draw() {
 
@@ -77,7 +80,8 @@ void GameScene::Draw() {
 	/// <summary>
 	/// ここに3Dオブジェクトの描画処理を追加できる
 	/// </summary>
-	model_->Draw(worldTransform_, debugCamera_->GetViewProjection(), textureHandle_);
+	model_->Draw(worldTransforms_[0], viewProjection_, textureHandle_);
+	model_->Draw(worldTransforms_[1], viewProjection_, textureHandle_);
 	// 3Dオブジェクト描画後処理
 	Model::PostDraw();
 #pragma endregion
