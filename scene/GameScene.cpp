@@ -1,12 +1,13 @@
 ﻿#include "GameScene.h"
 #include "TextureManager.h"
 #include <cassert>
+#include <random>
 
 using namespace DirectX;
 
 GameScene::GameScene() {}
 
-GameScene::~GameScene() {}
+GameScene::~GameScene() { delete sprite_; }
 
 void GameScene::Initialize() {
 
@@ -14,36 +15,46 @@ void GameScene::Initialize() {
 	input_ = Input::GetInstance();
 	audio_ = Audio::GetInstance();
 	debugText_ = DebugText::GetInstance();
-	textureHandle_ = TextureManager::Load("mario.jpg");
 	model_ = Model::Create();
+	textureHandle_ = TextureManager::Load("mario.jpg");
+	reticlePic_ = TextureManager::Load("reticle.png");
+	sprite_ = Sprite::Create(reticlePic_, {640-64, 360-64});
 
-	for (int y = 0; y < 9; y++) {
-		for (int x = 0; x < 9; x++) {
-			worldTransforms_[y][x].Initialize();
-			worldTransforms_[y][x].translation_ = {
-			  -16.0f + 4.0f * (float)x, 16.0f - 4.0f * (float)y, 0};
-			worldTransforms_[y][x].UpdateMatrix();
-		}
+	// 乱数シード生成器
+	std::random_device seed_gen;
+	// メルセンヌ・ツイスタ
+	std::mt19937_64 engine(seed_gen());
+	// 乱数範囲
+	std::uniform_real_distribution<float> rotDist(0.0f, XM_2PI);
+	std::uniform_real_distribution<float> posDist(-10.0f, 10.0f);
+
+	for (size_t i = 0; i < _countof(worldTransform_); i++) {
+		worldTransform_[i].scale_ = {1.0f, 1.0f, 1.0f};
+		worldTransform_[i].rotation_ = {rotDist(engine), rotDist(engine), rotDist(engine)};
+		worldTransform_[i].translation_ = {posDist(engine), posDist(engine), posDist(engine)};
+		worldTransform_[i].Initialize();
 	}
-
+	viewProjection_.fovAngleY = XMConvertToRadians(40.0f);
 	viewProjection_.Initialize();
+
+	reticle = 0;
 }
 
 void GameScene::Update() {
-	const float MOVE_TARGRT_SPD = 0.2f;
-	const float MOVE_FOV_ANGLE_Y_SPD = 0.01f;
+	const float MOVE_TARGRT_SPD = 0.4f;
+	    viewProjection_.target.x +=
+	  (input_->PushKey(DIK_RIGHT) - input_->PushKey(DIK_LEFT)) * MOVE_TARGRT_SPD;
+	viewProjection_.target.y +=
+	  (input_->PushKey(DIK_UP) - input_->PushKey(DIK_DOWN)) * MOVE_TARGRT_SPD;
 
-	viewProjection_.target.x += (input_->PushKey(DIK_D) - input_->PushKey(DIK_A)) * MOVE_TARGRT_SPD;
-	viewProjection_.target.y += (input_->PushKey(DIK_W) - input_->PushKey(DIK_S)) * MOVE_TARGRT_SPD;
-
-	viewProjection_.fovAngleY +=
-	  (input_->PushKey(DIK_DOWN) - input_->PushKey(DIK_UP)) * MOVE_FOV_ANGLE_Y_SPD;
-
-	if (viewProjection_.fovAngleY >= XM_PI) {
-		viewProjection_.fovAngleY = XM_PI;
+	if (input_->TriggerKey(DIK_SPACE)) {
+		reticle = !reticle;
 	}
-	if (viewProjection_.fovAngleY <= 0.01f) {
-		viewProjection_.fovAngleY = 0.01f;
+
+	if (reticle) {
+		viewProjection_.fovAngleY = XMConvertToRadians(20.0f);
+	} else {
+		viewProjection_.fovAngleY = XMConvertToRadians(40.0f);
 	}
 
 	viewProjection_.UpdateMatrix();
@@ -92,10 +103,9 @@ void GameScene::Draw() {
 	/// <summary>
 	/// ここに3Dオブジェクトの描画処理を追加できる
 	/// </summary>
-	for (int y = 0; y < 9; y++) {
-		for (int x = 0; x < 9; x++) {
-			model_->Draw(worldTransforms_[y][x], viewProjection_, textureHandle_);
-		}
+
+	for (int i = 0; i < _countof(worldTransform_); i++) {
+		model_->Draw(worldTransform_[i], viewProjection_, textureHandle_);
 	}
 	// 3Dオブジェクト描画後処理
 	Model::PostDraw();
@@ -106,7 +116,9 @@ void GameScene::Draw() {
 	Sprite::PreDraw(commandList);
 
 	// ここに前景スプライトの描画処理を追加できる
-
+	if (reticle) {
+		sprite_->Draw();
+	}
 	// デバッグテキストの描画
 	debugText_->DrawAll(commandList);
 

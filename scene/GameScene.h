@@ -27,9 +27,12 @@ class GameScene {
 	DebugText* debugText_ = nullptr;
 
 	uint32_t textureHandle_ = 0;
+	uint32_t reticlePic_ = 0;
 	Model* model_ = nullptr;
+	Sprite* sprite_ = nullptr;
 	// ゲームシーン用
-	WorldTransform worldTransforms_[9][9];
+	WorldTransform worldTransform_[100];
 	ViewProjection viewProjection_;
 	float viewAngle;
+	bool reticle;
 };
