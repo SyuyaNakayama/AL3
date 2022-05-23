@@ -11,6 +11,14 @@
 #include "WorldTransform.h"
 #include <DirectXMath.h>
 
+using namespace DirectX;
+
+const XMFLOAT3 operator+(const XMFLOAT3& v1, const XMFLOAT3& v2);
+const XMFLOAT3 operator-(const XMFLOAT3& v1, const XMFLOAT3& v2);
+const XMFLOAT3 operator*(const XMFLOAT3& v, float s);
+const XMFLOAT3 operator*(float s, const XMFLOAT3& v);
+const XMFLOAT3 operator/(const XMFLOAT3& v, float s);
+
 /// ゲームシーン
 class GameScene {
   public:              // メンバ関数

@@ -2,8 +2,19 @@
 #include "TextureManager.h"
 #include <cassert>
 #include <random>
-
 using namespace DirectX;
+
+const XMFLOAT3 operator+(const XMFLOAT3& v1, const XMFLOAT3& v2) { return v1 + v2; }
+const XMFLOAT3 operator-(const XMFLOAT3& v1, const XMFLOAT3& v2) {
+	XMFLOAT3 temp(v1);
+	return temp -= v2;
+}
+const XMFLOAT3 operator*(const XMFLOAT3& v, float s) {
+	XMFLOAT3 temp(v);
+	return temp *= s;
+}
+const XMFLOAT3 operator*(float s, const XMFLOAT3& v) { return v * s; }
+const XMFLOAT3 operator/(const XMFLOAT3& v, float s) { return v / s; }
 
 GameScene::GameScene() {}
 
@@ -29,19 +40,32 @@ void GameScene::Initialize() {
 	}
 
 	viewProjection_.eye.z = -25;
-	viewProjection_.target = worldTransform_[targetNum].translation_;
+	viewProjection_.target = {0, 0, 0};
 	viewProjection_.Initialize();
 }
 
 void GameScene::Update() {
-	// 何Fで次のオブジェクトを注視するか
-	const int DIV_VEC = 6;
+	static bool isMove = 0;
+	static XMFLOAT3 direction;
+	float spd = 0.4f;
 
 	if (input_->TriggerKey(DIK_SPACE)) {
+		isMove = 1;
 		if (++targetNum == 3) {
 			targetNum = 0;
 		}
-		viewProjection_.target = worldTransform_[targetNum].translation_;
+		direction = worldTransform_[targetNum].translation_ - viewProjection_.target;
+		direction.Norm();
+	}
+	if (isMove) {
+		XMFLOAT3 temp = worldTransform_[targetNum].translation_ - viewProjection_.target;
+		XMFLOAT3 temp2 = direction * spd;
+		float length = temp.Length();
+		if (length < temp2.Length()) {
+			viewProjection_.target = worldTransform_[targetNum].translation_;
+		} else {
+			viewProjection_.target += direction * spd;
+		}
 	}
 
 	viewProjection_.UpdateMatrix();
