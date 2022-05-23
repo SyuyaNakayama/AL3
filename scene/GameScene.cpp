@@ -42,19 +42,20 @@ void GameScene::Initialize() {
 
 void GameScene::Update() {
 	const float MOVE_TARGRT_SPD = 0.4f;
+
 	    viewProjection_.target.x +=
 	  (input_->PushKey(DIK_RIGHT) - input_->PushKey(DIK_LEFT)) * MOVE_TARGRT_SPD;
 	viewProjection_.target.y +=
 	  (input_->PushKey(DIK_UP) - input_->PushKey(DIK_DOWN)) * MOVE_TARGRT_SPD;
 
-	if (input_->TriggerKey(DIK_SPACE)) {
-		reticle = !reticle;
+	if (input_->PushKey(DIK_SPACE)) {
+		viewProjection_.fovAngleY -= XMConvertToRadians(2.0f);
+	} else if (viewProjection_.fovAngleY <= XMConvertToRadians(40.0f)) {
+		viewProjection_.fovAngleY += XMConvertToRadians(2.0f);
 	}
 
-	if (reticle) {
+	if (viewProjection_.fovAngleY <= XMConvertToRadians(20.0f)) {
 		viewProjection_.fovAngleY = XMConvertToRadians(20.0f);
-	} else {
-		viewProjection_.fovAngleY = XMConvertToRadians(40.0f);
 	}
 
 	viewProjection_.UpdateMatrix();
@@ -116,7 +117,7 @@ void GameScene::Draw() {
 	Sprite::PreDraw(commandList);
 
 	// ここに前景スプライトの描画処理を追加できる
-	if (reticle) {
+	if (input_->PushKey(DIK_SPACE)) {
 		sprite_->Draw();
 	}
 	// デバッグテキストの描画
