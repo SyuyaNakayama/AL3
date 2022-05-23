@@ -28,11 +28,12 @@ class GameScene {
 
 	uint32_t textureHandle_ = 0;
 	uint32_t reticlePic_ = 0;
+	uint32_t scopePic_ = 0;
 	Model* model_ = nullptr;
-	Sprite* sprite_ = nullptr;
+	Sprite* sprite_[2] = {nullptr,nullptr};
 	// ゲームシーン用
 	WorldTransform worldTransform_[100];
 	ViewProjection viewProjection_;
 	float viewAngle;
-	bool reticle;
+	bool reticle,isZoomIn,isZoomOut;
 };

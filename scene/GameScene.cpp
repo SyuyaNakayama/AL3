@@ -7,7 +7,10 @@ using namespace DirectX;
 
 GameScene::GameScene() {}
 
-GameScene::~GameScene() { delete sprite_; }
+GameScene::~GameScene() {
+	delete sprite_[0];
+	delete sprite_[1];
+}
 
 void GameScene::Initialize() {
 
@@ -18,7 +21,9 @@ void GameScene::Initialize() {
 	model_ = Model::Create();
 	textureHandle_ = TextureManager::Load("mario.jpg");
 	reticlePic_ = TextureManager::Load("reticle.png");
-	sprite_ = Sprite::Create(reticlePic_, {640-64, 360-64});
+	scopePic_ = TextureManager::Load("scope.png");
+	sprite_[0] = Sprite::Create(reticlePic_, {640 - 64, 360 - 64});
+	sprite_[1] = Sprite::Create(scopePic_, {0, 0});
 
 	// 乱数シード生成器
 	std::random_device seed_gen;
@@ -34,28 +39,55 @@ void GameScene::Initialize() {
 		worldTransform_[i].translation_ = {posDist(engine), posDist(engine), posDist(engine)};
 		worldTransform_[i].Initialize();
 	}
-	viewProjection_.fovAngleY = XMConvertToRadians(40.0f);
+	viewProjection_.fovAngleY = XMConvertToRadians(90.0f);
 	viewProjection_.Initialize();
 
-	reticle = 0;
+	reticle = 0, isZoomIn = 0, isZoomOut = 0;
 }
 
 void GameScene::Update() {
 	const float MOVE_TARGRT_SPD = 0.4f;
 
-	    viewProjection_.target.x +=
+	viewProjection_.target.x +=
 	  (input_->PushKey(DIK_RIGHT) - input_->PushKey(DIK_LEFT)) * MOVE_TARGRT_SPD;
 	viewProjection_.target.y +=
 	  (input_->PushKey(DIK_UP) - input_->PushKey(DIK_DOWN)) * MOVE_TARGRT_SPD;
 
-	if (input_->PushKey(DIK_SPACE)) {
-		viewProjection_.fovAngleY -= XMConvertToRadians(2.0f);
-	} else if (viewProjection_.fovAngleY <= XMConvertToRadians(40.0f)) {
-		viewProjection_.fovAngleY += XMConvertToRadians(2.0f);
+	if (input_->TriggerKey(DIK_SPACE)) {
+		viewProjection_.fovAngleY = XMConvertToRadians(33.3f);
+		reticle = !reticle;
 	}
 
-	if (viewProjection_.fovAngleY <= XMConvertToRadians(20.0f)) {
-		viewProjection_.fovAngleY = XMConvertToRadians(20.0f);
+	if (!reticle) {
+		viewProjection_.fovAngleY = XMConvertToRadians(90.0f);
+	}
+
+	if (reticle) {
+		if (
+		  input_->TriggerKey(DIK_W) &&
+		  viewProjection_.fovAngleY > XMConvertToRadians(33.3f / 2.0f)) {
+			isZoomIn = !isZoomIn;
+			isZoomOut = 0;
+		} else if (
+		  input_->TriggerKey(DIK_S) && viewProjection_.fovAngleY < XMConvertToRadians(33.3f)) {
+			isZoomOut = !isZoomOut;
+			isZoomIn = 0;
+		}
+
+		if (isZoomIn) {
+			viewProjection_.fovAngleY -= XMConvertToRadians(2.0f);
+		}
+		if (isZoomOut) {
+			viewProjection_.fovAngleY += XMConvertToRadians(2.0f);
+		}
+
+		if (viewProjection_.fovAngleY <= XMConvertToRadians(33.3f / 2.0f)) {
+			isZoomIn = 0;
+		}
+
+		if (viewProjection_.fovAngleY >= XMConvertToRadians(33.3f)) {
+			isZoomOut = 0;
+		}
 	}
 
 	viewProjection_.UpdateMatrix();
@@ -78,6 +110,16 @@ void GameScene::Update() {
 
 	debugText_->SetPos(20, 100);
 	debugText_->Printf("nearZ:%f", viewProjection_.nearZ);
+
+	debugText_->SetPos(960, 80);
+	if (reticle) {
+		if (isZoomOut || viewProjection_.fovAngleY == XMConvertToRadians(33.3f)) {
+			debugText_->Printf("x4");
+		}
+		if (isZoomIn || viewProjection_.fovAngleY <= XMConvertToRadians(33.3f / 2.0f)) {
+			debugText_->Printf("x8");
+		}
+	}
 }
 
 void GameScene::Draw() {
@@ -117,8 +159,9 @@ void GameScene::Draw() {
 	Sprite::PreDraw(commandList);
 
 	// ここに前景スプライトの描画処理を追加できる
-	if (input_->PushKey(DIK_SPACE)) {
-		sprite_->Draw();
+	if (reticle) {
+		sprite_[0]->Draw();
+		sprite_[1]->Draw();
 	}
 	// デバッグテキストの描画
 	debugText_->DrawAll(commandList);
