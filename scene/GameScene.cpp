@@ -50,35 +50,39 @@ void GameScene::Initialize() {
 	worldTransform_[PartId::LegR].parent_ = &worldTransform_[PartId::Hip];
 	worldTransform_[PartId::LegR].Initialize();
 
+	viewProjection_.eye = {0, 0, -25};
 	viewProjection_.Initialize();
 }
 
 void GameScene::Update() {
-	const float K_CHARACTER_SPD = 0.2f;
-	const float K_CHEST_ROT_SPD = 0.05f;
+	const float CHARACTER_SPD = 0.2f;
+	const float CHARACTER_ROT_SPD = 0.05f;
 
 	// 移動
 	worldTransform_[PartId::Root].translation_.x +=
-	  (input_->PushKey(DIK_RIGHT) - input_->PushKey(DIK_LEFT)) * K_CHARACTER_SPD;
+	  (input_->PushKey(DIK_RIGHT) - input_->PushKey(DIK_LEFT)) * CHARACTER_SPD;
 	// 上半身の回転
 	worldTransform_[PartId::Chest].rotation_.y +=
-	  (input_->PushKey(DIK_I) - input_->PushKey(DIK_U)) * K_CHEST_ROT_SPD;
+	  (input_->PushKey(DIK_I) - input_->PushKey(DIK_U) + input_->PushKey(DIK_A) -
+	   input_->PushKey(DIK_D)) *
+	  CHARACTER_ROT_SPD;
 	// 下半身の回転
-	worldTransform_[PartId::Hip].rotation_.y +=
-	  (input_->PushKey(DIK_K) - input_->PushKey(DIK_J)) * K_CHEST_ROT_SPD;
+	worldTransform_[PartId::Hip].rotation_.y += (input_->PushKey(DIK_K) - input_->PushKey(DIK_J) +
+	                                             input_->PushKey(DIK_A) - input_->PushKey(DIK_D)) *
+	                                            CHARACTER_ROT_SPD;
 
+	// Armの回転
+	worldTransform_[PartId::ArmL].rotation_.x -= CHARACTER_ROT_SPD * 2;
+	worldTransform_[PartId::ArmR].rotation_.x += CHARACTER_ROT_SPD * 2;
+	// Legの回転
+	worldTransform_[PartId::LegL].rotation_.x += CHARACTER_ROT_SPD * 2;
+	worldTransform_[PartId::LegR].rotation_.x -= CHARACTER_ROT_SPD * 2;
 
-	worldTransform_[PartId::Root].UpdateMatrix();
-	worldTransform_[PartId::Spine].UpdateMatrix();
-	worldTransform_[PartId::Chest].UpdateMatrix();
-	worldTransform_[PartId::Head].UpdateMatrix();
-	worldTransform_[PartId::ArmL].UpdateMatrix();
-	worldTransform_[PartId::ArmR].UpdateMatrix();
-	worldTransform_[PartId::Hip].UpdateMatrix();
-	worldTransform_[PartId::LegL].UpdateMatrix();
-	worldTransform_[PartId::LegR].UpdateMatrix();
+	for (size_t i = 0; i < 9; i++) {
+		worldTransform_[i].UpdateMatrix();
+	}
 
-	debugText_->SetPos(50, 150);
+	debugText_->SetPos(50, 100);
 	debugText_->Printf(
 	  "Root:(%f,%f,%f)", worldTransform_[PartId::Root].translation_.x,
 	  worldTransform_[PartId::Root].translation_.y, worldTransform_[PartId::Root].translation_.z);
@@ -107,7 +111,7 @@ void GameScene::Draw() {
 
 	// ここに3Dオブジェクトの描画処理を追加できる
 	for (size_t i = PartId::Chest; i < 9; i++) {
-	model_->Draw(worldTransform_[i], viewProjection_, textureHandle_);
+		model_->Draw(worldTransform_[i], viewProjection_, textureHandle_);
 	}
 	// 3Dオブジェクト描画後処理
 	Model::PostDraw();
