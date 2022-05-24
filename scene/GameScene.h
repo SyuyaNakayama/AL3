@@ -43,4 +43,6 @@ class GameScene {
 	// ゲームシーン用
 	WorldTransform worldTransform_[10];
 	ViewProjection viewProjection_;
+	float tipRotAngle;
+	float tipRotSpd;
 };

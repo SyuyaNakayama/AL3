@@ -52,6 +52,9 @@ void GameScene::Initialize() {
 
 	viewProjection_.eye = {0, 0, -25};
 	viewProjection_.Initialize();
+
+	tipRotAngle = 0.0f;
+	tipRotSpd = 0.05f;
 }
 
 void GameScene::Update() {
@@ -70,13 +73,16 @@ void GameScene::Update() {
 	worldTransform_[PartId::Hip].rotation_.y += (input_->PushKey(DIK_K) - input_->PushKey(DIK_J) +
 	                                             input_->PushKey(DIK_A) - input_->PushKey(DIK_D)) *
 	                                            CHARACTER_ROT_SPD;
-
+	tipRotAngle += tipRotSpd;
+	if (fabs(tipRotAngle) > XM_PI / 4.0f) {
+		tipRotSpd = -tipRotSpd;
+	}
 	// Armの回転
-	worldTransform_[PartId::ArmL].rotation_.x -= CHARACTER_ROT_SPD * 2;
-	worldTransform_[PartId::ArmR].rotation_.x += CHARACTER_ROT_SPD * 2;
-	// Legの回転
-	worldTransform_[PartId::LegL].rotation_.x += CHARACTER_ROT_SPD * 2;
-	worldTransform_[PartId::LegR].rotation_.x -= CHARACTER_ROT_SPD * 2;
+	worldTransform_[PartId::ArmL].rotation_.x = -tipRotAngle;
+	worldTransform_[PartId::ArmR].rotation_.x = tipRotAngle;
+	// Legの回転							  
+	worldTransform_[PartId::LegL].rotation_.x = tipRotAngle;
+	worldTransform_[PartId::LegR].rotation_.x = -tipRotAngle;
 
 	for (size_t i = 0; i < 9; i++) {
 		worldTransform_[i].UpdateMatrix();
@@ -86,6 +92,10 @@ void GameScene::Update() {
 	debugText_->Printf(
 	  "Root:(%f,%f,%f)", worldTransform_[PartId::Root].translation_.x,
 	  worldTransform_[PartId::Root].translation_.y, worldTransform_[PartId::Root].translation_.z);
+	debugText_->SetPos(50, 120);
+	debugText_->Printf(
+	  "abs(worldTransform_[PartId::ArmL].rotation_.x):%f",
+	  fabs(worldTransform_[PartId::ArmL].rotation_.x));
 }
 
 void GameScene::Draw() {
