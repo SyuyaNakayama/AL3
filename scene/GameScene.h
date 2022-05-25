@@ -25,11 +25,15 @@ class GameScene {
 		Spine, // 脊椎
 		Chest, // 胸
 		Head,  // 頭
-		ArmL,  // 左腕
-		ArmR,  // 右腕
+		ArmL1, // 左腕1
+		ArmL2, // 左腕2
+		ArmR1, // 右腕1
+		ArmR2, // 右腕2
 		Hip,   // 尻
-		LegL,  // 左足
-		LegR   // 右足
+		LegL1, // 左足1
+		LegL2, // 左足2
+		LegR1, // 右足1
+		LegR2, // 右足2
 	};
 
   private: // メンバ変数
@@ -41,7 +45,7 @@ class GameScene {
 	uint32_t textureHandle_ = 0;
 	Model* model_ = nullptr;
 	// ゲームシーン用
-	WorldTransform worldTransform_[10];
+	WorldTransform worldTransform_[13];
 	ViewProjection viewProjection_;
 	float tipRotAngle;
 	float tipRotSpd;

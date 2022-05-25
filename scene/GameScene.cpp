@@ -30,27 +30,40 @@ void GameScene::Initialize() {
 	worldTransform_[PartId::Head].parent_ = &worldTransform_[PartId::Chest];
 	worldTransform_[PartId::Head].Initialize();
 
-	worldTransform_[PartId::ArmL].translation_ = {-3.0f, 0, 0};
-	worldTransform_[PartId::ArmL].parent_ = &worldTransform_[PartId::Chest];
-	worldTransform_[PartId::ArmL].Initialize();
+	worldTransform_[PartId::ArmL1].translation_ = {-3.0f, 0, 0};
+	worldTransform_[PartId::ArmL1].parent_ = &worldTransform_[PartId::Chest];
+	worldTransform_[PartId::ArmL1].Initialize();
+	worldTransform_[PartId::ArmL2].translation_ = {0, -2.0f, 0};
+	worldTransform_[PartId::ArmL2].parent_ = &worldTransform_[PartId::ArmL1];
+	worldTransform_[PartId::ArmL2].Initialize();
 
-	worldTransform_[PartId::ArmR].translation_ = {3.0f, 0, 0};
-	worldTransform_[PartId::ArmR].parent_ = &worldTransform_[PartId::Chest];
-	worldTransform_[PartId::ArmR].Initialize();
+	worldTransform_[PartId::ArmR1].translation_ = {3.0f, 0, 0};
+	worldTransform_[PartId::ArmR1].parent_ = &worldTransform_[PartId::Chest];
+	worldTransform_[PartId::ArmR1].Initialize();
+	worldTransform_[PartId::ArmR2].translation_ = {0, -2.0f, 0};
+	worldTransform_[PartId::ArmR2].parent_ = &worldTransform_[PartId::ArmR1];
+	worldTransform_[PartId::ArmR2].Initialize();
 	// 下半身
 	worldTransform_[PartId::Hip].translation_ = {0, -3.0f, 0};
 	worldTransform_[PartId::Hip].parent_ = &worldTransform_[PartId::Spine];
 	worldTransform_[PartId::Hip].Initialize();
 
-	worldTransform_[PartId::LegL].translation_ = {-3.0f, -3.0f, 0};
-	worldTransform_[PartId::LegL].parent_ = &worldTransform_[PartId::Hip];
-	worldTransform_[PartId::LegL].Initialize();
+	worldTransform_[PartId::LegL1].translation_ = {-3.0f, -3.0f, 0};
+	worldTransform_[PartId::LegL1].parent_ = &worldTransform_[PartId::Hip];
+	worldTransform_[PartId::LegL1].Initialize();
+	worldTransform_[PartId::LegL2].translation_ = {0, -2.0f, 0};
+	worldTransform_[PartId::LegL2].parent_ = &worldTransform_[PartId::LegL1];
+	worldTransform_[PartId::LegL2].Initialize();
 
-	worldTransform_[PartId::LegR].translation_ = {3.0f, -3.0f, 0};
-	worldTransform_[PartId::LegR].parent_ = &worldTransform_[PartId::Hip];
-	worldTransform_[PartId::LegR].Initialize();
+	worldTransform_[PartId::LegR1].translation_ = {3.0f, -3.0f, 0};
+	worldTransform_[PartId::LegR1].parent_ = &worldTransform_[PartId::Hip];
+	worldTransform_[PartId::LegR1].Initialize();
+	worldTransform_[PartId::LegR2].translation_ = {0, -2.0f, 0};
+	worldTransform_[PartId::LegR2].parent_ = &worldTransform_[PartId::LegR1];
+	worldTransform_[PartId::LegR2].Initialize();
 
-	viewProjection_.eye = {0, 0, -25};
+	viewProjection_.target.y = -2.5f;
+	viewProjection_.eye = {0, -2.5f, -25};
 	viewProjection_.Initialize();
 
 	tipRotAngle = 0.0f;
@@ -73,18 +86,29 @@ void GameScene::Update() {
 	worldTransform_[PartId::Hip].rotation_.y += (input_->PushKey(DIK_K) - input_->PushKey(DIK_J) +
 	                                             input_->PushKey(DIK_A) - input_->PushKey(DIK_D)) *
 	                                            CHARACTER_ROT_SPD;
-	tipRotAngle += tipRotSpd;
+	if (input_->PushKey(DIK_W)) {
+		tipRotAngle += tipRotSpd;
+	} else {
+		if (tipRotAngle >= 0) {
+			tipRotAngle -= fabs(tipRotSpd);
+		} else {
+			tipRotAngle += fabs(tipRotSpd);
+		}
+		if (fabs(tipRotAngle) <= fabs(tipRotSpd)) {
+			tipRotAngle = 0;
+		}
+	}
 	if (fabs(tipRotAngle) > XM_PI / 4.0f) {
 		tipRotSpd = -tipRotSpd;
 	}
 	// Armの回転
-	worldTransform_[PartId::ArmL].rotation_.x = -tipRotAngle;
-	worldTransform_[PartId::ArmR].rotation_.x = tipRotAngle;
-	// Legの回転							  
-	worldTransform_[PartId::LegL].rotation_.x = tipRotAngle;
-	worldTransform_[PartId::LegR].rotation_.x = -tipRotAngle;
+	worldTransform_[PartId::ArmL1].rotation_.x = -tipRotAngle;
+	worldTransform_[PartId::ArmR1].rotation_.x = tipRotAngle;
+	// Legの回転
+	worldTransform_[PartId::LegL1].rotation_.x = tipRotAngle;
+	worldTransform_[PartId::LegR1].rotation_.x = -tipRotAngle;
 
-	for (size_t i = 0; i < 9; i++) {
+	for (size_t i = 0; i < _countof(worldTransform_); i++) {
 		worldTransform_[i].UpdateMatrix();
 	}
 
@@ -93,9 +117,7 @@ void GameScene::Update() {
 	  "Root:(%f,%f,%f)", worldTransform_[PartId::Root].translation_.x,
 	  worldTransform_[PartId::Root].translation_.y, worldTransform_[PartId::Root].translation_.z);
 	debugText_->SetPos(50, 120);
-	debugText_->Printf(
-	  "abs(worldTransform_[PartId::ArmL].rotation_.x):%f",
-	  fabs(worldTransform_[PartId::ArmL].rotation_.x));
+	debugText_->Printf("tipRotAngle:%f", XMConvertToDegrees(tipRotAngle));
 }
 
 void GameScene::Draw() {
@@ -120,7 +142,7 @@ void GameScene::Draw() {
 	Model::PreDraw(commandList);
 
 	// ここに3Dオブジェクトの描画処理を追加できる
-	for (size_t i = PartId::Chest; i < 9; i++) {
+	for (size_t i = PartId::Chest; i < _countof(worldTransform_); i++) {
 		model_->Draw(worldTransform_[i], viewProjection_, textureHandle_);
 	}
 	// 3Dオブジェクト描画後処理
