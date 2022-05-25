@@ -62,12 +62,14 @@ void GameScene::Initialize() {
 	worldTransform_[PartId::LegR2].parent_ = &worldTransform_[PartId::LegR1];
 	worldTransform_[PartId::LegR2].Initialize();
 
-	viewProjection_.target.y = -2.5f;
-	viewProjection_.eye = {0, -2.5f, -25};
+	viewProjection_.target.y = 1.0f;
+	viewProjection_.eye = {0, 1.0f, -30};
 	viewProjection_.Initialize();
 
 	tipRotAngle = 0.0f;
 	tipRotSpd = 0.05f;
+	isJump = 0;
+	jumpSpd = 0;
 }
 
 void GameScene::Update() {
@@ -87,7 +89,7 @@ void GameScene::Update() {
 	                                             input_->PushKey(DIK_A) - input_->PushKey(DIK_D)) *
 	                                            CHARACTER_ROT_SPD;
 	if (input_->PushKey(DIK_W)) {
-		tipRotAngle += tipRotSpd;
+		tipRotAngle += tipRotSpd * (input_->PushKey(DIK_LSHIFT) + 1);
 	} else {
 		if (tipRotAngle >= 0) {
 			tipRotAngle -= fabs(tipRotSpd);
@@ -108,6 +110,24 @@ void GameScene::Update() {
 	worldTransform_[PartId::LegL1].rotation_.x = tipRotAngle;
 	worldTransform_[PartId::LegR1].rotation_.x = -tipRotAngle;
 
+	// ジャンプ
+	if (!isJump) {
+		if (input_->TriggerKey(DIK_SPACE)) {
+			isJump = 1;
+			jumpSpd = 0.7f;
+		}
+	} else {
+		worldTransform_[PartId::Root].translation_.y += jumpSpd;
+		worldTransform_[PartId::Spine].translation_.y += jumpSpd;
+		jumpSpd -= 0.07f;
+
+		if (worldTransform_[PartId::Root].translation_.y < 0) {
+			worldTransform_[PartId::Root].translation_.y = 0;
+			worldTransform_[PartId::Spine].translation_.y = 0;
+			isJump = 0;
+		}
+	}
+
 	for (size_t i = 0; i < _countof(worldTransform_); i++) {
 		worldTransform_[i].UpdateMatrix();
 	}
@@ -116,8 +136,6 @@ void GameScene::Update() {
 	debugText_->Printf(
 	  "Root:(%f,%f,%f)", worldTransform_[PartId::Root].translation_.x,
 	  worldTransform_[PartId::Root].translation_.y, worldTransform_[PartId::Root].translation_.z);
-	debugText_->SetPos(50, 120);
-	debugText_->Printf("tipRotAngle:%f", XMConvertToDegrees(tipRotAngle));
 }
 
 void GameScene::Draw() {

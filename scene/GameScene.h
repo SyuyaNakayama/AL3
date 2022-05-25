@@ -49,4 +49,6 @@ class GameScene {
 	ViewProjection viewProjection_;
 	float tipRotAngle;
 	float tipRotSpd;
+	bool isJump;
+	float jumpSpd;
 };
