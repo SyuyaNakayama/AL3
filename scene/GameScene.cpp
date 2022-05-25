@@ -17,6 +17,7 @@ GameScene::GameScene() {}
 GameScene::~GameScene() {
 	delete model_;
 	delete debugCamera_;
+	delete player_;
 }
 
 void GameScene::Initialize() {
@@ -25,33 +26,19 @@ void GameScene::Initialize() {
 	input_ = Input::GetInstance();
 	audio_ = Audio::GetInstance();
 	debugText_ = DebugText::GetInstance();
-	textureHandle_ = TextureManager::Load("mario.jpg");
 	model_ = Model::Create();
 	debugCamera_ = new DebugCamera(1280, 720);
 	AxisIndicator::GetInstance()->SetVisible(1);
 	AxisIndicator::GetInstance()->SetTargetViewProjection(&debugCamera_->GetViewProjection());
 	PrimitiveDrawer::GetInstance()->SetViewProjection(&debugCamera_->GetViewProjection());
-	worldTransforms_[0].Initialize();
-
-	worldTransforms_[1].Initialize();
-	worldTransforms_[1].translation_ = {0, 4.5f, 0};
-	worldTransforms_[1].parent_ = &worldTransforms_[0];
-
+	playerPic = TextureManager::Load("mario.jpg");
+	player_ = new Player();
+	player_->Initialize(model_, playerPic);
 	viewProjection_.Initialize();
 }
 
 void GameScene::Update() {
-	const float MOVE_SPD = 0.2f;
-
-	worldTransforms_[0].translation_.x +=
-	  (input_->PushKey(DIK_RIGHT) - input_->PushKey(DIK_LEFT)) * MOVE_SPD;
-
-	worldTransforms_[0].UpdateMatrix();
-	worldTransforms_[0].TransferMatrix();
-
-	worldTransforms_[1].UpdateMatrix();
-	worldTransforms_[1].matWorld_ *= worldTransforms_[0].matWorld_;
-	worldTransforms_[1].TransferMatrix();
+	player_->Update();
 	debugCamera_->Update();
 }
 
@@ -80,9 +67,7 @@ void GameScene::Draw() {
 
 	/// <summary>
 	/// ここに3Dオブジェクトの描画処理を追加できる
-	/// </summary>
-	model_->Draw(worldTransforms_[0], viewProjection_, textureHandle_);
-	model_->Draw(worldTransforms_[1], viewProjection_, textureHandle_);
+	player_->Draw(viewProjection_);
 	// 3Dオブジェクト描画後処理
 	Model::PostDraw();
 #pragma endregion
