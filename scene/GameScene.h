@@ -4,6 +4,7 @@
 #include "DebugCamera.h"
 #include "DebugText.h"
 #include "DirectXCommon.h"
+#include "Enemy.h"
 #include "Input.h"
 #include "Model.h"
 #include "Player.h"
@@ -19,7 +20,6 @@
 class GameScene {
 
   public:         // メンバ関数
-	GameScene();  // コンストクラタ
 	~GameScene(); // デストラクタ
 
 	void Initialize(); // 初期化
@@ -37,5 +37,6 @@ class GameScene {
 	uint32_t playerPic;
 	// ゲームシーン用
 	ViewProjection viewProjection_;
-	Player* player_ = nullptr;
+	std::unique_ptr<Player> player_ = nullptr;
+	std::unique_ptr<Enemy> enemy_ = nullptr;
 };

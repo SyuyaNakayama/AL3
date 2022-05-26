@@ -1,10 +1,10 @@
 #include "Player.h"
 #include <assert.h>
 
-void Player::Initialize(Model* model, uint32_t textureHandle) {
+void Player::Initialize(Model* model) {
 	assert(model);
 	model_ = model;
-	textureHandle_ = textureHandle;
+	textureHandle_ = TextureManager::Load("picture/player.png");
 	input_ = Input::GetInstance();
 	debugText_ = DebugText::GetInstance();
 	worldTransform_.Initialize();

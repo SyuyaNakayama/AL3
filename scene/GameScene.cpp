@@ -12,12 +12,9 @@ const Matrix4 operator*(const Matrix4& m1, const Matrix4& m2) {
 	return temp;
 }
 
-GameScene::GameScene() {}
-
 GameScene::~GameScene() {
 	delete model_;
 	delete debugCamera_;
-	delete player_;
 }
 
 void GameScene::Initialize() {
@@ -31,14 +28,18 @@ void GameScene::Initialize() {
 	AxisIndicator::GetInstance()->SetVisible(1);
 	AxisIndicator::GetInstance()->SetTargetViewProjection(&debugCamera_->GetViewProjection());
 	PrimitiveDrawer::GetInstance()->SetViewProjection(&debugCamera_->GetViewProjection());
-	playerPic = TextureManager::Load("picture/enemy.png");
-	player_ = new Player();
-	player_->Initialize(model_, playerPic);
 	viewProjection_.Initialize();
+	player_ = std::make_unique<Player>();
+	player_->Initialize(model_);
+	enemy_ = std::make_unique<Enemy>();
+	enemy_->Initialize(model_, {0, 0, 100.0f}, {0, 0, -0.5f});
 }
 
 void GameScene::Update() {
 	player_->Update();
+	if (enemy_) {
+		enemy_->Update();
+	}
 	debugCamera_->Update();
 }
 
@@ -68,6 +69,9 @@ void GameScene::Draw() {
 	/// <summary>
 	/// ここに3Dオブジェクトの描画処理を追加できる
 	player_->Draw(viewProjection_);
+	if (enemy_) {
+		enemy_->Draw(viewProjection_);
+	}
 	// 3Dオブジェクト描画後処理
 	Model::PostDraw();
 #pragma endregion
