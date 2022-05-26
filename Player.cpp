@@ -28,7 +28,7 @@ void Player::Move() {
 
 void Player::Rotate() {
 	const float ROT_SPD = 0.03f;
-	
+
 	worldTransform_.rotation_.y += (input_->PushKey(DIK_A) - input_->PushKey(DIK_D)) * ROT_SPD;
 }
 
@@ -37,18 +37,25 @@ void Player::Attack() {
 		return;
 	}
 
+	const float BULLET_SPD = 1.0f;
+	Vector3 velocity(0, 0, BULLET_SPD);
+
+	velocity = worldTransform_.matWorld_.MatrixProduct(velocity);
+
 	std::unique_ptr<PlayerBullet> newBullet = std::make_unique<PlayerBullet>();
-	newBullet->Initialize(model_, worldTransform_.translation_);
+	newBullet->Initialize(model_, worldTransform_.translation_, velocity);
 
 	bullets_.push_back(std::move(newBullet));
 }
 
 void Player::Update() {
+	bullets_.remove_if([](std::unique_ptr<PlayerBullet>& bullet) { return bullet->IsDead(); });
+
 	Move();
 	Rotate();
 	Attack();
 
-	for (std::unique_ptr<PlayerBullet>& bullet:bullets_) {
+	for (std::unique_ptr<PlayerBullet>& bullet : bullets_) {
 		bullet->Update();
 	}
 

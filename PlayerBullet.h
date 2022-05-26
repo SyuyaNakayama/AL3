@@ -1,6 +1,4 @@
 #pragma once
-#include "DebugText.h"
-#include "Input.h"
 #include "Model.h"
 #include "ViewProjection.h"
 #include "WorldTransform.h"
@@ -11,8 +9,12 @@ class PlayerBullet {
 	Model* model_;
 	uint32_t textureHandle_;
 	Vector3 velocity_;
+	static const int LIFE_TIME = 60 * 5;
+	int deathTimer_;
+	bool isDead_;
   public:
-	void Initialize(Model* model, const Vector3& position,const Vector3& velocity);
+	void Initialize(Model* model, const Vector3& position, const Vector3& velocity);
 	void Update();
 	void Draw(const ViewProjection& viewprojection);
+	bool IsDead() const { return isDead_; }
 };

@@ -1,9 +1,7 @@
 #pragma once
 #include "DebugText.h"
 #include "Input.h"
-#include "Model.h"
 #include "PlayerBullet.h"
-#include "WorldTransform.h"
 #include <memory>
 #include <list>
 
