@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include <math.h>
 /// <summary>
 /// 行列
 /// </summary>

@@ -31,7 +31,7 @@ void GameScene::Initialize() {
 	AxisIndicator::GetInstance()->SetVisible(1);
 	AxisIndicator::GetInstance()->SetTargetViewProjection(&debugCamera_->GetViewProjection());
 	PrimitiveDrawer::GetInstance()->SetViewProjection(&debugCamera_->GetViewProjection());
-	playerPic = TextureManager::Load("mario.jpg");
+	playerPic = TextureManager::Load("picture/enemy.png");
 	player_ = new Player();
 	player_->Initialize(model_, playerPic);
 	viewProjection_.Initialize();
