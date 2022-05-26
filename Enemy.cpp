@@ -1,6 +1,17 @@
 #include "Enemy.h"
 #include <assert.h>
 
+void Enemy::Initialize(Model* model, const Vector3& position, const Vector3& velocity) {
+	assert(model);
+	model_ = model;
+	textureHandle_ = TextureManager::Load("picture/enemy.png");
+	debugText_ = DebugText::GetInstance();
+	worldTransform_.Initialize();
+	worldTransform_.translation_ = position;
+	worldTransform_.scale_.y = 2.0f;
+	velocity_ = velocity;
+}
+
 void Enemy::Approach() {
 	const Vector3 APPROACH_SPD = {0, 0, -0.2f};
 	worldTransform_.translation_ += APPROACH_SPD;
@@ -15,27 +26,10 @@ void Enemy::Leave() {
 	worldTransform_.translation_ += LEAVE_SPD;
 }
 
-void Enemy::Initialize(Model* model, const Vector3& position, const Vector3& velocity) {
-	assert(model);
-	model_ = model;
-	textureHandle_ = TextureManager::Load("picture/enemy.png");
-	debugText_ = DebugText::GetInstance();
-	worldTransform_.Initialize();
-	worldTransform_.translation_ = position;
-	worldTransform_.scale_.y = 2.0f;
-	velocity_ = velocity;
-}
+void (Enemy::*Enemy::pPhaseFuncTable[])() = {&Enemy::Approach, &Enemy::Leave};
 
 void Enemy::Update() {
-	switch (phase_) {
-	case Enemy::Phase::Approach:
-	default:
-		Approach();
-		break;
-	case Enemy::Phase::Leave:
-		Leave();
-		break;
-	}
+	(this->*pPhaseFuncTable[static_cast<size_t>(phase_)])();
 
 	worldTransform_.UpdateMatrix();
 	worldTransform_.TransferMatrix();
