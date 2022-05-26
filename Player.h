@@ -4,6 +4,8 @@
 #include "Model.h"
 #include "PlayerBullet.h"
 #include "WorldTransform.h"
+#include <memory>
+#include <list>
 
 class Player {
   private:
@@ -12,7 +14,7 @@ class Player {
 	Input* input_;
 	DebugText* debugText_;
 	WorldTransform worldTransform_;
-	PlayerBullet* bullet_;
+	std::list<std::unique_ptr<PlayerBullet>> bullets_;
 
 	void Move();
 	void Rotate();
