@@ -1,21 +1,7 @@
 #include "Enemy.h"
 #include <assert.h>
 
-void Enemy::Approach() {
-	const Vector3 APPROACH_SPD = {0, 0, -0.2f};
-	worldTransform_.translation_ += APPROACH_SPD;
-
-	if (worldTransform_.translation_.z < 0.0f) {
-		phase_ = Phase::Leave;
-	}
-}
-
-void Enemy::Leave() {
-	const Vector3 LEAVE_SPD = {-0.2f, 0.2f, -0.2f};
-	worldTransform_.translation_ += LEAVE_SPD;
-}
-
-void Enemy::Initialize(Model* model, const Vector3& position, const Vector3& velocity) {
+void Enemy::Initialize(Model* model, const Vector3& position) {
 	assert(model);
 	model_ = model;
 	textureHandle_ = TextureManager::Load("picture/enemy.png");
@@ -23,10 +9,45 @@ void Enemy::Initialize(Model* model, const Vector3& position, const Vector3& vel
 	worldTransform_.Initialize();
 	worldTransform_.translation_ = position;
 	worldTransform_.scale_.y = 2.0f;
-	velocity_ = velocity;
+	fireTimer = 0;
+	ApproachInit();
+}
+
+void Enemy::Approach() {
+	const Vector3 APPROACH_SPD = {0, 0, -0.2f};
+	worldTransform_.translation_ += APPROACH_SPD;
+	
+	if (--fireTimer > 0) {
+		return;
+	}
+
+	Fire();
+	fireTimer = FIRE_INTERVAL;
+
+	if (worldTransform_.translation_.z < 0.0f) {
+		phase_ = Phase::Leave;
+	}
+}
+
+void Enemy::ApproachInit() { fireTimer = FIRE_INTERVAL; }
+
+void Enemy::Leave() {
+	const Vector3 LEAVE_SPD = {-0.2f, 0.2f, -0.2f};
+	worldTransform_.translation_ += LEAVE_SPD;
+}
+
+void Enemy::Fire() {
+	const float BULLET_SPD = -1.0f;
+	Vector3 velocity(0, 0, BULLET_SPD);
+
+	std::unique_ptr<EnemyBullet> newBullet = std::make_unique<EnemyBullet>();
+	newBullet->Initialize(model_, worldTransform_.translation_, velocity);
+
+	bullets_.push_back(std::move(newBullet));
 }
 
 void Enemy::Update() {
+	bullets_.remove_if([](std::unique_ptr<EnemyBullet>& bullet) { return bullet->IsDead(); });
 	switch (phase_) {
 	case Enemy::Phase::Approach:
 	default:
@@ -35,6 +56,10 @@ void Enemy::Update() {
 	case Enemy::Phase::Leave:
 		Leave();
 		break;
+	}
+
+	for (std::unique_ptr<EnemyBullet>& bullet : bullets_) {
+		bullet->Update();
 	}
 
 	worldTransform_.UpdateMatrix();
@@ -48,4 +73,8 @@ void Enemy::Update() {
 
 void Enemy::Draw(const ViewProjection& viewProjection) {
 	model_->Draw(worldTransform_, viewProjection, textureHandle_);
+
+	for (std::unique_ptr<EnemyBullet>& bullet : bullets_) {
+		bullet->Draw(viewProjection);
+	}
 }
