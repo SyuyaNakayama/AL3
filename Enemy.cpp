@@ -9,27 +9,22 @@ void Enemy::Initialize(Model* model, const Vector3& position) {
 	worldTransform_.Initialize();
 	worldTransform_.translation_ = position;
 	worldTransform_.scale_.y = 2.0f;
-	fireTimer = 0;
 	ApproachInit();
 }
 
 void Enemy::Approach() {
 	const Vector3 APPROACH_SPD = {0, 0, -0.2f};
 	worldTransform_.translation_ += APPROACH_SPD;
-	
-	if (--fireTimer > 0) {
-		return;
-	}
-
-	Fire();
-	fireTimer = FIRE_INTERVAL;
 
 	if (worldTransform_.translation_.z < 0.0f) {
 		phase_ = Phase::Leave;
 	}
 }
 
-void Enemy::ApproachInit() { fireTimer = FIRE_INTERVAL; }
+void Enemy::ApproachInit() {
+	timedCalls_.push_back(
+	  std::make_unique<TimedCall>(std::bind(&Enemy::CallFire, this), FIRE_INTERVAL));
+}
 
 void Enemy::Leave() {
 	const Vector3 LEAVE_SPD = {-0.2f, 0.2f, -0.2f};
@@ -48,12 +43,19 @@ void Enemy::Fire() {
 
 void Enemy::Update() {
 	bullets_.remove_if([](std::unique_ptr<EnemyBullet>& bullet) { return bullet->IsDead(); });
+	timedCalls_.remove_if([](std::unique_ptr<TimedCall>& tc) { return tc->IsFinished(); });
+	
 	switch (phase_) {
 	case Enemy::Phase::Approach:
 	default:
 		Approach();
+		
+	for (std::unique_ptr<TimedCall>& tc : timedCalls_) {
+		tc->Update();
+	}
 		break;
 	case Enemy::Phase::Leave:
+		timedCalls_.remove_if([](std::unique_ptr<TimedCall>& tc) { return 1; });
 		Leave();
 		break;
 	}
@@ -69,6 +71,12 @@ void Enemy::Update() {
 	debugText_->Printf(
 	  "enemyPos:(%f,%f,%f)", worldTransform_.translation_.x, worldTransform_.translation_.y,
 	  worldTransform_.translation_.z);
+}
+
+void Enemy::CallFire() {
+	Fire();
+
+	timedCalls_.push_back(std::make_unique<TimedCall>(std::bind(&Enemy::CallFire, this), 60));
 }
 
 void Enemy::Draw(const ViewProjection& viewProjection) {
