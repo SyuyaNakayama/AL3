@@ -22,4 +22,5 @@ class Player {
 	void Initialize(Model* model);
 	void Update();
 	void Draw(ViewProjection viewProjection);
+	Vector3 GetWorldPosition();
 };

@@ -1,5 +1,6 @@
 #include "Enemy.h"
 #include <assert.h>
+#include "Player.h"
 
 void Enemy::Initialize(Model* model, const Vector3& position) {
 	assert(model);
@@ -14,9 +15,9 @@ void Enemy::Initialize(Model* model, const Vector3& position) {
 }
 
 void Enemy::Approach() {
-	const Vector3 APPROACH_SPD = {0, 0, -0.2f};
+	const Vector3 APPROACH_SPD = { 0, 0, -0.2f };
 	worldTransform_.translation_ += APPROACH_SPD;
-	
+
 	if (--fireTimer > 0) {
 		return;
 	}
@@ -32,13 +33,19 @@ void Enemy::Approach() {
 void Enemy::ApproachInit() { fireTimer = FIRE_INTERVAL; }
 
 void Enemy::Leave() {
-	const Vector3 LEAVE_SPD = {-0.2f, 0.2f, -0.2f};
+	const Vector3 LEAVE_SPD = { -0.2f, 0.2f, -0.2f };
 	worldTransform_.translation_ += LEAVE_SPD;
 }
 
 void Enemy::Fire() {
-	const float BULLET_SPD = -1.0f;
-	Vector3 velocity(0, 0, BULLET_SPD);
+	assert(player_);
+	
+	const float BULLET_SPD = 1.0f;
+	Vector3 playerPos=player_->GetWorldPosition();
+	Vector3 enemyPos=GetWorldPosition();
+	Vector3 velocity = playerPos - enemyPos;
+	velocity.normalize();
+	velocity *= BULLET_SPD;
 
 	std::unique_ptr<EnemyBullet> newBullet = std::make_unique<EnemyBullet>();
 	newBullet->Initialize(model_, worldTransform_.translation_, velocity);
@@ -67,8 +74,8 @@ void Enemy::Update() {
 
 	debugText_->SetPos(50, 70);
 	debugText_->Printf(
-	  "enemyPos:(%f,%f,%f)", worldTransform_.translation_.x, worldTransform_.translation_.y,
-	  worldTransform_.translation_.z);
+		"enemyPos:(%f,%f,%f)", worldTransform_.translation_.x, worldTransform_.translation_.y,
+		worldTransform_.translation_.z);
 }
 
 void Enemy::Draw(const ViewProjection& viewProjection) {
@@ -77,4 +84,9 @@ void Enemy::Draw(const ViewProjection& viewProjection) {
 	for (std::unique_ptr<EnemyBullet>& bullet : bullets_) {
 		bullet->Draw(viewProjection);
 	}
+}
+
+Vector3 Enemy::GetWorldPosition()
+{
+	return Vector3(worldTransform_.translation_);
 }

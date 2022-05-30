@@ -5,6 +5,8 @@
 #include "WorldTransform.h"
 #include "EnemyBullet.h"
 
+class Player;
+
 class Enemy {
   private:
 	enum class Phase { Approach, Leave };
@@ -18,6 +20,7 @@ class Enemy {
 	Phase phase_ = Phase::Approach;
 	static const int FIRE_INTERVAL = 60;
 	int fireTimer;
+	Player* player_;
 
 	void Approach();
 	void ApproachInit();
@@ -28,4 +31,6 @@ class Enemy {
 	void Initialize(Model* model, const Vector3& position);
 	void Update();
 	void Draw(const ViewProjection& viewprojection);
+	void SetPlayer(Player* player) { player_ = player; }
+	Vector3 GetWorldPosition();
 };
