@@ -34,7 +34,6 @@ void GameScene::Initialize() {
 	player_->Initialize(model_);
 	enemy_ = std::make_unique<Enemy>();
 	enemy_->Initialize(model_, {10.0f, 0, 50.0f});
-	enemy_->SetPlayer(player_);
 }
 
 void GameScene::Update() {
