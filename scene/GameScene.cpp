@@ -15,6 +15,7 @@ const Matrix4 operator*(const Matrix4& m1, const Matrix4& m2) {
 GameScene::~GameScene() {
 	delete model_;
 	delete debugCamera_;
+	delete player_;
 }
 
 void GameScene::Initialize() {
@@ -29,10 +30,11 @@ void GameScene::Initialize() {
 	AxisIndicator::GetInstance()->SetTargetViewProjection(&debugCamera_->GetViewProjection());
 	PrimitiveDrawer::GetInstance()->SetViewProjection(&debugCamera_->GetViewProjection());
 	viewProjection_.Initialize();
-	player_ = std::make_unique<Player>();
+	player_ = new Player;
 	player_->Initialize(model_);
 	enemy_ = std::make_unique<Enemy>();
 	enemy_->Initialize(model_, {10.0f, 0, 50.0f});
+	enemy_->SetPlayer(player_);
 }
 
 void GameScene::Update() {

@@ -37,6 +37,6 @@ class GameScene {
 	uint32_t playerPic;
 	// ゲームシーン用
 	ViewProjection viewProjection_;
-	std::unique_ptr<Player> player_ = nullptr;
+	Player* player_ = nullptr;
 	std::unique_ptr<Enemy> enemy_ = nullptr;
 };
