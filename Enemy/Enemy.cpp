@@ -13,6 +13,8 @@ void Enemy::Initialize(Model* model, const Vector3& position) {
 	ApproachInit();
 }
 
+void (Enemy::* Enemy::pPhaseFuncTable[])() = { &Enemy::Approach, &Enemy::Leave };
+
 void Enemy::Approach() {
 	const Vector3 APPROACH_SPD = {0, 0, -0.2f};
 	worldTransform_.translation_ += APPROACH_SPD;
@@ -48,15 +50,16 @@ void Enemy::Fire() {
 
 void Enemy::Update() {
 	bullets_.remove_if([](std::unique_ptr<EnemyBullet>& bullet) { return bullet->IsDead(); });
-	switch (phase_) {
-	case Enemy::Phase::Approach:
-	default:
-		Approach();
-		break;
-	case Enemy::Phase::Leave:
-		Leave();
-		break;
-	}
+	//switch (phase_) {
+	//case Enemy::Phase::Approach:
+	//default:
+	//	Approach();
+	//	break;
+	//case Enemy::Phase::Leave:
+	//	Leave();
+	//	break;
+	//}
+	pPhaseFuncTable[phase_];
 
 	for (std::unique_ptr<EnemyBullet>& bullet : bullets_) {
 		bullet->Update();

@@ -6,7 +6,7 @@
 #include "EnemyBullet.h"
 
 class Enemy {
-  private:
+private:
 	enum class Phase { Approach, Leave };
 
 	WorldTransform worldTransform_;
@@ -24,7 +24,10 @@ class Enemy {
 	void Leave();
 
 	void Fire();
-  public:
+
+	static void (Enemy::* pPhaseFuncTable[])();
+
+public:
 	void Initialize(Model* model, const Vector3& position);
 	void Update();
 	void Draw(const ViewProjection& viewprojection);
