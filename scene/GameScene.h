@@ -34,7 +34,8 @@ class GameScene {
 	Model* model_ = nullptr;
 	DebugCamera* debugCamera_ = nullptr;
 
-	uint32_t playerPic;
+	WorldTransform ground_;
+	uint32_t groundPic_;
 	// ゲームシーン用
 	ViewProjection viewProjection_;
 	Player* player_ = nullptr;

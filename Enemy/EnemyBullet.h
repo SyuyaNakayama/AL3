@@ -12,11 +12,10 @@ class EnemyBullet {
 	uint32_t textureHandle_;
 	Vector3 velocity_;
 	int deathTimer_;
-	bool isDead_;
 
   public:
 	void Initialize(Model* model, const Vector3& position, const Vector3& velocity);
 	void Update();
 	void Draw(const ViewProjection& viewProjection);
-	bool IsDead() const { return isDead_; }
+	bool isDead_;
 };

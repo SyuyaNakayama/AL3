@@ -4,22 +4,24 @@
 #include "PlayerBullet.h"
 #include <memory>
 #include <list>
+#include "Timer.h"
 
 class Player {
   private:
 	Model* model_;
-	uint32_t textureHandle_;
 	Input* input_;
 	DebugText* debugText_;
-	WorldTransform worldTransform_;
 	std::list<std::unique_ptr<PlayerBullet>> bullets_;
+	ViewProjection *viewProjection_;
+	int hp;
+	Timer bulletInterval_;
+	Vector3 toEnemy_;
 
 	void Move();
-	void Rotate();
+	void Jump();
 	void Attack();
-
   public:
-	void Initialize(Model* model);
-	void Update();
-	void Draw(ViewProjection viewProjection);
+	void Initialize(Model* model, ViewProjection* viewProjection);
+	void Update(Vector3 enemyTranslation);
+	void Draw();
 };

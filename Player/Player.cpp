@@ -1,76 +1,90 @@
 #include "Player.h"
 #include <assert.h>
+#include "function.h"
 
-void Player::Initialize(Model* model) {
+void Player::Initialize(Model* model, ViewProjection* viewProjection)
+{
 	assert(model);
 	model_ = model;
-	textureHandle_ = TextureManager::Load("picture/player.png");
 	input_ = Input::GetInstance();
 	debugText_ = DebugText::GetInstance();
-	worldTransform_.Initialize();
-	worldTransform_.scale_.y = 2.0f;
+	viewProjection_ = viewProjection;
+	bulletInterval_ = 40;
 }
 
-void Player::Move() {
-	const float MOVE_SPD = 0.4f;
-	const Vector2 MOVE_LIMIT = {34.0f, 17.0f};
+void Player::Move()
+{
+	const float MOVE_SPD = 0.6f;
+	Vector3 spd(0, 0, 0);
+	Vector3 yAxis(0, 1.0f, 0);
 
-	worldTransform_.translation_.x +=
-	  (input_->PushKey(DIK_RIGHT) - input_->PushKey(DIK_LEFT)) * MOVE_SPD;
-	worldTransform_.translation_.y +=
-	  (input_->PushKey(DIK_UP) - input_->PushKey(DIK_DOWN)) * MOVE_SPD;
+	if (input_->PushKey(DIK_LEFT)) { spd += toEnemy_.cross(yAxis); }
+	if (input_->PushKey(DIK_RIGHT)) { spd -= toEnemy_.cross(yAxis); }
+	if (input_->PushKey(DIK_UP)) { spd += toEnemy_; }
+	if (input_->PushKey(DIK_DOWN)) { spd -= toEnemy_; }
 
-	worldTransform_.translation_.x = max(worldTransform_.translation_.x, -MOVE_LIMIT.x);
-	worldTransform_.translation_.x = min(worldTransform_.translation_.x, +MOVE_LIMIT.x);
-	worldTransform_.translation_.y = max(worldTransform_.translation_.y, -MOVE_LIMIT.y);
-	worldTransform_.translation_.y = min(worldTransform_.translation_.y, +MOVE_LIMIT.y);
+	spd.normalize();
+	spd *= MOVE_SPD;
+	viewProjection_->eye += spd;
+
+	Clamp(viewProjection_->eye.x);
+	Clamp(viewProjection_->eye.z);
 }
 
-void Player::Rotate() {
-	const float ROT_SPD = 0.03f;
-
-	worldTransform_.rotation_.y += (input_->PushKey(DIK_A) - input_->PushKey(DIK_D)) * ROT_SPD;
-}
-
-void Player::Attack() {
-	if (!input_->TriggerKey(DIK_SPACE)) {
-		return;
+void Player::Jump()
+{
+	static bool isJump = 0;
+	if (!isJump && input_->TriggerKey(DIK_SPACE)) { isJump = 1; }
+	if (isJump)
+	{
+		const float JUMP_HEIGHT_MAX = 0.85f;
+		static float jumpSpd = JUMP_HEIGHT_MAX;
+		viewProjection_->eye.y += jumpSpd;
+		viewProjection_->target.y += jumpSpd;
+		jumpSpd -= 0.07f;
+		if (viewProjection_->eye.y < 0)
+		{
+			viewProjection_->eye.y = 0;
+			viewProjection_->target.y = 0;
+			jumpSpd = JUMP_HEIGHT_MAX;
+			isJump = 0;
+		}
 	}
+}
+
+void Player::Attack()
+{
+	if (!bulletInterval_.CountDown()) { return; }
 
 	const float BULLET_SPD = 1.0f;
-	Vector3 velocity(0, 0, BULLET_SPD);
-
-	velocity = worldTransform_.matWorld_.MatrixProduct(velocity);
+	Vector3 velocity = toEnemy_ * BULLET_SPD;
 
 	std::unique_ptr<PlayerBullet> newBullet = std::make_unique<PlayerBullet>();
-	newBullet->Initialize(model_, worldTransform_.translation_, velocity);
+	newBullet->Initialize(model_, viewProjection_->eye, velocity);
 
 	bullets_.push_back(std::move(newBullet));
 }
 
-void Player::Update() {
+void Player::Update(Vector3 enemyTranslation)
+{
 	bullets_.remove_if([](std::unique_ptr<PlayerBullet>& bullet) { return bullet->IsDead(); });
+	toEnemy_ = enemyTranslation - viewProjection_->eye;
+	toEnemy_.y = 0;
+	toEnemy_.normalize();
+	viewProjection_->target = enemyTranslation;
 
 	Move();
-	Rotate();
+	Jump();
 	Attack();
 
-	for (std::unique_ptr<PlayerBullet>& bullet : bullets_) {
-		bullet->Update();
-	}
-
-	worldTransform_.UpdateMatrix();
-	worldTransform_.TransferMatrix();
+	for (std::unique_ptr<PlayerBullet>& bullet : bullets_) { bullet->Update(); }
 
 	debugText_->SetPos(50, 50);
-	debugText_->Printf(
-	  "Player:(%f,%f,%f)", worldTransform_.translation_.x, worldTransform_.translation_.y,
-	  worldTransform_.translation_.z);
+	debugText_->Printf("(%f,%f,%f)", viewProjection_->eye.x, viewProjection_->eye.y, viewProjection_->eye.z);
 }
 
-void Player::Draw(ViewProjection viewProjection) {
-	model_->Draw(worldTransform_, viewProjection, textureHandle_);
+void Player::Draw() {
 	for (std::unique_ptr<PlayerBullet>& bullet : bullets_) {
-		bullet->Draw(viewProjection);
+		bullet->Draw(*viewProjection_);
 	}
 }

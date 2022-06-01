@@ -6,20 +6,15 @@
 
 using namespace DirectX;
 
-const Matrix4 operator*(const Matrix4& m1, const Matrix4& m2) {
-	Matrix4 temp = m1;
-	temp *= m2;
-	return temp;
-}
-
-GameScene::~GameScene() {
+GameScene::~GameScene()
+{
 	delete model_;
 	delete debugCamera_;
 	delete player_;
 }
 
-void GameScene::Initialize() {
-
+void GameScene::Initialize()
+{
 	dxCommon_ = DirectXCommon::GetInstance();
 	input_ = Input::GetInstance();
 	audio_ = Audio::GetInstance();
@@ -29,23 +24,30 @@ void GameScene::Initialize() {
 	AxisIndicator::GetInstance()->SetVisible(1);
 	AxisIndicator::GetInstance()->SetTargetViewProjection(&debugCamera_->GetViewProjection());
 	PrimitiveDrawer::GetInstance()->SetViewProjection(&debugCamera_->GetViewProjection());
+	groundPic_ = TextureManager::Load("picture/ground.png");
+	viewProjection_.eye.z = -20;
 	viewProjection_.Initialize();
+	ground_.Initialize();
+	ground_.translation_.y = -7.0f;
+	ground_.scale_ = { 75.0f,5.0f,75.0f };
+	ground_.UpdateMatrix();
+	ground_.TransferMatrix();
 	player_ = new Player;
-	player_->Initialize(model_);
+	player_->Initialize(model_, &viewProjection_);
 	enemy_ = std::make_unique<Enemy>();
-	enemy_->Initialize(model_, {10.0f, 0, 50.0f});
+	enemy_->Initialize(model_, &viewProjection_.eye);
 }
 
-void GameScene::Update() {
-	player_->Update();
-	if (enemy_) {
-		enemy_->Update();
-	}
+void GameScene::Update()
+{
+	player_->Update(enemy_->worldTransform_.translation_);
+	//if (enemy_) { enemy_->Update(); }
 	debugCamera_->Update();
+	viewProjection_.UpdateMatrix();
 }
 
-void GameScene::Draw() {
-
+void GameScene::Draw()
+{
 	// コマンドリストの取得
 	ID3D12GraphicsCommandList* commandList = dxCommon_->GetCommandList();
 
@@ -53,9 +55,7 @@ void GameScene::Draw() {
 	// 背景スプライト描画前処理
 	Sprite::PreDraw(commandList);
 
-	/// <summary>
-	/// ここに背景スプライトの描画処理を追加できる
-	/// </summary>
+	// ここに背景スプライトの描画処理を追加できる
 
 	// スプライト描画後処理
 	Sprite::PostDraw();
@@ -67,12 +67,12 @@ void GameScene::Draw() {
 	// 3Dオブジェクト描画前処理
 	Model::PreDraw(commandList);
 
-	/// <summary>
-	/// ここに3Dオブジェクトの描画処理を追加できる
-	player_->Draw(viewProjection_);
+	// ここに3Dオブジェクトの描画処理を追加できる
+	player_->Draw();
 	if (enemy_) {
 		enemy_->Draw(viewProjection_);
 	}
+	model_->Draw(ground_, viewProjection_, groundPic_);
 	// 3Dオブジェクト描画後処理
 	Model::PostDraw();
 #pragma endregion
@@ -81,9 +81,7 @@ void GameScene::Draw() {
 	// 前景スプライト描画前処理
 	Sprite::PreDraw(commandList);
 
-	/// <summary>
-	/// ここに前景スプライトの描画処理を追加できる
-	/// </summary>
+	// ここに前景スプライトの描画処理を追加できる
 
 	// デバッグテキストの描画
 	debugText_->DrawAll(commandList);

@@ -4,31 +4,34 @@
 #include "ViewProjection.h"
 #include "WorldTransform.h"
 #include "EnemyBullet.h"
+#include "Timer.h"
 
-class Enemy {
+class Enemy
+{
 private:
-	enum class Phase { Approach, Leave };
-
-	WorldTransform worldTransform_;
 	Model* model_;
 	uint32_t textureHandle_;
 	Vector3 velocity_;
 	DebugText* debugText_;
-	std::list<std::unique_ptr<EnemyBullet>> bullets_;
-	Phase phase_ = Phase::Approach;
-	static const int FIRE_INTERVAL = 60;
-	int fireTimer;
+	std::list<std::unique_ptr<EnemyBullet>> missiles_;
+	size_t phase_;
+	Vector3* playerTranslation_;
+	Timer attackTimer_;
+	Vector3 toPlayer_;
+	bool isActionEnd;
+	Vector3 tackleSpd;
 
-	void Approach();
-	void ApproachInit();
-	void Leave();
-
-	void Fire();
+	void Beam();
+	void Missile();
+	void Bomb();
+	void Press();
+	void Tackle();
+	void Summon();
 
 	static void (Enemy::* pPhaseFuncTable[])();
-
 public:
-	void Initialize(Model* model, const Vector3& position);
+	WorldTransform worldTransform_;
+	void Initialize(Model* model, Vector3* playerTranslation);
 	void Update();
 	void Draw(const ViewProjection& viewprojection);
 };
