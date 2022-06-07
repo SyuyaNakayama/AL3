@@ -18,7 +18,7 @@ void PlayerBullet::Update()
 {
 	worldTransform_.translation_ += velocity_;
 
-	if (isOver(worldTransform_.translation_.x,75.0f)) {		isDead_ = 1;	}
+	if (isOver(worldTransform_.translation_.x) || isOver(worldTransform_.translation_.z)) { isDead_ = 1; }
 	worldTransform_.UpdateMatrix();
 	worldTransform_.TransferMatrix();
 }

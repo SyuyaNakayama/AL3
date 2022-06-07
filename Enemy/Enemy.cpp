@@ -2,6 +2,7 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <time.h>
+#include "function.h"
 
 void Enemy::Initialize(Model* model, Vector3* playerTranslation)
 {
@@ -33,18 +34,21 @@ void Enemy::Beam()
 
 void Enemy::Missile()
 {
+	missiles_.remove_if([](std::unique_ptr<EnemyBullet>& bullet) { return bullet->isDead_; });
+
 	static int missileCount = 0;
 	if (!attackTimer_.CountDown()) { return; }
-	
+
 	const float spdConst = 2.0f;
 	toPlayer_ *= spdConst;
 	std::unique_ptr<EnemyBullet> newMissile = std::make_unique<EnemyBullet>();
 	newMissile->Initialize(model_, worldTransform_.translation_, toPlayer_);
 	missiles_.push_back(std::move(newMissile));
-	if(++missileCount>=10)
+	if (++missileCount >= 10)
 	{
 		isActionEnd = 1;
 		missileCount = 0;
+		missiles_.remove_if([](std::unique_ptr< EnemyBullet >& bullet) { return 1; });
 	}
 }
 
@@ -60,7 +64,22 @@ void Enemy::Press()
 
 void Enemy::Tackle()
 {
-	worldTransform_.translation_ += tackleSpd;
+	static bool isStart = 0;
+	if (!isStart)
+	{
+		tackleSpd = toPlayer_ * 1.5f;
+		isStart = 1;
+	}
+	else
+	{
+		worldTransform_.translation_ += tackleSpd;
+		if(isOver(worldTransform_.translation_.x)||isOver(worldTransform_.translation_.z))
+		{
+			worldTransform_.translation_ += tackleSpd;
+			isStart = 0;
+			isActionEnd = 1;
+		}
+	}
 }
 
 void Enemy::Summon()
@@ -70,17 +89,15 @@ void Enemy::Summon()
 
 void Enemy::Update()
 {
-	missiles_.remove_if([](std::unique_ptr<EnemyBullet>& bullet) { return bullet->isDead_; });
 
-	toPlayer_= *playerTranslation_ - worldTransform_.translation_;
+	toPlayer_ = *playerTranslation_ - worldTransform_.translation_;
 	toPlayer_.y = 0;
 	toPlayer_.normalize();
 	(this->*pPhaseFuncTable[phase_])();
-	if(isActionEnd)
+	if (isActionEnd)
 	{
 		phase_ = 4;
-		tackleSpd = toPlayer_ * 1.5f;
-		isActionEnd=0;
+		isActionEnd = 0;
 	}
 
 	for (std::unique_ptr<EnemyBullet>& bullet : missiles_) {

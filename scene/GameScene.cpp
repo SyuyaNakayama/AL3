@@ -41,7 +41,7 @@ void GameScene::Initialize()
 void GameScene::Update()
 {
 	player_->Update(enemy_->worldTransform_.translation_);
-	//if (enemy_) { enemy_->Update(); }
+	if (enemy_) { enemy_->Update(); }
 	debugCamera_->Update();
 	viewProjection_.UpdateMatrix();
 }
