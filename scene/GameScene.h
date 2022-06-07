@@ -19,7 +19,6 @@ class GameScene {
 
   public: // メンバ関数
 	
-	GameScene();	// コンストクラタ
 	~GameScene();	// デストラクタ
 	
 	void Initialize();	// 初期化
@@ -36,6 +35,6 @@ class GameScene {
 
 	uint32_t textureHandle_ = 0;
 	// ゲームシーン用
-	WorldTransform worldTransforms_[7];
+	WorldTransform worldTransforms_[2];
 	ViewProjection viewProjection_;
 };

@@ -6,14 +6,6 @@
 
 using namespace DirectX;
 
-const Matrix4 operator*(const Matrix4& m1, const Matrix4& m2) {
-	Matrix4 temp = m1;
-	temp *= m2;
-	return temp;
-}
-
-GameScene::GameScene() {}
-
 GameScene::~GameScene() {
 	delete model_;
 	delete debugCamera_;
@@ -31,27 +23,28 @@ void GameScene::Initialize() {
 	AxisIndicator::GetInstance()->SetVisible(1);
 	AxisIndicator::GetInstance()->SetTargetViewProjection(&debugCamera_->GetViewProjection());
 	PrimitiveDrawer::GetInstance()->SetViewProjection(&debugCamera_->GetViewProjection());
-	worldTransforms_[0].Initialize();
 
-	worldTransforms_[1].Initialize();
-	worldTransforms_[1].translation_ = {0, 4.5f, 0};
-	worldTransforms_[1].parent_ = &worldTransforms_[0];
+	for (size_t i = 0; i < _countof(worldTransforms_); i++)
+	{
+		worldTransforms_->Initialize();
+	}
+	worldTransforms_[0].scale_.y = 2.0f;
+	worldTransforms_[0].UpdateMatrix();
+	worldTransforms_[0].TransferMatrix();
 
 	viewProjection_.Initialize();
 }
 
 void GameScene::Update() {
-	const float MOVE_SPD = 0.2f;
+	const float MOVE_SPD = 0.5f;
+	const float ROTA_SPD = 0.1f;
 
-	worldTransforms_[0].translation_.x +=
-	  (input_->PushKey(DIK_RIGHT) - input_->PushKey(DIK_LEFT)) * MOVE_SPD;
+	worldTransforms_->rotation_.y += (input_->PushKey(DIK_RIGHT) - input_->PushKey(DIK_LEFT)) * ROTA_SPD;
+	worldTransforms_->translation_.z += (input_->PushKey(DIK_UP) - input_->PushKey(DIK_DOWN)) * MOVE_SPD;
 
 	worldTransforms_[0].UpdateMatrix();
 	worldTransforms_[0].TransferMatrix();
 
-	worldTransforms_[1].UpdateMatrix();
-	worldTransforms_[1].matWorld_ *= worldTransforms_[0].matWorld_;
-	worldTransforms_[1].TransferMatrix();
 	debugCamera_->Update();
 }
 
@@ -81,8 +74,8 @@ void GameScene::Draw() {
 	/// <summary>
 	/// ここに3Dオブジェクトの描画処理を追加できる
 	/// </summary>
-	model_->Draw(worldTransforms_[0], viewProjection_, textureHandle_);
-	model_->Draw(worldTransforms_[1], viewProjection_, textureHandle_);
+	model_->Draw(worldTransforms_[0], debugCamera_->GetViewProjection(), textureHandle_);
+	//model_->Draw(worldTransforms_[1], viewProjection_, textureHandle_);
 	// 3Dオブジェクト描画後処理
 	Model::PostDraw();
 #pragma endregion
