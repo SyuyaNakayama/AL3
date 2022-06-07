@@ -57,4 +57,15 @@ struct WorldTransform {
 		matScale *= matTrans;
 		matWorld_ = matScale;
 	}
+
+	Vector3 MatrixProduct(const Vector3& v) {
+		Vector3 temp(v);
+		Vector3 ans(0, 0, 0);
+
+		ans.x = temp.x * m[0][0] + temp.y * m[1][0] + temp.z * m[2][0];
+		ans.y = temp.x * m[0][1] + temp.y * m[1][1] + temp.z * m[2][1];
+		ans.z = temp.x * m[0][2] + temp.y * m[1][2] + temp.z * m[2][2];
+
+		return ans;
+	}
 };
