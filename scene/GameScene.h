@@ -37,4 +37,5 @@ class GameScene {
 	// ゲームシーン用
 	WorldTransform worldTransforms_[2];
 	ViewProjection viewProjection_;
+	int mode = 0;
 };
