@@ -1,6 +1,8 @@
 #include "EnemyBullet.h"
 #include <assert.h>
 
+using namespace MathUtility;
+
 void EnemyBullet::Initialize(Model* model, const Vector3& position, const Vector3& velocity) {
 	assert(model);
 	model_ = model;
@@ -11,6 +13,10 @@ void EnemyBullet::Initialize(Model* model, const Vector3& position, const Vector
 	velocity_ = velocity;
 	deathTimer_ = LIFE_TIME;
 	isDead_ = 0;
+
+	worldTransform_.rotation_.y = std::atan2(velocity.x, velocity.z) + PI / 2;
+	float length = velocity.x * velocity.x + velocity.z * velocity.z;
+	worldTransform_.rotation_.z = std::atan2(-velocity.y, length);
 }
 
 void EnemyBullet::Update() {

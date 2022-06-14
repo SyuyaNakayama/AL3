@@ -16,7 +16,7 @@ void Enemy::Initialize(Model* model, const Vector3& position) {
 
 void Enemy::Approach() {
 	const Vector3 APPROACH_SPD = { 0, 0, -0.2f };
-	worldTransform_.translation_ += APPROACH_SPD;
+	//worldTransform_.translation_ += APPROACH_SPD;
 
 	if (--fireTimer > 0) {
 		return;

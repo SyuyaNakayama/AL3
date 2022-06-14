@@ -4,7 +4,7 @@
 #include "TextureManager.h"
 #include <cassert>
 
-using namespace DirectX;
+//using namespace DirectX;
 
 const Matrix4 operator*(const Matrix4& m1, const Matrix4& m2) {
 	Matrix4 temp = m1;
@@ -33,7 +33,7 @@ void GameScene::Initialize() {
 	player_ = new Player;
 	player_->Initialize(model_);
 	enemy_ = std::make_unique<Enemy>();
-	enemy_->Initialize(model_, {10.0f, 0, 50.0f});
+	enemy_->Initialize(model_, {10.0f, 0, 20.0f});
 	enemy_->SetPlayer(player_);
 }
 
