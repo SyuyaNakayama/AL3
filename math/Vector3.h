@@ -1,4 +1,6 @@
 #pragma once
+#include "Vector2.h"
+
 class Vector3
 {
 public:
@@ -21,6 +23,8 @@ public:
 	Vector3& operator-=(const Vector3& v);
 	Vector3& operator*=(float s);
 	Vector3& operator/=(float s);
+
+	void ShowVector(Vector2 textPos);
 };
 
 // 2項演算子オーバーロード

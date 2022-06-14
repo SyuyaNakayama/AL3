@@ -16,10 +16,13 @@ private:
 	std::list<std::unique_ptr<EnemyBullet>> missiles_;
 	size_t phase_;
 	Vector3* playerTranslation_;
+	ViewProjection* viewProjection_;
 	Timer attackTimer_;
 	Vector3 toPlayer_;
 	bool isActionEnd;
 	Vector3 tackleSpd;
+
+	enum Phase { beam, missile, bomb, press, tackle, summon };
 
 	void Beam();
 	void Missile();
@@ -31,7 +34,7 @@ private:
 	static void (Enemy::* pPhaseFuncTable[])();
 public:
 	WorldTransform worldTransform_;
-	void Initialize(Model* model, Vector3* playerTranslation);
+	void Initialize(Model* model, Vector3* playerTranslation, ViewProjection* viewProjection);
 	void Update();
 	void Draw(const ViewProjection& viewprojection);
 };

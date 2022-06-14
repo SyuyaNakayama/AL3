@@ -1,5 +1,6 @@
 #include "Vector3.h"
 #include <math.h>
+#include "DebugText.h"
 
 Vector3::Vector3()
 {
@@ -87,6 +88,13 @@ Vector3& Vector3::operator/=(float s)
 	y /= s;
 	z /= s;
 	return *this;
+}
+
+void Vector3::ShowVector(Vector2 textPos)
+{
+	DebugText* debugText = DebugText::GetInstance();
+	debugText->SetPos(textPos.x, textPos.y);
+	debugText->Printf("(%f,%f,%f)", x, y, z);
 }
 
 const Vector3 operator+(const Vector3& v1, const Vector3& v2)

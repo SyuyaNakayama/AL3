@@ -4,7 +4,7 @@
 #include <time.h>
 #include "function.h"
 
-void Enemy::Initialize(Model* model, Vector3* playerTranslation)
+void Enemy::Initialize(Model* model, Vector3* playerTranslation, ViewProjection* viewProjection)
 {
 	assert(model);
 	model_ = model;
@@ -14,7 +14,8 @@ void Enemy::Initialize(Model* model, Vector3* playerTranslation)
 	worldTransform_.translation_ = { 10.0f, 3.0f, 20.0f };
 	worldTransform_.scale_ = { 2.5f,5.0f,2.5f };
 	srand(time(NULL));
-	phase_ = 1;
+	phase_ = Phase::bomb;
+	viewProjection_ = viewProjection;
 	playerTranslation_ = playerTranslation;
 	attackTimer_ = 20;
 	isActionEnd = 0;
@@ -54,7 +55,25 @@ void Enemy::Missile()
 
 void Enemy::Bomb()
 {
+	WorldTransform worldTransform;
+	worldTransform.Initialize();
+	static bool isStart = 0;
+	uint32_t texture = TextureManager::Load("Picture/bomb.png");
+	static float spd=1.0f;
 
+	if (!isStart)
+	{
+		worldTransform.translation_ = worldTransform_.translation_;
+		worldTransform.translation_.y = worldTransform_.scale_.y;
+		isStart = 1;
+	}
+	else
+	{
+		worldTransform.translation_.y += spd;
+		spd -= 0.1f;
+	}
+
+	model_->Draw(worldTransform, *viewProjection_, texture);
 }
 
 void Enemy::Press()
@@ -73,7 +92,7 @@ void Enemy::Tackle()
 	else
 	{
 		worldTransform_.translation_ += tackleSpd;
-		if(isOver(worldTransform_.translation_.x)||isOver(worldTransform_.translation_.z))
+		if (isOver(worldTransform_.translation_.x) || isOver(worldTransform_.translation_.z))
 		{
 			worldTransform_.translation_ += tackleSpd;
 			isStart = 0;
@@ -89,7 +108,6 @@ void Enemy::Summon()
 
 void Enemy::Update()
 {
-
 	toPlayer_ = *playerTranslation_ - worldTransform_.translation_;
 	toPlayer_.y = 0;
 	toPlayer_.normalize();

@@ -35,7 +35,7 @@ void GameScene::Initialize()
 	player_ = new Player;
 	player_->Initialize(model_, &viewProjection_);
 	enemy_ = std::make_unique<Enemy>();
-	enemy_->Initialize(model_, &viewProjection_.eye);
+	enemy_->Initialize(model_, &viewProjection_.eye, &viewProjection_);
 }
 
 void GameScene::Update()
@@ -43,6 +43,7 @@ void GameScene::Update()
 	player_->Update(enemy_->worldTransform_.translation_);
 	if (enemy_) { enemy_->Update(); }
 	debugCamera_->Update();
+	viewProjection_.target.ShowVector({ 0,0 });
 	viewProjection_.UpdateMatrix();
 }
 

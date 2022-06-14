@@ -14,27 +14,47 @@ void Player::Initialize(Model* model, ViewProjection* viewProjection)
 
 void Player::Move()
 {
+	enum Spd { front, side, all };
 	const float MOVE_SPD = 0.6f;
-	Vector3 spd(0, 0, 0);
+	Vector3 spd[3];
 	Vector3 yAxis(0, 1.0f, 0);
 
-	if (input_->PushKey(DIK_LEFT)) { spd += toEnemy_.cross(yAxis); }
-	if (input_->PushKey(DIK_RIGHT)) { spd -= toEnemy_.cross(yAxis); }
-	if (input_->PushKey(DIK_UP)) { spd += toEnemy_; }
-	if (input_->PushKey(DIK_DOWN)) { spd -= toEnemy_; }
+	spd[front] = viewProjection_->target - viewProjection_->eye;
+	spd[front].normalize();
+	spd[side] = spd[front].cross({ 0,1.0f,0 });
+	spd[side].normalize();
 
-	spd.normalize();
-	spd *= MOVE_SPD;
-	viewProjection_->eye += spd;
+	spd[front] *= input_->PushKey(DIK_UP) - input_->PushKey(DIK_DOWN);
+	spd[side] *= input_->PushKey(DIK_LEFT) - input_->PushKey(DIK_RIGHT);
+
+	spd[all] = spd[front] + spd[side];
+	spd[all].normalize();
+	spd[all] *= MOVE_SPD;
+
+	viewProjection_->eye += spd[all];
+	viewProjection_->target += spd[all];
 
 	Clamp(viewProjection_->eye.x);
 	Clamp(viewProjection_->eye.z);
 }
 
+void Player::Rotate()
+{
+	static const float ROT_SPD = 0.04f;
+
+	angle_ += (input_->PushKey(DIK_A) - input_->PushKey(DIK_D)) * ROT_SPD;
+	viewProjection_->target =
+	{
+		viewProjection_->eye.x + cosf(angle_),
+		viewProjection_->eye.y,
+		viewProjection_->eye.z + sinf(angle_),
+	};
+}
+
 void Player::Jump()
 {
 	static bool isJump = 0;
-	if (!isJump && input_->TriggerKey(DIK_SPACE)) { isJump = 1; }
+	if (!isJump && input_->TriggerKey(DIK_W)) { isJump = 1; }
 	if (isJump)
 	{
 		const float JUMP_HEIGHT_MAX = 0.85f;
@@ -57,7 +77,7 @@ void Player::Attack()
 	if (!bulletInterval_.CountDown()) { return; }
 
 	const float BULLET_SPD = 1.0f;
-	Vector3 velocity = toEnemy_ * BULLET_SPD;
+	Vector3 velocity = Vector3{ cosf(angle_),0,sinf(angle_) } *BULLET_SPD;
 
 	std::unique_ptr<PlayerBullet> newBullet = std::make_unique<PlayerBullet>();
 	newBullet->Initialize(model_, viewProjection_->eye, velocity);
@@ -68,19 +88,13 @@ void Player::Attack()
 void Player::Update(Vector3 enemyTranslation)
 {
 	bullets_.remove_if([](std::unique_ptr<PlayerBullet>& bullet) { return bullet->IsDead(); });
-	toEnemy_ = enemyTranslation - viewProjection_->eye;
-	toEnemy_.y = 0;
-	toEnemy_.normalize();
-	viewProjection_->target = enemyTranslation;
 
+	Rotate();
 	Move();
 	Jump();
 	Attack();
 
 	for (std::unique_ptr<PlayerBullet>& bullet : bullets_) { bullet->Update(); }
-
-	debugText_->SetPos(50, 50);
-	debugText_->Printf("(%f,%f,%f)", viewProjection_->eye.x, viewProjection_->eye.y, viewProjection_->eye.z);
 }
 
 void Player::Draw() {

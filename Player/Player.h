@@ -15,9 +15,10 @@ class Player {
 	ViewProjection *viewProjection_;
 	int hp;
 	Timer bulletInterval_;
-	Vector3 toEnemy_;
+	float angle_ = 0;
 
 	void Move();
+	void Rotate();
 	void Jump();
 	void Attack();
   public:
