@@ -9,6 +9,7 @@ using namespace DirectX;
 GameScene::~GameScene()
 {
 	delete model_;
+	delete sprite_;
 	delete debugCamera_;
 	delete player_;
 }
@@ -20,6 +21,8 @@ void GameScene::Initialize()
 	audio_ = Audio::GetInstance();
 	debugText_ = DebugText::GetInstance();
 	model_ = Model::Create();
+	sprite_ = Sprite::Create(TextureManager::Load("picture/BackGround.png"), {});
+	sprite_->SetSize({ 1280.0f,720.0f });
 	debugCamera_ = new DebugCamera(1280, 720);
 	AxisIndicator::GetInstance()->SetVisible(1);
 	AxisIndicator::GetInstance()->SetTargetViewProjection(&debugCamera_->GetViewProjection());
@@ -43,7 +46,6 @@ void GameScene::Update()
 	player_->Update(enemy_->worldTransform_.translation_);
 	if (enemy_) { enemy_->Update(); }
 	debugCamera_->Update();
-	viewProjection_.target.ShowVector({ 0,0 });
 	viewProjection_.UpdateMatrix();
 }
 
@@ -57,7 +59,7 @@ void GameScene::Draw()
 	Sprite::PreDraw(commandList);
 
 	// ここに背景スプライトの描画処理を追加できる
-
+	sprite_->Draw();
 	// スプライト描画後処理
 	Sprite::PostDraw();
 	// 深度バッファクリア
@@ -71,7 +73,7 @@ void GameScene::Draw()
 	// ここに3Dオブジェクトの描画処理を追加できる
 	player_->Draw();
 	if (enemy_) {
-		enemy_->Draw(viewProjection_);
+		enemy_->Draw();
 	}
 	model_->Draw(ground_, viewProjection_, groundPic_);
 	// 3Dオブジェクト描画後処理

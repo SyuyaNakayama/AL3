@@ -1,7 +1,9 @@
 #include "EnemyBullet.h"
 #include <assert.h>
+#include "function.h"
 
-void EnemyBullet::Initialize(Model* model, const Vector3& position, const Vector3& velocity) {
+void EnemyBullet::Initialize(Model* model, const Vector3& position, const Vector3& velocity)
+{
 	assert(model);
 	model_ = model;
 	textureHandle_ = TextureManager::Load("picture/missile.png");
@@ -9,14 +11,16 @@ void EnemyBullet::Initialize(Model* model, const Vector3& position, const Vector
 	worldTransform_.translation_ = position;
 	worldTransform_.scale_.x = 2.0f;
 	velocity_ = velocity;
-	deathTimer_ = LIFE_TIME;
 	isDead_ = 0;
 }
 
-void EnemyBullet::Update() {
+void EnemyBullet::Update()
+{
 	worldTransform_.translation_ += velocity_;
 
-	if (--deathTimer_ <= 0) {
+	if (isOver(worldTransform_.translation_.x) ||
+		isOver(worldTransform_.translation_.z))
+	{
 		isDead_ = 1;
 	}
 
@@ -24,6 +28,7 @@ void EnemyBullet::Update() {
 	worldTransform_.TransferMatrix();
 }
 
-void EnemyBullet::Draw(const ViewProjection& viewProjection) {
+void EnemyBullet::Draw(const ViewProjection& viewProjection)
+{
 	model_->Draw(worldTransform_, viewProjection, textureHandle_);
 }

@@ -32,6 +32,7 @@ class GameScene {
 	Audio* audio_ = nullptr;
 	DebugText* debugText_ = nullptr;
 	Model* model_ = nullptr;
+	Sprite* sprite_ = nullptr;
 	DebugCamera* debugCamera_ = nullptr;
 
 	WorldTransform ground_;

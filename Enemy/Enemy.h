@@ -5,6 +5,7 @@
 #include "WorldTransform.h"
 #include "EnemyBullet.h"
 #include "Timer.h"
+#include "Bomb.h"
 
 class Enemy
 {
@@ -20,7 +21,9 @@ private:
 	Timer attackTimer_;
 	Vector3 toPlayer_;
 	bool isActionEnd;
+	bool isStart;
 	Vector3 tackleSpd;
+	Bomb bomb_;
 
 	enum Phase { beam, missile, bomb, press, tackle, summon };
 
@@ -36,5 +39,5 @@ public:
 	WorldTransform worldTransform_;
 	void Initialize(Model* model, Vector3* playerTranslation, ViewProjection* viewProjection);
 	void Update();
-	void Draw(const ViewProjection& viewprojection);
+	void Draw();
 };

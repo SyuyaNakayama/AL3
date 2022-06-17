@@ -14,11 +14,12 @@ void Enemy::Initialize(Model* model, Vector3* playerTranslation, ViewProjection*
 	worldTransform_.translation_ = { 10.0f, 3.0f, 20.0f };
 	worldTransform_.scale_ = { 2.5f,5.0f,2.5f };
 	srand(time(NULL));
-	phase_ = Phase::bomb;
+	phase_ = Phase::missile;
 	viewProjection_ = viewProjection;
 	playerTranslation_ = playerTranslation;
 	attackTimer_ = 20;
 	isActionEnd = 0;
+	isStart = 0;
 	tackleSpd = { 0,0,0 };
 }
 
@@ -45,6 +46,8 @@ void Enemy::Missile()
 	std::unique_ptr<EnemyBullet> newMissile = std::make_unique<EnemyBullet>();
 	newMissile->Initialize(model_, worldTransform_.translation_, toPlayer_);
 	missiles_.push_back(std::move(newMissile));
+
+
 	if (++missileCount >= 10)
 	{
 		isActionEnd = 1;
@@ -55,25 +58,19 @@ void Enemy::Missile()
 
 void Enemy::Bomb()
 {
-	WorldTransform worldTransform;
-	worldTransform.Initialize();
-	static bool isStart = 0;
-	uint32_t texture = TextureManager::Load("Picture/bomb.png");
-	static float spd=1.0f;
-
 	if (!isStart)
 	{
-		worldTransform.translation_ = worldTransform_.translation_;
-		worldTransform.translation_.y = worldTransform_.scale_.y;
+		Vector3 bombSpd = toPlayer_ /= 20.0f;
+		bombSpd.y = 1.5f;
+		bomb_.Initialize(model_, worldTransform_.translation_, bombSpd);
 		isStart = 1;
 	}
-	else
+	if (isStart)
 	{
-		worldTransform.translation_.y += spd;
-		spd -= 0.1f;
-	}
+		bomb_.Update();
 
-	model_->Draw(worldTransform, *viewProjection_, texture);
+		if (bomb_.isDead_) { isActionEnd = 1; }
+	}
 }
 
 void Enemy::Press()
@@ -83,7 +80,6 @@ void Enemy::Press()
 
 void Enemy::Tackle()
 {
-	static bool isStart = 0;
 	if (!isStart)
 	{
 		tackleSpd = toPlayer_ * 1.5f;
@@ -92,10 +88,10 @@ void Enemy::Tackle()
 	else
 	{
 		worldTransform_.translation_ += tackleSpd;
+
 		if (isOver(worldTransform_.translation_.x) || isOver(worldTransform_.translation_.z))
 		{
-			worldTransform_.translation_ += tackleSpd;
-			isStart = 0;
+			worldTransform_.translation_ -= tackleSpd;
 			isActionEnd = 1;
 		}
 	}
@@ -114,23 +110,23 @@ void Enemy::Update()
 	(this->*pPhaseFuncTable[phase_])();
 	if (isActionEnd)
 	{
-		phase_ = 4;
+		phase_ = Phase::bomb;
+		isStart = 0;
 		isActionEnd = 0;
 	}
 
-	for (std::unique_ptr<EnemyBullet>& bullet : missiles_) {
-		bullet->Update();
-	}
+	for (std::unique_ptr<EnemyBullet>& bullet : missiles_) { bullet->Update(); }
 
 	worldTransform_.UpdateMatrix();
 	worldTransform_.TransferMatrix();
 }
 
-void Enemy::Draw(const ViewProjection& viewProjection)
+void Enemy::Draw()
 {
-	model_->Draw(worldTransform_, viewProjection, textureHandle_);
+	model_->Draw(worldTransform_, *viewProjection_, textureHandle_);
 
 	for (std::unique_ptr<EnemyBullet>& bullet : missiles_) {
-		bullet->Draw(viewProjection);
+		bullet->Draw(*viewProjection_);
 	}
+	if (!bomb_.isDead_) { bomb_.Draw(*viewProjection_); }
 }

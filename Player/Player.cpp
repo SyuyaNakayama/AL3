@@ -10,6 +10,7 @@ void Player::Initialize(Model* model, ViewProjection* viewProjection)
 	debugText_ = DebugText::GetInstance();
 	viewProjection_ = viewProjection;
 	bulletInterval_ = 40;
+	angle_ = PI / 2.0f;
 }
 
 void Player::Move()
@@ -92,7 +93,7 @@ void Player::Update(Vector3 enemyTranslation)
 	Rotate();
 	Move();
 	Jump();
-	Attack();
+	//Attack();
 
 	for (std::unique_ptr<PlayerBullet>& bullet : bullets_) { bullet->Update(); }
 }

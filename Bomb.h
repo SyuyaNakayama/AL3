@@ -3,17 +3,16 @@
 #include "ViewProjection.h"
 #include "WorldTransform.h"
 
-class EnemyBullet 
+class Bomb
 {
-  private:
+private:
 	WorldTransform worldTransform_;
 	Model* model_;
 	uint32_t textureHandle_;
 	Vector3 velocity_;
-
-  public:
+public:
+	bool isDead_ = 1;
 	void Initialize(Model* model, const Vector3& position, const Vector3& velocity);
 	void Update();
 	void Draw(const ViewProjection& viewProjection);
-	bool isDead_;
 };
