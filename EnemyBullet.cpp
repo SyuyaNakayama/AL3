@@ -20,6 +20,11 @@ void EnemyBullet::Initialize(Model* model, const Vector3& position, const Vector
 }
 
 void EnemyBullet::Update() {
+	Vector3 toPlayer = *player_ - worldTransform_.translation_;
+
+	toPlayer.normalize();
+	velocity_.normalize();
+
 	worldTransform_.translation_ += velocity_;
 
 	if (--deathTimer_ <= 0) {
