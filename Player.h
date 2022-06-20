@@ -6,7 +6,7 @@
 #include <list>
 
 class Player {
-  private:
+private:
 	Model* model_;
 	uint32_t textureHandle_;
 	Input* input_;
@@ -18,9 +18,12 @@ class Player {
 	void Rotate();
 	void Attack();
 
-  public:
+public:
 	void Initialize(Model* model);
 	void Update();
 	void Draw(ViewProjection viewProjection);
 	Vector3 GetWorldPosition();
+	void OnCollision() {};
+	const Vector3 GetPosition() { return worldTransform_.translation_; }
+	const std::list<std::unique_ptr<PlayerBullet>>& GetBullets() { return bullets_; }
 };

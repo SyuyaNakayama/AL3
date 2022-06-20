@@ -18,16 +18,12 @@ void Enemy::Approach() {
 	const Vector3 APPROACH_SPD = { 0, 0, -0.2f };
 	worldTransform_.translation_ += APPROACH_SPD;
 
-	if (--fireTimer > 0) {
-		return;
-	}
+	if (--fireTimer > 0) { return; }
 
 	Fire();
 	fireTimer = FIRE_INTERVAL;
 
-	if (worldTransform_.translation_.z < 0.0f) {
-		phase_ = Phase::Leave;
-	}
+	if (worldTransform_.translation_.z < 0.0f) { phase_ = Phase::Leave; }
 }
 
 void Enemy::ApproachInit() { fireTimer = FIRE_INTERVAL; }
@@ -39,10 +35,10 @@ void Enemy::Leave() {
 
 void Enemy::Fire() {
 	assert(player_);
-	
+
 	const float BULLET_SPD = 1.0f;
-	Vector3 playerPos=player_->GetWorldPosition();
-	Vector3 enemyPos=GetWorldPosition();
+	Vector3 playerPos = player_->GetWorldPosition();
+	Vector3 enemyPos = GetPosition();
 	Vector3 velocity = playerPos - enemyPos;
 	velocity.normalize();
 	velocity *= BULLET_SPD;
@@ -84,9 +80,4 @@ void Enemy::Draw(const ViewProjection& viewProjection) {
 	for (std::unique_ptr<EnemyBullet>& bullet : bullets_) {
 		bullet->Draw(viewProjection);
 	}
-}
-
-Vector3 Enemy::GetWorldPosition()
-{
-	return Vector3(worldTransform_.translation_);
 }

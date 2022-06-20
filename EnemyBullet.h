@@ -4,7 +4,7 @@
 #include "WorldTransform.h"
 
 class EnemyBullet {
-  private:
+private:
 	static const int LIFE_TIME = 60 * 5;
 
 	WorldTransform worldTransform_;
@@ -14,9 +14,11 @@ class EnemyBullet {
 	int deathTimer_;
 	bool isDead_;
 
-  public:
+public:
 	void Initialize(Model* model, const Vector3& position, const Vector3& velocity);
 	void Update();
 	void Draw(const ViewProjection& viewProjection);
 	bool IsDead() const { return isDead_; }
+	void OnCollision() { isDead_ = 1; };
+	const Vector3 GetPosition() { return worldTransform_.translation_; }
 };

@@ -19,14 +19,14 @@
 /// </summary>
 class GameScene {
 
-  public:         // メンバ関数
+public:         // メンバ関数
 	~GameScene(); // デストラクタ
 
 	void Initialize(); // 初期化
 	void Update();     // 毎フレーム処理
 	void Draw();       // 描画
-
-  private: // メンバ変数
+	void CheckAllCollisions();
+private: // メンバ変数
 	DirectXCommon* dxCommon_ = nullptr;
 	Input* input_ = nullptr;
 	Audio* audio_ = nullptr;

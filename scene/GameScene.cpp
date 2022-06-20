@@ -33,15 +33,65 @@ void GameScene::Initialize() {
 	player_ = new Player;
 	player_->Initialize(model_);
 	enemy_ = std::make_unique<Enemy>();
-	enemy_->Initialize(model_, {10.0f, 0, 50.0f});
+	enemy_->Initialize(model_, { 10.0f, 0, 50.0f });
 	enemy_->SetPlayer(player_);
+}
+
+void GameScene::CheckAllCollisions()
+{
+	Vector3 posA, posB;
+
+	const std::list<std::unique_ptr<PlayerBullet>>& playerBullets = player_->GetBullets();
+	const std::list<std::unique_ptr<EnemyBullet>>& enemyBullets = enemy_->GetBullets();
+#pragma region 自キャラと敵弾の当たり判定
+	posA = player_->GetPosition();
+
+	for (const std::unique_ptr<EnemyBullet>& bullet : enemyBullets)
+	{
+		posB = bullet->GetPosition();
+		posB -= posA;
+		if (posB.length() <= 3.0f)
+		{
+			player_->OnCollision();
+			bullet->OnCollision();
+		}
+	}
+#pragma endregion
+#pragma region 自弾と敵キャラの当たり判定
+	posA = enemy_->GetPosition();
+
+	for (const std::unique_ptr<PlayerBullet>& bullet : playerBullets)
+	{
+		posB = bullet->GetPosition();
+		posB -= posA;
+		if (posB.length() <= 3.0f)
+		{
+			enemy_->OnCollision();
+			bullet->OnCollision();
+		}
+	}
+#pragma endregion
+#pragma region 自弾と敵弾の当たり判定
+	for (const std::unique_ptr<PlayerBullet>& playerBullet : playerBullets) {
+		for (const std::unique_ptr<EnemyBullet>& enemyBullet : enemyBullets)
+		{
+			posA = playerBullet->GetPosition();
+			posB = enemyBullet->GetPosition();
+			posB -= posA;
+			if (posB.length() <= 2.0f)
+			{
+				playerBullet->OnCollision();
+				enemyBullet->OnCollision();
+			}
+		}
+	}
+#pragma endregion
 }
 
 void GameScene::Update() {
 	player_->Update();
-	if (enemy_) {
-		enemy_->Update();
-	}
+	if (enemy_) { enemy_->Update(); }
+	CheckAllCollisions();
 	debugCamera_->Update();
 }
 
@@ -71,9 +121,7 @@ void GameScene::Draw() {
 	/// <summary>
 	/// ここに3Dオブジェクトの描画処理を追加できる
 	player_->Draw(viewProjection_);
-	if (enemy_) {
-		enemy_->Draw(viewProjection_);
-	}
+	if (enemy_) { enemy_->Draw(viewProjection_); }
 	// 3Dオブジェクト描画後処理
 	Model::PostDraw();
 #pragma endregion

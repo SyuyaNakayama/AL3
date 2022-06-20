@@ -8,7 +8,7 @@
 class Player;
 
 class Enemy {
-  private:
+private:
 	enum class Phase { Approach, Leave };
 
 	WorldTransform worldTransform_;
@@ -27,10 +27,12 @@ class Enemy {
 	void Leave();
 
 	void Fire();
-  public:
+public:
 	void Initialize(Model* model, const Vector3& position);
 	void Update();
 	void Draw(const ViewProjection& viewprojection);
 	void SetPlayer(Player* player) { player_ = player; }
-	Vector3 GetWorldPosition();
+	const Vector3 GetPosition() { return worldTransform_.translation_; }
+	void OnCollision() {};
+	const std::list<std::unique_ptr<EnemyBullet>>& GetBullets() { return bullets_; }
 };
