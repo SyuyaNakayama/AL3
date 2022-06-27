@@ -16,15 +16,16 @@ GameScene::~GameScene() {
 	delete model_;
 	delete debugCamera_;
 	delete player_;
+	delete modelSkydome_;
 }
 
 void GameScene::Initialize() {
-
 	dxCommon_ = DirectXCommon::GetInstance();
 	input_ = Input::GetInstance();
 	audio_ = Audio::GetInstance();
 	debugText_ = DebugText::GetInstance();
 	model_ = Model::Create();
+	//modelSkydome_ = Model::CreateFromOBJ("skydome", 1);
 	debugCamera_ = new DebugCamera(1280, 720);
 	AxisIndicator::GetInstance()->SetVisible(1);
 	AxisIndicator::GetInstance()->SetTargetViewProjection(&debugCamera_->GetViewProjection());
@@ -35,6 +36,7 @@ void GameScene::Initialize() {
 	enemy_ = std::make_unique<Enemy>();
 	enemy_->Initialize(model_, { 10.0f, 0, 50.0f });
 	enemy_->SetPlayer(player_);
+	//skydome_->Initialize(model_);
 }
 
 void GameScene::CheckAllCollisions()
@@ -122,6 +124,8 @@ void GameScene::Draw() {
 	/// ここに3Dオブジェクトの描画処理を追加できる
 	player_->Draw(viewProjection_);
 	if (enemy_) { enemy_->Draw(viewProjection_); }
+	//skydome_->Draw(viewProjection_);
+
 	// 3Dオブジェクト描画後処理
 	Model::PostDraw();
 #pragma endregion

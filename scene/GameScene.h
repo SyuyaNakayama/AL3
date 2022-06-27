@@ -12,6 +12,7 @@
 #include "Sprite.h"
 #include "ViewProjection.h"
 #include "WorldTransform.h"
+#include "Skydome.h"
 #include <DirectXMath.h>
 
 /// <summary>
@@ -19,7 +20,7 @@
 /// </summary>
 class GameScene {
 
-public:         // メンバ関数
+public: // メンバ関数
 	~GameScene(); // デストラクタ
 
 	void Initialize(); // 初期化
@@ -32,11 +33,11 @@ private: // メンバ変数
 	Audio* audio_ = nullptr;
 	DebugText* debugText_ = nullptr;
 	Model* model_ = nullptr;
-	DebugCamera* debugCamera_ = nullptr;
-
-	uint32_t playerPic;
-	// ゲームシーン用
+	Model* modelSkydome_ = nullptr;
 	ViewProjection viewProjection_;
+	DebugCamera* debugCamera_ = nullptr;
 	Player* player_ = nullptr;
+	uint32_t playerPic;
 	std::unique_ptr<Enemy> enemy_ = nullptr;
+	std::unique_ptr<Skydome> skydome_ = nullptr;
 };
