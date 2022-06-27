@@ -25,7 +25,7 @@ void GameScene::Initialize() {
 	audio_ = Audio::GetInstance();
 	debugText_ = DebugText::GetInstance();
 	model_ = Model::Create();
-	//modelSkydome_ = Model::CreateFromOBJ("skydome", 1);
+	modelSkydome_ = Model::CreateFromOBJ("skydome", 1);
 	debugCamera_ = new DebugCamera(1280, 720);
 	AxisIndicator::GetInstance()->SetVisible(1);
 	AxisIndicator::GetInstance()->SetTargetViewProjection(&debugCamera_->GetViewProjection());
@@ -36,7 +36,8 @@ void GameScene::Initialize() {
 	enemy_ = std::make_unique<Enemy>();
 	enemy_->Initialize(model_, { 10.0f, 0, 50.0f });
 	enemy_->SetPlayer(player_);
-	//skydome_->Initialize(model_);
+	skydome_ = std::make_unique<Skydome>();
+	skydome_->Initialize(modelSkydome_);
 }
 
 void GameScene::CheckAllCollisions()
@@ -95,6 +96,7 @@ void GameScene::Update() {
 	if (enemy_) { enemy_->Update(); }
 	CheckAllCollisions();
 	debugCamera_->Update();
+	viewProjection_ = debugCamera_->GetViewProjection();
 }
 
 void GameScene::Draw() {
@@ -124,7 +126,7 @@ void GameScene::Draw() {
 	/// ここに3Dオブジェクトの描画処理を追加できる
 	player_->Draw(viewProjection_);
 	if (enemy_) { enemy_->Draw(viewProjection_); }
-	//skydome_->Draw(viewProjection_);
+	skydome_->Draw(viewProjection_);
 
 	// 3Dオブジェクト描画後処理
 	Model::PostDraw();
