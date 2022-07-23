@@ -24,68 +24,26 @@ void GameScene::Initialize() {
 	AxisIndicator::GetInstance()->SetTargetViewProjection(&debugCamera_->GetViewProjection());
 	PrimitiveDrawer::GetInstance()->SetViewProjection(&debugCamera_->GetViewProjection());
 
-	for (size_t i = 0; i < _countof(worldTransforms_); i++)
-	{
-		worldTransforms_[i].Initialize();
-	}
-	worldTransforms_[0].scale_.y = 2.0f;
-
-	worldTransforms_[1].parent_ = &worldTransforms_[0];
-	worldTransforms_[1].scale_.y = 0.5f;
-	worldTransforms_[1].translation_ = { 0,0.5f,2.0f };
-
+	worldTransform_.Initialize();
 	viewProjection_.Initialize();
 }
 
 void GameScene::Update() {
-	const float MOVE_SPD = 0.5f;
+	const float SPD = 0.1f;
 	const float ROTA_SPD = 0.1f;
-	const char MODE_NAME[2][14]
-	{
-		"BioWalk","CameraEyeMove"
-	};
 
-	if (input_->TriggerKey(DIK_Q))
-	{
-		if (++mode >= 2) { mode = 0; }
-	}
+	float sSpd = (input_->PushKey(DIK_Q) - input_->PushKey(DIK_W)) * SPD;
+	float rSpd = (input_->PushKey(DIK_Z) - input_->PushKey(DIK_X)) * ROTA_SPD;
+	float tSpd = (input_->PushKey(DIK_A) - input_->PushKey(DIK_S)) * SPD*5.0f;
 
-	if (mode == 0)
-	{
-		worldTransforms_[0].rotation_.y += (input_->PushKey(DIK_D) - input_->PushKey(DIK_A)) * ROTA_SPD;
-		worldTransforms_[0].translation_ += worldTransforms_[0].matWorld_.MatrixProduct(
-			{ 0,0,(input_->PushKey(DIK_W) - input_->PushKey(DIK_S)) * MOVE_SPD });
-	}
-	if (mode == 1)
-	{
-		enum Axis { x, z };
-		Vector3 cameraTargetAxis[2];
+	worldTransform_.scale_ += {sSpd, sSpd, sSpd};
+	worldTransform_.rotation_ += {rSpd, rSpd, rSpd};
+	worldTransform_.translation_ += {tSpd, tSpd, tSpd};
 
-		cameraTargetAxis[Axis::z] = debugCamera_->GetViewProjection().target - debugCamera_->GetViewProjection().eye;
-		cameraTargetAxis[Axis::z].normalize();
-		cameraTargetAxis[Axis::x] = cameraTargetAxis[Axis::z].cross(debugCamera_->GetViewProjection().up);
-		cameraTargetAxis[Axis::x].normalize();
-
-		worldTransforms_[0].translation_ -= (input_->PushKey(DIK_D) - input_->PushKey(DIK_A)) * cameraTargetAxis[Axis::x] * MOVE_SPD;
-		worldTransforms_[0].translation_ += (input_->PushKey(DIK_W) - input_->PushKey(DIK_S)) * cameraTargetAxis[Axis::z] * MOVE_SPD;
-	}
-
-	worldTransforms_[0].UpdateMatrix();
-	worldTransforms_[0].TransferMatrix();
-	worldTransforms_[1].UpdateMatrix();
-	worldTransforms_[1].matWorld_ *= worldTransforms_[0].matWorld_;
-	worldTransforms_[1].TransferMatrix();
+	worldTransform_.UpdateMatrix();
+	worldTransform_.TransferMatrix();
 
 	debugCamera_->Update();
-
-	debugText_->SetPos(0, 0);
-	debugText_->Printf("mode:%s", MODE_NAME[mode]);
-	debugText_->SetPos(0, 20);
-	debugText_->Printf("mouse:CameraMove");
-	debugText_->SetPos(0, 40);
-	debugText_->Printf("Q:ModeChange");
-	debugText_->SetPos(0, 60);
-	debugText_->Printf("ADWS:Move");
 }
 
 void GameScene::Draw() {
@@ -114,8 +72,7 @@ void GameScene::Draw() {
 	/// <summary>
 	/// ここに3Dオブジェクトの描画処理を追加できる
 	/// </summary>
-	model_->Draw(worldTransforms_[0], debugCamera_->GetViewProjection(), textureHandle_);
-	model_->Draw(worldTransforms_[1], debugCamera_->GetViewProjection(), textureHandle_);
+	model_->Draw(worldTransform_, debugCamera_->GetViewProjection(), textureHandle_);
 	// 3Dオブジェクト描画後処理
 	Model::PostDraw();
 #pragma endregion
