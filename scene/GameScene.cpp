@@ -31,12 +31,14 @@ void GameScene::Initialize() {
 	AxisIndicator::GetInstance()->SetTargetViewProjection(&debugCamera_->GetViewProjection());
 	PrimitiveDrawer::GetInstance()->SetViewProjection(&debugCamera_->GetViewProjection());
 	viewProjection_.Initialize();
+	railCamera = make_unique<RailCamera>();
+	railCamera->Initialize({ 0,0,-50.0f }, {});
 	player_ = new Player;
 	player_->Initialize(model_);
-	enemy_ = std::make_unique<Enemy>();
+	enemy_ = make_unique<Enemy>();
 	enemy_->Initialize(model_, { 10.0f, 0, 50.0f });
 	enemy_->SetPlayer(player_);
-	skydome_ = std::make_unique<Skydome>();
+	skydome_ = make_unique<Skydome>();
 	skydome_->Initialize(modelSkydome_);
 }
 
@@ -44,12 +46,12 @@ void GameScene::CheckAllCollisions()
 {
 	Vector3 posA, posB;
 
-	const std::list<std::unique_ptr<PlayerBullet>>& playerBullets = player_->GetBullets();
-	const std::list<std::unique_ptr<EnemyBullet>>& enemyBullets = enemy_->GetBullets();
+	const list<unique_ptr<PlayerBullet>>& playerBullets = player_->GetBullets();
+	const list<unique_ptr<EnemyBullet>>& enemyBullets = enemy_->GetBullets();
 #pragma region 自キャラと敵弾の当たり判定
 	posA = player_->GetPosition();
 
-	for (const std::unique_ptr<EnemyBullet>& bullet : enemyBullets)
+	for (const unique_ptr<EnemyBullet>& bullet : enemyBullets)
 	{
 		posB = bullet->GetPosition();
 		posB -= posA;
@@ -63,7 +65,7 @@ void GameScene::CheckAllCollisions()
 #pragma region 自弾と敵キャラの当たり判定
 	posA = enemy_->GetPosition();
 
-	for (const std::unique_ptr<PlayerBullet>& bullet : playerBullets)
+	for (const unique_ptr<PlayerBullet>& bullet : playerBullets)
 	{
 		posB = bullet->GetPosition();
 		posB -= posA;
@@ -75,8 +77,8 @@ void GameScene::CheckAllCollisions()
 	}
 #pragma endregion
 #pragma region 自弾と敵弾の当たり判定
-	for (const std::unique_ptr<PlayerBullet>& playerBullet : playerBullets) {
-		for (const std::unique_ptr<EnemyBullet>& enemyBullet : enemyBullets)
+	for (const unique_ptr<PlayerBullet>& playerBullet : playerBullets) {
+		for (const unique_ptr<EnemyBullet>& enemyBullet : enemyBullets)
 		{
 			posA = playerBullet->GetPosition();
 			posB = enemyBullet->GetPosition();
@@ -91,12 +93,14 @@ void GameScene::CheckAllCollisions()
 #pragma endregion
 }
 
-void GameScene::Update() {
-	player_->Update();
+void GameScene::Update()
+{
 	if (enemy_) { enemy_->Update(); }
 	CheckAllCollisions();
-	debugCamera_->Update();
-	viewProjection_ = debugCamera_->GetViewProjection();
+
+	railCamera->Update({ 0,0,-0.5f }, {});
+	player_->Update(*railCamera);
+	viewProjection_ = railCamera->GetViewProjection();
 }
 
 void GameScene::Draw() {

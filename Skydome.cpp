@@ -7,7 +7,7 @@ void Skydome::Initialize(Model* model)
 	assert(model);
 	model_ = model;
 	worldTransform_.Initialize();
-	worldTransform_.scale_ = { 100,100,100 };
+	worldTransform_.scale_ = { 1000,1000,1000 };
 	worldTransform_.UpdateMatrix();
 	worldTransform_.TransferMatrix();
 }

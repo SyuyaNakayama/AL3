@@ -1,5 +1,5 @@
 ﻿#pragma once
-
+#include <DirectXMath.h>
 #include "Audio.h"
 #include "DebugCamera.h"
 #include "DebugText.h"
@@ -13,20 +13,12 @@
 #include "ViewProjection.h"
 #include "WorldTransform.h"
 #include "Skydome.h"
-#include <DirectXMath.h>
+#include "RailCamera.h"
 
-/// <summary>
-/// ゲームシーン
-/// </summary>
-class GameScene {
-
-public: // メンバ関数
-	~GameScene(); // デストラクタ
-
-	void Initialize(); // 初期化
-	void Update();     // 毎フレーム処理
-	void Draw();       // 描画
-	void CheckAllCollisions();
+using namespace std;
+// ゲームシーン
+class GameScene 
+{
 private: // メンバ変数
 	DirectXCommon* dxCommon_ = nullptr;
 	Input* input_ = nullptr;
@@ -37,7 +29,13 @@ private: // メンバ変数
 	ViewProjection viewProjection_;
 	DebugCamera* debugCamera_ = nullptr;
 	Player* player_ = nullptr;
-	uint32_t playerPic;
-	std::unique_ptr<Enemy> enemy_ = nullptr;
-	std::unique_ptr<Skydome> skydome_ = nullptr;
+	unique_ptr<Enemy> enemy_ = nullptr;
+	unique_ptr<Skydome> skydome_ = nullptr;
+	unique_ptr<RailCamera> railCamera = nullptr;
+public: // メンバ関数
+	~GameScene(); // デストラクタ
+	void Initialize(); // 初期化
+	void Update();     // 毎フレーム処理
+	void Draw();       // 描画
+	void CheckAllCollisions();
 };

@@ -9,16 +9,17 @@ void Player::Initialize(Model* model) {
 	debugText_ = DebugText::GetInstance();
 	worldTransform_.Initialize();
 	worldTransform_.scale_.y = 2.0f;
+	worldTransform_.translation_.z = 50.0f;
 }
 
 void Player::Move() {
 	const float MOVE_SPD = 0.4f;
-	const Vector2 MOVE_LIMIT = {34.0f, 17.0f};
+	const Vector2 MOVE_LIMIT = { 34.0f, 17.0f };
 
 	worldTransform_.translation_.x +=
-	  (input_->PushKey(DIK_RIGHT) - input_->PushKey(DIK_LEFT)) * MOVE_SPD;
+		(input_->PushKey(DIK_RIGHT) - input_->PushKey(DIK_LEFT)) * MOVE_SPD;
 	worldTransform_.translation_.y +=
-	  (input_->PushKey(DIK_UP) - input_->PushKey(DIK_DOWN)) * MOVE_SPD;
+		(input_->PushKey(DIK_UP) - input_->PushKey(DIK_DOWN)) * MOVE_SPD;
 
 	worldTransform_.translation_.x = max(worldTransform_.translation_.x, -MOVE_LIMIT.x);
 	worldTransform_.translation_.x = min(worldTransform_.translation_.x, +MOVE_LIMIT.x);
@@ -32,50 +33,42 @@ void Player::Rotate() {
 	worldTransform_.rotation_.y += (input_->PushKey(DIK_A) - input_->PushKey(DIK_D)) * ROT_SPD;
 }
 
-void Player::Attack() {
-	if (!input_->TriggerKey(DIK_SPACE)) {
-		return;
-	}
+void Player::Attack(RailCamera railCamera) {
+	if (!input_->TriggerKey(DIK_SPACE)) { return; }
 
 	const float BULLET_SPD = 1.0f;
 	Vector3 velocity(0, 0, BULLET_SPD);
 
-	velocity = worldTransform_.matWorld_.MatrixProduct(velocity);
+	velocity = worldTransform_.matWorld_ * velocity;
 
-	std::unique_ptr<PlayerBullet> newBullet = std::make_unique<PlayerBullet>();
-	newBullet->Initialize(model_, worldTransform_.translation_, velocity);
+	unique_ptr<PlayerBullet> newBullet = make_unique<PlayerBullet>();
+	newBullet->Initialize(model_, worldTransform_.matWorld_.GetTranslationFromMatrix(), velocity);
 
-	bullets_.push_back(std::move(newBullet));
+	bullets_.push_back(move(newBullet));
 }
 
-void Player::Update() {
-	bullets_.remove_if([](std::unique_ptr<PlayerBullet>& bullet) { return bullet->IsDead(); });
+void Player::Update(RailCamera railCamera) {
+	bullets_.remove_if([](unique_ptr<PlayerBullet>& bullet) { return bullet->IsDead(); });
 
 	Move();
 	Rotate();
-	Attack();
+	Attack(railCamera);
 
-	for (std::unique_ptr<PlayerBullet>& bullet : bullets_) {
-		bullet->Update();
-	}
+	for (unique_ptr<PlayerBullet>& bullet : bullets_) { bullet->Update(); }
 
 	worldTransform_.UpdateMatrix();
+	worldTransform_.matWorld_ *= railCamera.GetWorldTransform().matWorld_;
 	worldTransform_.TransferMatrix();
 
-	debugText_->SetPos(50, 50);
+	debugText_->SetPos(50, 350);
 	debugText_->Printf(
-	  "Player:(%f,%f,%f)", worldTransform_.translation_.x, worldTransform_.translation_.y,
-	  worldTransform_.translation_.z);
+		"Player:(%f,%f,%f)", worldTransform_.matWorld_.GetTranslationFromMatrix().x,
+		worldTransform_.matWorld_.GetTranslationFromMatrix().y,
+		worldTransform_.matWorld_.GetTranslationFromMatrix().z);
 }
 
-void Player::Draw(ViewProjection viewProjection) {
-	model_->Draw(worldTransform_, viewProjection, textureHandle_);
-	for (std::unique_ptr<PlayerBullet>& bullet : bullets_) {
-		bullet->Draw(viewProjection);
-	}
-}
-
-Vector3 Player::GetWorldPosition()
+void Player::Draw(ViewProjection viewProjection)
 {
-	return Vector3(worldTransform_.translation_);
+	model_->Draw(worldTransform_, viewProjection, textureHandle_);
+	for (unique_ptr<PlayerBullet>& bullet : bullets_) { bullet->Draw(viewProjection); }
 }

@@ -37,7 +37,7 @@ void Enemy::Fire() {
 	assert(player_);
 
 	const float BULLET_SPD = 1.0f;
-	Vector3 playerPos = player_->GetWorldPosition();
+	Vector3 playerPos = player_->GetPosition();
 	Vector3 enemyPos = GetPosition();
 	Vector3 velocity = playerPos - enemyPos;
 	velocity.normalize();

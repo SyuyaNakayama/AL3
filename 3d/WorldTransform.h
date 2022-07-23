@@ -49,9 +49,9 @@ struct WorldTransform {
 	void UpdateMatrix() {
 		Matrix4 matScale, matRot, matTrans;
 
-		matScale.GetScaleMat(scale_);
-		matRot.GetRotMat(rotation_);
-		matTrans.GetTransMat(translation_);
+		matScale.SetScaleMat(scale_);
+		matRot.SetRotMat(rotation_);
+		matTrans.SetTransMat(translation_);
 
 		matScale *= matRot;
 		matScale *= matTrans;
