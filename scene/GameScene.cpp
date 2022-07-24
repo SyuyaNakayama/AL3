@@ -93,6 +93,11 @@ void GameScene::CheckAllCollisions()
 #pragma endregion
 }
 
+void GameScene::AddEnemyBullet(unique_ptr<EnemyBullet> enemyBullet)
+{
+	enemyBullets_.push_back(move(enemyBullet));
+}
+
 void GameScene::Update()
 {
 	if (enemy_) { enemy_->Update(); }

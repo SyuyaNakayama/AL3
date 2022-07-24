@@ -17,7 +17,7 @@
 
 using namespace std;
 // ゲームシーン
-class GameScene 
+class GameScene
 {
 private: // メンバ変数
 	DirectXCommon* dxCommon_ = nullptr;
@@ -32,10 +32,12 @@ private: // メンバ変数
 	unique_ptr<Enemy> enemy_ = nullptr;
 	unique_ptr<Skydome> skydome_ = nullptr;
 	unique_ptr<RailCamera> railCamera = nullptr;
+	list<unique_ptr<EnemyBullet>> enemyBullets_;
 public: // メンバ関数
 	~GameScene(); // デストラクタ
 	void Initialize(); // 初期化
 	void Update();     // 毎フレーム処理
-	void Draw();       // 描画
 	void CheckAllCollisions();
+	void AddEnemyBullet(unique_ptr<EnemyBullet> enemyBullet);
+	void Draw();       // 描画
 };

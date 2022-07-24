@@ -6,6 +6,7 @@
 #include "EnemyBullet.h"
 
 class Player;
+class GameScene;
 
 class Enemy {
 private:
@@ -21,6 +22,7 @@ private:
 	static const int FIRE_INTERVAL = 60;
 	int fireTimer;
 	Player* player_;
+	GameScene* gameScene_;
 
 	void Approach();
 	void ApproachInit();
@@ -35,4 +37,5 @@ public:
 	const Vector3 GetPosition() { return worldTransform_.translation_; }
 	void OnCollision() {};
 	const std::list<std::unique_ptr<EnemyBullet>>& GetBullets() { return bullets_; }
+	void SetGameScene(GameScene* gameScene) { gameScene_ = gameScene; }
 };
