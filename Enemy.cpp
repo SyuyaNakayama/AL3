@@ -1,9 +1,9 @@
 #include "Enemy.h"
 #include <assert.h>
 #include "Player.h"
+#include "GameScene.h"
 
 void Enemy::Initialize(Model* model, const Vector3& position) {
-	assert(model);
 	model_ = model;
 	textureHandle_ = TextureManager::Load("picture/enemy.png");
 	debugText_ = DebugText::GetInstance();
@@ -33,9 +33,8 @@ void Enemy::Leave() {
 	worldTransform_.translation_ += LEAVE_SPD;
 }
 
-void Enemy::Fire() {
-	assert(player_);
-
+void Enemy::Fire() 
+{
 	const float BULLET_SPD = 1.0f;
 	Vector3 playerPos = player_->GetPosition();
 	Vector3 enemyPos = GetPosition();
@@ -43,15 +42,16 @@ void Enemy::Fire() {
 	velocity.normalize();
 	velocity *= BULLET_SPD;
 
-	std::unique_ptr<EnemyBullet> newBullet = std::make_unique<EnemyBullet>();
+	unique_ptr<EnemyBullet> newBullet = make_unique<EnemyBullet>();
 	newBullet->Initialize(model_, worldTransform_.translation_, velocity);
 
-	bullets_.push_back(std::move(newBullet));
+	gameScene_->GetEnemyBullets().push_back(move(newBullet));
 }
 
-void Enemy::Update() {
-	bullets_.remove_if([](std::unique_ptr<EnemyBullet>& bullet) { return bullet->IsDead(); });
-	switch (phase_) {
+void Enemy::Update() 
+{
+	switch (phase_) 
+	{
 	case Enemy::Phase::Approach:
 	default:
 		Approach();
@@ -59,10 +59,6 @@ void Enemy::Update() {
 	case Enemy::Phase::Leave:
 		Leave();
 		break;
-	}
-
-	for (std::unique_ptr<EnemyBullet>& bullet : bullets_) {
-		bullet->Update();
 	}
 
 	worldTransform_.UpdateMatrix();
@@ -74,10 +70,7 @@ void Enemy::Update() {
 		worldTransform_.translation_.z);
 }
 
-void Enemy::Draw(const ViewProjection& viewProjection) {
+void Enemy::Draw(const ViewProjection& viewProjection) 
+{
 	model_->Draw(worldTransform_, viewProjection, textureHandle_);
-
-	for (std::unique_ptr<EnemyBullet>& bullet : bullets_) {
-		bullet->Draw(viewProjection);
-	}
 }

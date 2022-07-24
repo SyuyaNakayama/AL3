@@ -3,7 +3,8 @@
 #include "ViewProjection.h"
 #include "WorldTransform.h"
 
-class EnemyBullet {
+class EnemyBullet 
+{
 private:
 	static const int LIFE_TIME = 60 * 5;
 

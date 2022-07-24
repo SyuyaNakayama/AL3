@@ -29,15 +29,17 @@ private: // メンバ変数
 	ViewProjection viewProjection_;
 	DebugCamera* debugCamera_ = nullptr;
 	Player* player_ = nullptr;
-	unique_ptr<Enemy> enemy_ = nullptr;
+	list<unique_ptr<Enemy>> enemy_;
 	unique_ptr<Skydome> skydome_ = nullptr;
 	unique_ptr<RailCamera> railCamera = nullptr;
 	list<unique_ptr<EnemyBullet>> enemyBullets_;
+	uint32_t enemyBulletTexture_;
 public: // メンバ関数
 	~GameScene(); // デストラクタ
 	void Initialize(); // 初期化
 	void Update();     // 毎フレーム処理
 	void CheckAllCollisions();
+	list<unique_ptr<EnemyBullet>> GetEnemyBullets() { return enemyBullets_; }
 	void AddEnemyBullet(unique_ptr<EnemyBullet> enemyBullet);
 	void Draw();       // 描画
 };

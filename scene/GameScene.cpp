@@ -6,48 +6,59 @@
 
 using namespace DirectX;
 
-const Matrix4 operator*(const Matrix4& m1, const Matrix4& m2) {
+const Matrix4 operator*(const Matrix4& m1, const Matrix4& m2)
+{
 	Matrix4 temp = m1;
 	temp *= m2;
 	return temp;
 }
 
-GameScene::~GameScene() {
+GameScene::~GameScene() 
+{
 	delete model_;
 	delete debugCamera_;
 	delete player_;
 	delete modelSkydome_;
 }
 
-void GameScene::Initialize() {
+void GameScene::Initialize() 
+{
 	dxCommon_ = DirectXCommon::GetInstance();
 	input_ = Input::GetInstance();
 	audio_ = Audio::GetInstance();
+	
 	debugText_ = DebugText::GetInstance();
+	debugCamera_ = new DebugCamera(1280, 720);
+	
 	model_ = Model::Create();
 	modelSkydome_ = Model::CreateFromOBJ("skydome", 1);
-	debugCamera_ = new DebugCamera(1280, 720);
+	
 	AxisIndicator::GetInstance()->SetVisible(1);
 	AxisIndicator::GetInstance()->SetTargetViewProjection(&debugCamera_->GetViewProjection());
 	PrimitiveDrawer::GetInstance()->SetViewProjection(&debugCamera_->GetViewProjection());
+	
 	viewProjection_.Initialize();
+	
 	railCamera = make_unique<RailCamera>();
 	railCamera->Initialize({ 0,0,-50.0f }, {});
+	
 	player_ = new Player;
 	player_->Initialize(model_);
-	enemy_ = make_unique<Enemy>();
-	enemy_->Initialize(model_, { 10.0f, 0, 50.0f });
-	enemy_->SetPlayer(player_);
+	
+	enemy_.push_back(make_unique<Enemy>());
+	for (unique_ptr<Enemy>& enemy : enemy_) { enemy->SetGameScene(this); }
+	
 	skydome_ = make_unique<Skydome>();
 	skydome_->Initialize(modelSkydome_);
 }
 
 void GameScene::CheckAllCollisions()
 {
+
 	Vector3 posA, posB;
 
 	const list<unique_ptr<PlayerBullet>>& playerBullets = player_->GetBullets();
-	const list<unique_ptr<EnemyBullet>>& enemyBullets = enemy_->GetBullets();
+	const list<unique_ptr<EnemyBullet>>& enemyBullets = enemyBullets_;
 #pragma region 自キャラと敵弾の当たり判定
 	posA = player_->GetPosition();
 
@@ -63,16 +74,18 @@ void GameScene::CheckAllCollisions()
 	}
 #pragma endregion
 #pragma region 自弾と敵キャラの当たり判定
-	posA = enemy_->GetPosition();
-
 	for (const unique_ptr<PlayerBullet>& bullet : playerBullets)
 	{
-		posB = bullet->GetPosition();
-		posB -= posA;
-		if (posB.length() <= 3.0f)
+		for (unique_ptr<Enemy>& enemy : enemy_)
 		{
-			enemy_->OnCollision();
-			bullet->OnCollision();
+			posA = enemy->GetPosition();
+			posB = bullet->GetPosition();
+			posB -= posA;
+			if (posB.length() <= 3.0f)
+			{
+				enemy->OnCollision();
+				bullet->OnCollision();
+			}
 		}
 	}
 #pragma endregion
@@ -100,16 +113,19 @@ void GameScene::AddEnemyBullet(unique_ptr<EnemyBullet> enemyBullet)
 
 void GameScene::Update()
 {
-	if (enemy_) { enemy_->Update(); }
+	enemyBullets_.remove_if([](unique_ptr<EnemyBullet>& bullet) { return bullet->IsDead(); });
+	enemy_.remove_if([](unique_ptr<Enemy>& enemy) { return enemy->IsDead(); });
 	CheckAllCollisions();
 
 	railCamera->Update({ 0,0,-0.5f }, {});
 	player_->Update(*railCamera);
+	for (unique_ptr<EnemyBullet>& bullet : enemyBullets_) { bullet->Update(); }
+	for (unique_ptr<Enemy>& enemy : enemy_) { enemy->Update(); }
 	viewProjection_ = railCamera->GetViewProjection();
 }
 
-void GameScene::Draw() {
-
+void GameScene::Draw()
+{
 	// コマンドリストの取得
 	ID3D12GraphicsCommandList* commandList = dxCommon_->GetCommandList();
 
@@ -134,7 +150,8 @@ void GameScene::Draw() {
 	/// <summary>
 	/// ここに3Dオブジェクトの描画処理を追加できる
 	player_->Draw(viewProjection_);
-	if (enemy_) { enemy_->Draw(viewProjection_); }
+	for (unique_ptr<EnemyBullet>& bullet : enemyBullets_) { bullet->Draw(viewProjection_); }
+	for (unique_ptr<Enemy>& enemy : enemy_) { enemy->Draw(viewProjection_); }
 	skydome_->Draw(viewProjection_);
 
 	// 3Dオブジェクト描画後処理

@@ -8,7 +8,8 @@
 class Player;
 class GameScene;
 
-class Enemy {
+class Enemy
+{
 private:
 	enum class Phase { Approach, Leave };
 
@@ -17,17 +18,16 @@ private:
 	uint32_t textureHandle_;
 	Vector3 velocity_;
 	DebugText* debugText_;
-	std::list<std::unique_ptr<EnemyBullet>> bullets_;
 	Phase phase_ = Phase::Approach;
 	static const int FIRE_INTERVAL = 60;
 	int fireTimer;
 	Player* player_;
 	GameScene* gameScene_;
+	bool isDead = 0;
 
 	void Approach();
 	void ApproachInit();
 	void Leave();
-
 	void Fire();
 public:
 	void Initialize(Model* model, const Vector3& position);
@@ -35,7 +35,7 @@ public:
 	void Draw(const ViewProjection& viewprojection);
 	void SetPlayer(Player* player) { player_ = player; }
 	const Vector3 GetPosition() { return worldTransform_.translation_; }
-	void OnCollision() {};
-	const std::list<std::unique_ptr<EnemyBullet>>& GetBullets() { return bullets_; }
+	void OnCollision() { isDead = 1; }
+	bool IsDead() { return isDead; }
 	void SetGameScene(GameScene* gameScene) { gameScene_ = gameScene; }
 };
