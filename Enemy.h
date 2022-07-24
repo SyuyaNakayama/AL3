@@ -30,10 +30,9 @@ private:
 	void Leave();
 	void Fire();
 public:
-	void Initialize(Model* model, const Vector3& position);
+	void Initialize(Model* model, const Vector3& position,Player* player);
 	void Update();
 	void Draw(const ViewProjection& viewprojection);
-	void SetPlayer(Player* player) { player_ = player; }
 	const Vector3 GetPosition() { return worldTransform_.translation_; }
 	void OnCollision() { isDead = 1; }
 	bool IsDead() { return isDead; }

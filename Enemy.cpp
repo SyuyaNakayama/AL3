@@ -3,7 +3,7 @@
 #include "Player.h"
 #include "GameScene.h"
 
-void Enemy::Initialize(Model* model, const Vector3& position) {
+void Enemy::Initialize(Model* model, const Vector3& position,Player* player) {
 	model_ = model;
 	textureHandle_ = TextureManager::Load("picture/enemy.png");
 	debugText_ = DebugText::GetInstance();
@@ -11,6 +11,7 @@ void Enemy::Initialize(Model* model, const Vector3& position) {
 	worldTransform_.translation_ = position;
 	worldTransform_.scale_.y = 2.0f;
 	fireTimer = 0;
+	player_ = player;
 	ApproachInit();
 }
 
@@ -45,7 +46,7 @@ void Enemy::Fire()
 	unique_ptr<EnemyBullet> newBullet = make_unique<EnemyBullet>();
 	newBullet->Initialize(model_, worldTransform_.translation_, velocity);
 
-	gameScene_->GetEnemyBullets().push_back(move(newBullet));
+	gameScene_->AddEnemyBullet(move(newBullet));
 }
 
 void Enemy::Update() 

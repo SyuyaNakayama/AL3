@@ -39,7 +39,6 @@ public: // メンバ関数
 	void Initialize(); // 初期化
 	void Update();     // 毎フレーム処理
 	void CheckAllCollisions();
-	list<unique_ptr<EnemyBullet>> GetEnemyBullets() { return enemyBullets_; }
 	void AddEnemyBullet(unique_ptr<EnemyBullet> enemyBullet);
 	void Draw();       // 描画
 };

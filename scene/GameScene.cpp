@@ -46,7 +46,11 @@ void GameScene::Initialize()
 	player_->Initialize(model_);
 	
 	enemy_.push_back(make_unique<Enemy>());
-	for (unique_ptr<Enemy>& enemy : enemy_) { enemy->SetGameScene(this); }
+	for (unique_ptr<Enemy>& enemy : enemy_) 
+	{
+		enemy->SetGameScene(this); 
+		enemy->Initialize(model_, { 10.0f,0,50.0f }, player_);
+	}
 	
 	skydome_ = make_unique<Skydome>();
 	skydome_->Initialize(modelSkydome_);
@@ -54,7 +58,6 @@ void GameScene::Initialize()
 
 void GameScene::CheckAllCollisions()
 {
-
 	Vector3 posA, posB;
 
 	const list<unique_ptr<PlayerBullet>>& playerBullets = player_->GetBullets();
