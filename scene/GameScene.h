@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include <DirectXMath.h>
+#include <sstream>
 #include "Audio.h"
 #include "DebugCamera.h"
 #include "DebugText.h"
@@ -34,11 +35,17 @@ private: // メンバ変数
 	unique_ptr<RailCamera> railCamera = nullptr;
 	list<unique_ptr<EnemyBullet>> enemyBullets_;
 	uint32_t enemyBulletTexture_;
+	stringstream enemyPopCommands;
+	int32_t waitTimer = 0;
+	bool isWait = 0;
 public: // メンバ関数
 	~GameScene(); // デストラクタ
 	void Initialize(); // 初期化
 	void Update();     // 毎フレーム処理
-	void CheckAllCollisions();
-	void AddEnemyBullet(unique_ptr<EnemyBullet> enemyBullet);
 	void Draw();       // 描画
+	void CheckAllCollisions();
+	void CreateEnemy(Vector3 pos);
+	void AddEnemyBullet(unique_ptr<EnemyBullet> enemyBullet);
+	void LoadEnemyPopData();
+	void UpdateEnemyPopCommands();
 };
