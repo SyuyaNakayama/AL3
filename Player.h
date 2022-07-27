@@ -5,6 +5,7 @@
 #include <memory>
 #include <list>
 #include "RailCamera.h"
+#include "Sprite.h"
 
 using namespace std;
 
@@ -16,14 +17,17 @@ private:
 	DebugText* debugText_;
 	WorldTransform worldTransform_;
 	list<unique_ptr<PlayerBullet>> bullets_;
+	WorldTransform worldTransform3DReticle_;
+	unique_ptr<Sprite> sprite2DReticle_;
 
 	void Move();
 	void Rotate();
 	void Attack(RailCamera railCamera);
 public:
 	void Initialize(Model* model);
-	void Update(RailCamera railCamera);
+	void Update(RailCamera railCamera, const ViewProjection& viewProjection);
 	void Draw(ViewProjection viewProjection);
+	void DrawUI();
 	Vector3 GetPosition(){ return worldTransform_.matWorld_.GetTranslationFromMatrix(); };
 	void OnCollision() {};
 	const list<unique_ptr<PlayerBullet>>& GetBullets() { return bullets_; }

@@ -46,13 +46,6 @@ void GameScene::Initialize()
 	player_ = new Player;
 	player_->Initialize(model_);
 
-	//enemy_.push_back(make_unique<Enemy>());
-	//for (unique_ptr<Enemy>& enemy : enemy_) 
-	//{
-	//	enemy->SetGameScene(this); 
-	//	enemy->Initialize(model_, { 10.0f,0,50.0f }, player_);
-	//}
-
 	skydome_ = make_unique<Skydome>();
 	skydome_->Initialize(modelSkydome_);
 
@@ -66,7 +59,7 @@ void GameScene::Update()
 	CheckAllCollisions();
 	UpdateEnemyPopCommands();
 	railCamera->Update({ 0,0,-0.5f }, {});
-	player_->Update(*railCamera);
+	player_->Update(*railCamera, viewProjection_);
 	for (unique_ptr<Enemy>& enemy : enemy_) { enemy->Update(); }
 	for (unique_ptr<EnemyBullet>& bullet : enemyBullets_) { bullet->Update(); }
 	viewProjection_ = railCamera->GetViewProjection();
@@ -100,7 +93,7 @@ void GameScene::Draw()
 	player_->Draw(viewProjection_);
 	for (unique_ptr<EnemyBullet>& bullet : enemyBullets_) { bullet->Draw(viewProjection_); }
 	for (unique_ptr<Enemy>& enemy : enemy_) { enemy->Draw(viewProjection_); }
-	skydome_->Draw(viewProjection_);
+	//skydome_->Draw(viewProjection_);
 
 	// 3Dオブジェクト描画後処理
 	Model::PostDraw();
@@ -113,7 +106,7 @@ void GameScene::Draw()
 	/// <summary>
 	/// ここに前景スプライトの描画処理を追加できる
 	/// </summary>
-
+	player_->DrawUI();
 	// デバッグテキストの描画
 	debugText_->DrawAll(commandList);
 	// スプライト描画後処理

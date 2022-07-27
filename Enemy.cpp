@@ -64,11 +64,6 @@ void Enemy::Update()
 
 	worldTransform_.UpdateMatrix();
 	worldTransform_.TransferMatrix();
-
-	debugText_->SetPos(50, 70);
-	debugText_->Printf(
-		"enemyPos:(%f,%f,%f)", worldTransform_.translation_.x, worldTransform_.translation_.y,
-		worldTransform_.translation_.z);
 }
 
 void Enemy::Draw(const ViewProjection& viewProjection) 

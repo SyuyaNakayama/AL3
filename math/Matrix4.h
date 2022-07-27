@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include <math.h>
 #include "Vector3.h"
+#include "Vector2.h"
 /// <summary>
 /// 行列
 /// </summary>
@@ -10,7 +11,7 @@ private:
 	// 行x列
 	float m[4][4];
 
-	void MatNorm()
+	void Identity()
 	{
 		for (int y = 0; y < 4; y++) {
 			for (size_t x = 0; x < 4; x++)
@@ -43,7 +44,7 @@ public:
 	}
 
 	void SetScaleMat(Vector3 scale) {
-		MatNorm();
+		Identity();
 		m[0][0] = scale.x;
 		m[1][1] = scale.y;
 		m[2][2] = scale.z;
@@ -73,7 +74,7 @@ public:
 		}
 	}
 	void SetTransMat(Vector3 trans) {
-		MatNorm();
+		Identity();
 		m[3][0] = trans.x;
 		m[3][1] = trans.y;
 		m[3][2] = trans.z;
@@ -83,4 +84,15 @@ public:
 	{
 		return { m[3][0],m[3][1],m[3][2] };
 	}
+
+	void GetViewPort(const Vector2 WIN_SIZE, const Vector2 OFFSET = { 0,0 })
+	{
+		Identity();
+		m[0][0] = WIN_SIZE.x / 2;
+		m[1][1] = -WIN_SIZE.y / 2;
+		m[3][0] = WIN_SIZE.x / 2 + OFFSET.x;
+		m[3][1] = WIN_SIZE.y / 2 + OFFSET.y;
+	}
+
+	float GetW() { return m[3][3]; }
 };
