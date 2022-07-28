@@ -66,39 +66,24 @@ void GameScene::CheckAllCollisions()
 			Collider* colliderB = *itrB;
 			CheckCollisionPair(*itrA, *itrB);
 		}
-		
+
 	}
-	/*
-#pragma region 自キャラと敵弾の当たり判定
-	for (const std::unique_ptr<EnemyBullet>& bullet : enemyBullets)
-	{
-		CheckCollisionPair(player_, bullet.get());
-	}
-#pragma endregion
-#pragma region 自弾と敵キャラの当たり判定
-	for (const std::unique_ptr<PlayerBullet>& bullet : playerBullets)
-	{
-		CheckCollisionPair(enemy_.get(), bullet.get());
-	}
-#pragma endregion
-#pragma region 自弾と敵弾の当たり判定
-	for (const std::unique_ptr<PlayerBullet>& playerBullet : playerBullets) {
-		for (const std::unique_ptr<EnemyBullet>& enemyBullet : enemyBullets)
-		{
-			CheckCollisionPair(playerBullet.get(), enemyBullet.get());
-		}
-	}
-#pragma endregion*/
 }
 
 void GameScene::CheckCollisionPair(Collider* colliderA, Collider* colliderB)
 {
+	if (!(colliderA->GetCollisionAttribute() & colliderB->GetCollisionMask()) ||
+		!(colliderB->GetCollisionAttribute() & colliderA->GetCollisionMask()))
+	{
+		return;
+	}
+
 	Vector3 colliderAPos = colliderA->GetWorldPosition(),
-	colliderBPos = colliderB->GetWorldPosition();
+		colliderBPos = colliderB->GetWorldPosition();
 
 	Vector3 vecAtoB = colliderAPos - colliderBPos;
 	float disAtoB = vecAtoB.length();
-	
+
 	if (disAtoB <= colliderA->GetRadius() + colliderB->GetRadius())
 	{
 		colliderA->OnCollision();

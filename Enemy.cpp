@@ -1,6 +1,7 @@
 #include "Enemy.h"
 #include <assert.h>
 #include "Player.h"
+#include "CollisionConfig.h"
 
 void Enemy::Initialize(Model* model, const Vector3& position) {
 	assert(model);
@@ -12,6 +13,8 @@ void Enemy::Initialize(Model* model, const Vector3& position) {
 	worldTransform_.scale_.y = 2.0f;
 	fireTimer = 0;
 	ApproachInit();
+	SetCollisionAttribute(CollisionAttribute::Enemy);
+	SetCollisionMask(~CollisionAttribute::Enemy);
 }
 
 void Enemy::Approach() {

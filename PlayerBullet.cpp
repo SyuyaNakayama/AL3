@@ -1,5 +1,6 @@
 #include "PlayerBullet.h"
 #include <assert.h>
+#include "CollisionConfig.h"
 
 void PlayerBullet::Initialize(Model* model, const Vector3& position, const Vector3& velocity) {
 	assert(model);
@@ -10,6 +11,8 @@ void PlayerBullet::Initialize(Model* model, const Vector3& position, const Vecto
 	velocity_ = velocity;
 	deathTimer_ = LIFE_TIME;
 	isDead_ = 0;
+	SetCollisionAttribute(CollisionAttribute::Player);
+	SetCollisionMask(~CollisionAttribute::Player);
 }
 
 void PlayerBullet::Update() {

@@ -1,5 +1,6 @@
 #include "Player.h"
 #include <assert.h>
+#include "CollisionConfig.h"
 
 void Player::Initialize(Model* model) {
 	assert(model);
@@ -9,6 +10,8 @@ void Player::Initialize(Model* model) {
 	debugText_ = DebugText::GetInstance();
 	worldTransform_.Initialize();
 	worldTransform_.scale_.y = 2.0f;
+	SetCollisionAttribute(CollisionAttribute::Player);
+	SetCollisionMask(~CollisionAttribute::Player);
 }
 
 void Player::Move() {

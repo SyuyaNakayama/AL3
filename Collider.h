@@ -1,14 +1,20 @@
 #pragma once
 #include "Vector3.h"
+#include <cstdint>
 
 class Collider
 {
 private:
 	float radius_ = 1.0f;
-	uint32_t collisionAttribute_
+	uint32_t collisionAttribute_ = 0xffffffff;
+	uint32_t collisionMask_ = 0xffffffff;
 public:
-	float GetRadius() { return radius_; }
-	void SetRadius(float radius) { radius_ = radius; }
 	virtual void OnCollision() = 0;
 	const virtual Vector3 GetWorldPosition() = 0;
+	float GetRadius() { return radius_; }
+	uint32_t GetCollisionAttribute() { return collisionAttribute_; }
+	uint32_t GetCollisionMask() { return collisionMask_; }
+	void SetRadius(float radius) { radius_ = radius; }
+	void SetCollisionAttribute(uint32_t collisionAttribute) { collisionAttribute_ = collisionAttribute; }
+	void SetCollisionMask(uint32_t collisionMask) { collisionMask_ = collisionMask; }
 };
