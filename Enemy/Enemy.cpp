@@ -14,7 +14,7 @@ void Enemy::Initialize(Model* model, Vector3* playerTranslation, ViewProjection*
 	worldTransform_.translation_ = { 10.0f, 3.0f, 20.0f };
 	worldTransform_.scale_ = { 2.5f,5.0f,2.5f };
 	srand(time(NULL));
-	phase_ = Phase::missile;
+	phase_ = Phase::bomb;
 	viewProjection_ = viewProjection;
 	playerTranslation_ = playerTranslation;
 	attackTimer_ = 20;
@@ -60,7 +60,7 @@ void Enemy::Bomb()
 {
 	if (!isStart)
 	{
-		Vector3 bombSpd = toPlayer_ /= 20.0f;
+		Vector3 bombSpd = (*playerTranslation_ - worldTransform_.translation_) / 120.0f;
 		bombSpd.y = 1.5f;
 		bomb_.Initialize(model_, worldTransform_.translation_, bombSpd);
 		isStart = 1;
