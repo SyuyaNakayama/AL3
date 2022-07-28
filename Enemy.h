@@ -4,10 +4,11 @@
 #include "ViewProjection.h"
 #include "WorldTransform.h"
 #include "EnemyBullet.h"
+#include "Collider.h"
 
 class Player;
 
-class Enemy {
+class Enemy :public Collider {
 private:
 	enum class Phase { Approach, Leave };
 
@@ -32,7 +33,7 @@ public:
 	void Update();
 	void Draw(const ViewProjection& viewprojection);
 	void SetPlayer(Player* player) { player_ = player; }
-	const Vector3 GetPosition() { return worldTransform_.translation_; }
-	void OnCollision() {};
+	const Vector3 GetWorldPosition()override { return worldTransform_.translation_; }
+	void OnCollision()override {};
 	const std::list<std::unique_ptr<EnemyBullet>>& GetBullets() { return bullets_; }
 };

@@ -4,8 +4,9 @@
 #include "PlayerBullet.h"
 #include <memory>
 #include <list>
+#include "Collider.h"
 
-class Player {
+class Player :public Collider {
 private:
 	Model* model_;
 	uint32_t textureHandle_;
@@ -22,8 +23,7 @@ public:
 	void Initialize(Model* model);
 	void Update();
 	void Draw(ViewProjection viewProjection);
-	Vector3 GetWorldPosition();
-	void OnCollision() {};
-	const Vector3 GetPosition() { return worldTransform_.translation_; }
+	const Vector3 GetWorldPosition()override { return worldTransform_.translation_; };
+	void OnCollision()override {};
 	const std::list<std::unique_ptr<PlayerBullet>>& GetBullets() { return bullets_; }
 };

@@ -74,8 +74,3 @@ void Player::Draw(ViewProjection viewProjection) {
 		bullet->Draw(viewProjection);
 	}
 }
-
-Vector3 Player::GetWorldPosition()
-{
-	return Vector3(worldTransform_.translation_);
-}

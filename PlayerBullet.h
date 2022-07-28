@@ -2,8 +2,9 @@
 #include "Model.h"
 #include "ViewProjection.h"
 #include "WorldTransform.h"
+#include "Collider.h"
 
-class PlayerBullet {
+class PlayerBullet :public Collider {
 private:
 	WorldTransform worldTransform_;
 	Model* model_;
@@ -17,6 +18,6 @@ public:
 	void Update();
 	void Draw(const ViewProjection& viewProjection);
 	bool IsDead() const { return isDead_; }
-	void OnCollision() { isDead_ = 1; };
-	const Vector3 GetPosition() { return worldTransform_.translation_; }
+	void OnCollision()override { isDead_ = 1; };
+	const Vector3 GetWorldPosition()override { return worldTransform_.translation_; }
 };

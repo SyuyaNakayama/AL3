@@ -12,6 +12,7 @@
 #include "Sprite.h"
 #include "ViewProjection.h"
 #include "WorldTransform.h"
+#include "Collider.h"
 #include <DirectXMath.h>
 
 /// <summary>
@@ -26,6 +27,7 @@ public:         // メンバ関数
 	void Update();     // 毎フレーム処理
 	void Draw();       // 描画
 	void CheckAllCollisions();
+	void CheckCollisionPair(Collider* colliderA, Collider* colliderB);
 private: // メンバ変数
 	DirectXCommon* dxCommon_ = nullptr;
 	Input* input_ = nullptr;
