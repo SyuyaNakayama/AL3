@@ -13,6 +13,7 @@
 #include "ViewProjection.h"
 #include "WorldTransform.h"
 #include <DirectXMath.h>
+#include "Collider/CollisionManager.h"
 
 /// <summary>
 /// ゲームシーン
@@ -41,4 +42,5 @@ class GameScene {
 	ViewProjection viewProjection_;
 	Player* player_ = nullptr;
 	std::unique_ptr<Enemy> enemy_ = nullptr;
+	std::unique_ptr<CollisionManager> collisionManager_ = nullptr;
 };

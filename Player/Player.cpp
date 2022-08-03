@@ -1,6 +1,7 @@
 #include "Player.h"
 #include <assert.h>
 #include "function.h"
+#include "Collider/CollisionConfig.h"
 
 void Player::Initialize(Model* model, ViewProjection* viewProjection)
 {
@@ -11,6 +12,9 @@ void Player::Initialize(Model* model, ViewProjection* viewProjection)
 	viewProjection_ = viewProjection;
 	bulletInterval_ = 40;
 	angle_ = PI / 2.0f;
+	SetCollisionAttribute(CollisionAttribute::CPlayer);
+	SetRadius(5.0f);
+	SetCollisionMask(CollisionMask::CPlayerMask);
 }
 
 void Player::Move()
@@ -88,18 +92,19 @@ void Player::Attack()
 
 void Player::Update(Vector3 enemyTranslation)
 {
-	bullets_.remove_if([](std::unique_ptr<PlayerBullet>& bullet) { return bullet->IsDead(); });
+	bullets_.remove_if([](std::unique_ptr<PlayerBullet>& bullet) { return bullet->isDead_; });
 
 	Rotate();
 	Move();
 	Jump();
-	//Attack();
+	Attack();
 
 	for (std::unique_ptr<PlayerBullet>& bullet : bullets_) { bullet->Update(); }
+	debugText_->SetPos(50, 50);
+	debugText_->Printf("PlayerHp:%d", hp_);
 }
 
-void Player::Draw() {
-	for (std::unique_ptr<PlayerBullet>& bullet : bullets_) {
-		bullet->Draw(*viewProjection_);
-	}
+void Player::Draw()
+{
+	for (std::unique_ptr<PlayerBullet>& bullet : bullets_) { bullet->Draw(*viewProjection_); }
 }

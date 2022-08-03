@@ -39,12 +39,14 @@ void GameScene::Initialize()
 	player_->Initialize(model_, &viewProjection_);
 	enemy_ = std::make_unique<Enemy>();
 	enemy_->Initialize(model_, &viewProjection_.eye, &viewProjection_);
+	collisionManager_ = std::make_unique<CollisionManager>();
 }
 
 void GameScene::Update()
 {
 	player_->Update(enemy_->worldTransform_.translation_);
 	if (enemy_) { enemy_->Update(); }
+	collisionManager_->CheckAllCollisions(player_,enemy_.get());
 	debugCamera_->Update();
 	viewProjection_.UpdateMatrix();
 }

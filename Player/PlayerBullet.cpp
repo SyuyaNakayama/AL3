@@ -1,6 +1,7 @@
 #include "PlayerBullet.h"
 #include <assert.h>
 #include "function.h"
+#include "Collider/CollisionConfig.h"
 
 void PlayerBullet::Initialize(Model* model, const Vector3& position, const Vector3& velocity)
 {
@@ -10,8 +11,8 @@ void PlayerBullet::Initialize(Model* model, const Vector3& position, const Vecto
 	worldTransform_.Initialize();
 	worldTransform_.translation_ = position;
 	velocity_ = velocity;
-	deathTimer_ = LIFE_TIME;
-	isDead_ = 0;
+	SetCollisionAttribute(CollisionAttribute::CPlayer);
+	SetCollisionMask(CollisionMask::CPlayerMask);
 }
 
 void PlayerBullet::Update()

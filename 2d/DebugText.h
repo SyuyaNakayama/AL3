@@ -41,6 +41,12 @@ class DebugText {
 	/// </summary>
 	/// <param name="fmt">書式付き文字列</param>
 	void Printf(const char* fmt, ...);
+	void PrintVector3(const char* string, Vector3 vec)
+	{
+		std::string str = string;
+		str += ":(%f,%f,%f)";
+		Printf(str.c_str(), vec.x, vec.y, vec.z);
+	}
 
 	/// <summary>
 	/// 書式付きコンソール出力

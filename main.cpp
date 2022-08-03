@@ -5,6 +5,8 @@
 #include "WinApp.h"
 #include "AxisIndicator.h"
 #include "PrimitiveDrawer.h"
+#include <time.h>
+#include <memory>
 
 // Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
@@ -16,7 +18,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	DebugText* debugText = nullptr;
 	AxisIndicator* axisIndicator = nullptr;
 	PrimitiveDrawer* primitiveDrawer = nullptr;
-	GameScene* gameScene = nullptr;
+	std::unique_ptr<GameScene> gameScene = nullptr;
 
 	// ゲームウィンドウの作成
 	win = WinApp::GetInstance();
@@ -58,16 +60,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #pragma endregion
 
 	// ゲームシーンの初期化
-	gameScene = new GameScene();
+	gameScene = std::make_unique<GameScene>();
 	gameScene->Initialize();
+	srand(time(NULL));
 
 	// メインループ
-	while (true) {
-		// メッセージ処理
-		if (win->ProcessMessage()) {
-			break;
-		}
-
+	while (!win->ProcessMessage())
+	{
 		// 入力関連の毎フレーム処理
 		input->Update();
 		// ゲームシーンの毎フレーム処理
@@ -88,7 +87,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	}
 
 	// 各種解放
-	SafeDelete(gameScene);
 	audio->Finalize();
 
 	// ゲームウィンドウの破棄

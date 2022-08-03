@@ -1,8 +1,8 @@
 #include "Enemy.h"
 #include <assert.h>
 #include <stdlib.h>
-#include <time.h>
 #include "function.h"
+#include "Collider/CollisionConfig.h"
 
 void Enemy::Initialize(Model* model, Vector3* playerTranslation, ViewProjection* viewProjection)
 {
@@ -10,22 +10,19 @@ void Enemy::Initialize(Model* model, Vector3* playerTranslation, ViewProjection*
 	model_ = model;
 	textureHandle_ = TextureManager::Load("picture/enemy.png");
 	debugText_ = DebugText::GetInstance();
-	worldTransform_.Initialize();
 	worldTransform_.translation_ = { 10.0f, 3.0f, 20.0f };
 	worldTransform_.scale_ = { 2.5f,5.0f,2.5f };
-	srand(time(NULL));
-	phase_ = Phase::bomb;
+	worldTransform_.Initialize();
 	viewProjection_ = viewProjection;
 	playerTranslation_ = playerTranslation;
-	attackTimer_ = 20;
-	isActionEnd = 0;
-	isStart = 0;
-	tackleSpd = { 0,0,0 };
+	SetCollisionAttribute(CollisionAttribute::CEnemy);
+	SetRadius(4.0f);
+	SetCollisionMask(CollisionMask::CEnemyMask);
 }
 
 void (Enemy::* Enemy::pPhaseFuncTable[])() =
 {
-	&Enemy::Beam,&Enemy::Missile,&Enemy::Bomb,
+	&Enemy::Beam,&Enemy::Missile,&Enemy::BombAction,
 	&Enemy::Press,&Enemy::Tackle,&Enemy::Summon
 };
 
@@ -47,7 +44,6 @@ void Enemy::Missile()
 	newMissile->Initialize(model_, worldTransform_.translation_, toPlayer_);
 	missiles_.push_back(std::move(newMissile));
 
-
 	if (++missileCount >= 10)
 	{
 		isActionEnd = 1;
@@ -56,20 +52,21 @@ void Enemy::Missile()
 	}
 }
 
-void Enemy::Bomb()
+void Enemy::BombAction()
 {
 	if (!isStart)
 	{
-		Vector3 bombSpd = (*playerTranslation_ - worldTransform_.translation_) / 120.0f;
+		Vector3 bombSpd = (*playerTranslation_ - worldTransform_.translation_) / 102.0f;
 		bombSpd.y = 1.5f;
-		bomb_.Initialize(model_, worldTransform_.translation_, bombSpd);
+		bomb_ = std::make_unique<Bomb>();
+		bomb_->Initialize(model_, worldTransform_.translation_, bombSpd);
 		isStart = 1;
 	}
 	if (isStart)
 	{
-		bomb_.Update();
+		bomb_->Update();
 
-		if (bomb_.isDead_) { isActionEnd = 1; }
+		if (bomb_->isDead_ && !bomb_->isExplosion) { isActionEnd = 1; }
 	}
 }
 
@@ -85,7 +82,7 @@ void Enemy::Tackle()
 		tackleSpd = toPlayer_ * 1.5f;
 		isStart = 1;
 	}
-	else
+	if (isStart)
 	{
 		worldTransform_.translation_ += tackleSpd;
 
@@ -119,14 +116,15 @@ void Enemy::Update()
 
 	worldTransform_.UpdateMatrix();
 	worldTransform_.TransferMatrix();
+
+	debugText_->SetPos(50, 70);
+	debugText_->Printf("EnemyHp:%d", hp_);
 }
 
 void Enemy::Draw()
 {
 	model_->Draw(worldTransform_, *viewProjection_, textureHandle_);
 
-	for (std::unique_ptr<EnemyBullet>& bullet : missiles_) {
-		bullet->Draw(*viewProjection_);
-	}
-	if (!bomb_.isDead_) { bomb_.Draw(*viewProjection_); }
+	for (std::unique_ptr<EnemyBullet>& bullet : missiles_) { bullet->Draw(*viewProjection_); }
+	bomb_->Draw(*viewProjection_);
 }
