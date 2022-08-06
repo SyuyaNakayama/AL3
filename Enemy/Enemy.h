@@ -6,41 +6,42 @@
 #include "EnemyBullet.h"
 #include "Timer.h"
 #include "Bomb.h"
+#include "Beam.h"
 
 class Enemy :public Collider
 {
 private:
-	enum Phase { beam, missile, bomb, press, tackle, summon };
+	enum Phase { beam, missile, bomb, press, tackle };
 
 	Model* model_;
 	uint32_t textureHandle_;
-	Vector3 velocity_;
 	DebugText* debugText_;
-	size_t phase_ = Phase::bomb;
+	size_t phase_ = Phase::missile;
+	Vector3 velocity_, toPlayer_;
 	Vector3* playerTranslation_;
-	ViewProjection* viewProjection_;
-	Timer attackTimer_ = 20;
-	Vector3 toPlayer_;
-	bool isActionEnd = 0, isStart = 0;
 	Vector3 tackleSpd{};
-	int hp_ = 500;
+	ViewProjection* viewProjection_;
+	Timer missileInterval_ = 20;
+	Timer beamTimer_ = 300, beamChargeTimer_ = 300;
+	bool isActionEnd = 0, isStart = 0;
+	const float JUMP_SPD_INIT = 2.0f;
+	float jumpSpd = JUMP_SPD_INIT;
+	Beam beam_;
+	int enemyState = 0;
 
-	void Beam();
-	void Missile();
+	void Beam(), Missile();
 	void BombAction();
-	void Press();
-	void Tackle();
-	void Summon();
-
+	void Press(), Tackle();
 	static void (Enemy::* pPhaseFuncTable[])();
 public:
+	int hp_;
 	std::list<std::unique_ptr<EnemyBullet>> missiles_;
 	std::unique_ptr<Bomb> bomb_;
 
 	WorldTransform worldTransform_;
 	void Initialize(Model* model, Vector3* playerTranslation, ViewProjection* viewProjection);
-	void Update();
-	void Draw();
+	void Update(), Draw();
+	void Clear();
 	void OnCollision() { hp_--; }
 	const Vector3 GetWorldPosition() { return worldTransform_.translation_; }
 };

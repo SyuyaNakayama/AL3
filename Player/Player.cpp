@@ -15,6 +15,7 @@ void Player::Initialize(Model* model, ViewProjection* viewProjection)
 	SetCollisionAttribute(CollisionAttribute::CPlayer);
 	SetRadius(5.0f);
 	SetCollisionMask(CollisionMask::CPlayerMask);
+	hp_ = 200;
 }
 
 void Player::Move()
@@ -36,8 +37,11 @@ void Player::Move()
 	spd[all].normalize();
 	spd[all] *= MOVE_SPD;
 
-	viewProjection_->eye += spd[all];
-	viewProjection_->target += spd[all];
+	//viewProjection_->eye += spd[all];
+	//viewProjection_->target += spd[all];
+
+	viewProjection_->target = { 0,0,0.1f };
+	viewProjection_->eye = { 0,250,0 };
 
 	Clamp(viewProjection_->eye.x);
 	Clamp(viewProjection_->eye.z);

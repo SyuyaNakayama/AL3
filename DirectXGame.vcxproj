@@ -99,9 +99,11 @@
     <ClCompile Include="base\WinApp.cpp" />
     <ClCompile Include="Bomb.cpp" />
     <ClCompile Include="Collider\CollisionManager.cpp" />
+    <ClCompile Include="Enemy\Beam.cpp" />
     <ClCompile Include="Enemy\Enemy.cpp" />
     <ClCompile Include="Enemy\EnemyBullet.cpp" />
     <ClCompile Include="function.cpp" />
+    <ClCompile Include="Ground.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="math\Vector3.cpp" />
     <ClCompile Include="Player\Player.cpp" />
@@ -130,6 +132,7 @@
     <ClInclude Include="base\SafeDelete.h" />
     <ClInclude Include="base\TextureManager.h" />
     <ClInclude Include="base\WinApp.h" />
+    <ClInclude Include="Beam.h" />
     <ClInclude Include="Bomb.h" />
     <ClInclude Include="Collider\Collider.h" />
     <ClInclude Include="Collider\CollisionConfig.h" />
@@ -137,6 +140,7 @@
     <ClInclude Include="Enemy\Enemy.h" />
     <ClInclude Include="Enemy\EnemyBullet.h" />
     <ClInclude Include="function.h" />
+    <ClInclude Include="Ground.h" />
     <ClInclude Include="input\Input.h" />
     <ClInclude Include="math\MathUtility.h" />
     <ClInclude Include="math\Matrix4.h" />

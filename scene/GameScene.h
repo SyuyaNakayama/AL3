@@ -12,35 +12,42 @@
 #include "Sprite.h"
 #include "ViewProjection.h"
 #include "WorldTransform.h"
-#include <DirectXMath.h>
 #include "Collider/CollisionManager.h"
+#include "Ground.h"
+#include <DirectXMath.h>
+#include <memory>
+#include <vector>
 
-/// <summary>
+using namespace std;
+
 /// ゲームシーン
-/// </summary>
-class GameScene {
+class GameScene
+{
+public:
+	GameScene();
+	void Initialize();
+	void Update();
+	void Draw();
+	void LoadResources();
 
-  public:         // メンバ関数
-	~GameScene(); // デストラクタ
-
-	void Initialize(); // 初期化
-	void Update();     // 毎フレーム処理
-	void Draw();       // 描画
-
-  private: // メンバ変数
+	enum Scene { Title, HowToPlay, Play, GameClear, GameOver };
+private:
 	DirectXCommon* dxCommon_ = nullptr;
 	Input* input_ = nullptr;
 	Audio* audio_ = nullptr;
 	DebugText* debugText_ = nullptr;
 	Model* model_ = nullptr;
-	Sprite* sprite_ = nullptr;
-	DebugCamera* debugCamera_ = nullptr;
+	Sprite* background_ = nullptr;
+	unique_ptr<DebugCamera> debugCamera_ = nullptr;
+	vector<Sprite*> themeSprite_;
+	vector<uint32_t> bgm_;
+	vector<uint32_t> se_;
 
-	WorldTransform ground_;
-	uint32_t groundPic_;
 	// ゲームシーン用
+	Scene scene_ = Scene::Play;
 	ViewProjection viewProjection_;
-	Player* player_ = nullptr;
-	std::unique_ptr<Enemy> enemy_ = nullptr;
-	std::unique_ptr<CollisionManager> collisionManager_ = nullptr;
+	unique_ptr<Player> player_ = nullptr;
+	unique_ptr<Enemy> enemy_ = nullptr;
+	unique_ptr<CollisionManager> collisionManager_ = nullptr;
+	Ground ground_;
 };

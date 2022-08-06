@@ -18,17 +18,27 @@ void Enemy::Initialize(Model* model, Vector3* playerTranslation, ViewProjection*
 	SetCollisionAttribute(CollisionAttribute::CEnemy);
 	SetRadius(4.0f);
 	SetCollisionMask(CollisionMask::CEnemyMask);
+	hp_ = 500;
 }
 
 void (Enemy::* Enemy::pPhaseFuncTable[])() =
 {
 	&Enemy::Beam,&Enemy::Missile,&Enemy::BombAction,
-	&Enemy::Press,&Enemy::Tackle,&Enemy::Summon
+	&Enemy::Press,&Enemy::Tackle
 };
 
 void Enemy::Beam()
 {
-
+	if (!isStart && beamChargeTimer_.CountDown())
+	{
+		beam_.Initialize(model_, enemyState);
+		isStart = 1;
+	}
+	if (isStart)
+	{
+		beam_.Update();
+		if (beamTimer_.CountDown()) { isActionEnd = 1; }
+	}
 }
 
 void Enemy::Missile()
@@ -36,19 +46,21 @@ void Enemy::Missile()
 	missiles_.remove_if([](std::unique_ptr<EnemyBullet>& bullet) { return bullet->isDead_; });
 
 	static int missileCount = 0;
-	if (!attackTimer_.CountDown()) { return; }
+	if (missileInterval_.CountDown())
+	{
+		toPlayer_ *= 2.0f;
+		std::unique_ptr<EnemyBullet> newMissile = std::make_unique<EnemyBullet>();
+		newMissile->Initialize(model_, worldTransform_.translation_, toPlayer_);
+		missiles_.push_back(std::move(newMissile));
+		missileCount++;
+	}
 
-	const float spdConst = 2.0f;
-	toPlayer_ *= spdConst;
-	std::unique_ptr<EnemyBullet> newMissile = std::make_unique<EnemyBullet>();
-	newMissile->Initialize(model_, worldTransform_.translation_, toPlayer_);
-	missiles_.push_back(std::move(newMissile));
+	for (std::unique_ptr<EnemyBullet>& bullet : missiles_) { bullet->Update(); }
 
-	if (++missileCount >= 10)
+	if (missileCount >= 10)
 	{
 		isActionEnd = 1;
 		missileCount = 0;
-		missiles_.remove_if([](std::unique_ptr< EnemyBullet >& bullet) { return 1; });
 	}
 }
 
@@ -66,13 +78,31 @@ void Enemy::BombAction()
 	{
 		bomb_->Update();
 
-		if (bomb_->isDead_ && !bomb_->isExplosion) { isActionEnd = 1; }
+		if (bomb_->isDead_ && !bomb_->isExplosion)
+		{
+			isActionEnd = 1;
+		}
 	}
 }
 
 void Enemy::Press()
 {
+	if (!isStart)
+	{
+		isStart = 1;
+	}
+	if (isStart)
+	{
+		worldTransform_.translation_.y += jumpSpd;
+		jumpSpd -= 0.05f;
 
+		if (worldTransform_.translation_.y <= 3.0f)
+		{
+			worldTransform_.translation_.y = 3.0f;
+			isActionEnd = 1;
+			jumpSpd = JUMP_SPD_INIT;
+		}
+	}
 }
 
 void Enemy::Tackle()
@@ -94,11 +124,6 @@ void Enemy::Tackle()
 	}
 }
 
-void Enemy::Summon()
-{
-
-}
-
 void Enemy::Update()
 {
 	toPlayer_ = *playerTranslation_ - worldTransform_.translation_;
@@ -107,12 +132,10 @@ void Enemy::Update()
 	(this->*pPhaseFuncTable[phase_])();
 	if (isActionEnd)
 	{
-		phase_ = Phase::bomb;
+		phase_ = Phase::missile;
 		isStart = 0;
 		isActionEnd = 0;
 	}
-
-	for (std::unique_ptr<EnemyBullet>& bullet : missiles_) { bullet->Update(); }
 
 	worldTransform_.UpdateMatrix();
 	worldTransform_.TransferMatrix();
@@ -126,5 +149,11 @@ void Enemy::Draw()
 	model_->Draw(worldTransform_, *viewProjection_, textureHandle_);
 
 	for (std::unique_ptr<EnemyBullet>& bullet : missiles_) { bullet->Draw(*viewProjection_); }
-	bomb_->Draw(*viewProjection_);
+	if (bomb_) { bomb_->Draw(*viewProjection_); }
+	beam_.Draw(*viewProjection_);
+}
+
+void Enemy::Clear()
+{
+	missiles_.clear();
 }

@@ -34,8 +34,6 @@ void Bomb::Update()
 		SetRadius(worldTransform_.scale_.x);
 	}
 
-	debugText_->SetPos(50, 90);
-	debugText_->PrintVector3("BombScale", worldTransform_.scale_);
 	worldTransform_.UpdateMatrix();
 	worldTransform_.TransferMatrix();
 }

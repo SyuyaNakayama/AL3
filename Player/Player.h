@@ -15,7 +15,6 @@ private:
 	Input* input_;
 	DebugText* debugText_;
 	ViewProjection* viewProjection_;
-	int hp_ = 200;
 	Timer bulletInterval_;
 	float angle_;
 
@@ -24,6 +23,7 @@ private:
 	void Jump();
 	void Attack();
 public:
+	int hp_;
 	std::list<std::unique_ptr<PlayerBullet>> bullets_;
 
 	void Initialize(Model* model, ViewProjection* viewProjection);

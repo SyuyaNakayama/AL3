@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include <math.h>
+#include "Vector3.h"
 /// <summary>
 /// 行列
 /// </summary>
