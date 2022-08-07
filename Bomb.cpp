@@ -21,7 +21,7 @@ void Bomb::Initialize(Model* model, const Vector3& position, const Vector3& velo
 void Bomb::Update()
 {
 	if (worldTransform_.translation_.y <= 0) { isDead_ = 1, isExplosion = 1; }
-	if (worldTransform_.scale_.x >= 5.0f) { isExplosion = 0; }
+	if (isExplosion) { if (lifeTimer_.CountDown()) { isExplosion = 0; } }
 
 	if (!isDead_)
 	{

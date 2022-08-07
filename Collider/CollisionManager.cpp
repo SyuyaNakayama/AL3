@@ -28,7 +28,7 @@ void CollisionManager::CheckAllCollisions(Player* player, Enemy* enemy)
 	colliders_.push_back(enemy);
 	for (const std::unique_ptr<PlayerBullet>& bullet : player->bullets_) { colliders_.push_back(bullet.get()); }
 	for (const std::unique_ptr<EnemyBullet>& bullet : enemy->missiles_) { colliders_.push_back(bullet.get()); }
-	colliders_.push_back(enemy->bomb_.get());
+	for (std::unique_ptr<Bomb>& bomb : enemy->bomb_) { colliders_.push_back(bomb.get()); }
 
 	std::list<Collider*>::iterator itrA = colliders_.begin();
 	for (; itrA != colliders_.end(); ++itrA)

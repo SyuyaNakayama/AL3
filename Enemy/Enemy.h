@@ -12,22 +12,25 @@ class Enemy :public Collider
 {
 private:
 	enum Phase { beam, missile, bomb, press, tackle };
+	enum State { Easy, Normal, Hard };
 
 	Model* model_;
 	uint32_t textureHandle_;
 	DebugText* debugText_;
-	size_t phase_ = Phase::missile;
+	size_t phase_ = Phase::bomb;
 	Vector3 velocity_, toPlayer_;
 	Vector3* playerTranslation_;
 	Vector3 tackleSpd{};
 	ViewProjection* viewProjection_;
-	Timer missileInterval_ = 20;
-	Timer beamTimer_ = 300, beamChargeTimer_ = 300;
+	Timer missileInterval_ = 40;
+	Timer beamTimer_ = 300;
 	bool isActionEnd = 0, isStart = 0;
 	const float JUMP_SPD_INIT = 2.0f;
 	float jumpSpd = JUMP_SPD_INIT;
 	Beam beam_;
-	int enemyState = 0;
+	State state = State::Hard;
+	Timer bombTimer_ = 75;
+	Timer idleTimer_ = 100;
 
 	void Beam(), Missile();
 	void BombAction();
@@ -36,7 +39,7 @@ private:
 public:
 	int hp_;
 	std::list<std::unique_ptr<EnemyBullet>> missiles_;
-	std::unique_ptr<Bomb> bomb_;
+	std::list<std::unique_ptr<Bomb>> bomb_;
 
 	WorldTransform worldTransform_;
 	void Initialize(Model* model, Vector3* playerTranslation, ViewProjection* viewProjection);

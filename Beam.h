@@ -15,4 +15,5 @@ public:
 	void Initialize(Model* model,int enemyState);
 	void Update();
 	void Draw(ViewProjection viewProjection);
+	void Clear() { worldTransforms_.clear(); }
 };
