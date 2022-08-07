@@ -3,8 +3,9 @@
 void Beam::Initialize(Model* model, int enemyState)
 {
 	model_ = model;
+	enemyState_ = enemyState;
 	textureHandle_ = TextureManager::Load("Picture/beam.png");
-	switch (enemyState)
+	switch (enemyState_)
 	{
 	case 0:
 		worldTransforms_.resize(5);
@@ -28,15 +29,11 @@ void Beam::Initialize(Model* model, int enemyState)
 		}
 		break;
 	case 2:
-		worldTransforms_.resize(4);
+		worldTransforms_.resize(2);
 		worldTransforms_[0].translation_.x = 75.0f;
 		worldTransforms_[0].scale_.z = 75.0f;
 		worldTransforms_[1].translation_.x = -75.0f;
 		worldTransforms_[1].scale_.z = 75.0f;
-		worldTransforms_[2].translation_.z = 75.0f;
-		worldTransforms_[2].scale_.x = 75.0f;
-		worldTransforms_[3].translation_.z = -75.0f;
-		worldTransforms_[3].scale_.x = 75.0f;
 		break;
 	}
 
@@ -50,14 +47,12 @@ void Beam::Initialize(Model* model, int enemyState)
 
 void Beam::Update()
 {
-	if (worldTransforms_.size() != 4 || worldTransforms_[0].translation_.x <= -75.0f) { return; }
+	if (worldTransforms_.size() != 2) { return; }
 	const float BEAM_SPD = 0.5f;
 	worldTransforms_[0].translation_.x -= BEAM_SPD;
 	worldTransforms_[1].translation_.x += BEAM_SPD;
-	worldTransforms_[2].translation_.z -= BEAM_SPD;
-	worldTransforms_[3].translation_.z += BEAM_SPD;
 
-	for (size_t i = 0; i < 4; i++)
+	for (size_t i = 0; i < worldTransforms_.size(); i++)
 	{
 		worldTransforms_[i].UpdateMatrix();
 		worldTransforms_[i].TransferMatrix();

@@ -15,6 +15,7 @@ private:
 	enum State { Easy, Normal, Hard };
 
 	Model* model_;
+	Model* pressRippleModel_;
 	uint32_t textureHandle_;
 	DebugText* debugText_;
 	size_t phase_ = Phase::bomb;
@@ -31,6 +32,9 @@ private:
 	State state = State::Hard;
 	Timer bombTimer_ = 75;
 	Timer idleTimer_ = 100;
+	WorldTransform rippleTransform_;
+	Timer rippleLifeTimer = 50;
+	bool isRippleExist = 0;
 
 	void Beam(), Missile();
 	void BombAction();

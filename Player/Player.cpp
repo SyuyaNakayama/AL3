@@ -37,11 +37,8 @@ void Player::Move()
 	spd[all].normalize();
 	spd[all] *= MOVE_SPD;
 
-	//viewProjection_->eye += spd[all];
-	//viewProjection_->target += spd[all];
-
-	viewProjection_->target = { 0,0,0.1f };
-	viewProjection_->eye = { 0,250,0 };
+	viewProjection_->eye += spd[all];
+	viewProjection_->target += spd[all];
 
 	Clamp(viewProjection_->eye.x);
 	Clamp(viewProjection_->eye.z);
@@ -105,7 +102,7 @@ void Player::Update(Vector3 enemyTranslation)
 
 	for (std::unique_ptr<PlayerBullet>& bullet : bullets_) { bullet->Update(); }
 	debugText_->SetPos(50, 50);
-	debugText_->Printf("PlayerHp:%d", hp_);
+	debugText_->Printf("%ld", input_->GetMouseMove().lZ);
 }
 
 void Player::Draw()

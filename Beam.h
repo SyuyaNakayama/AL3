@@ -11,6 +11,7 @@ private:
 	std::vector<WorldTransform> worldTransforms_;
 	Model* model_;
 	uint32_t textureHandle_;
+	int enemyState_;
 public:
 	void Initialize(Model* model,int enemyState);
 	void Update();

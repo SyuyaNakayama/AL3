@@ -10,11 +10,16 @@ void Enemy::Initialize(Model* model, Vector3* playerTranslation, ViewProjection*
 {
 	assert(model);
 	model_ = model;
+	pressRippleModel_ = Model::CreateFromOBJ("Ripple", true);
 	textureHandle_ = TextureManager::Load("picture/enemy.png");
 	debugText_ = DebugText::GetInstance();
-	worldTransform_.translation_ = { 10.0f, 3.0f, 20.0f };
+	worldTransform_.translation_ = { 0, 3.0f, 0 };
 	worldTransform_.scale_ = { 2.5f,5.0f,2.5f };
 	worldTransform_.Initialize();
+	rippleTransform_.scale_ = { 1.0f,2.0f,1.0f };
+	rippleTransform_.Initialize();
+	rippleTransform_.UpdateMatrix();
+	rippleTransform_.TransferMatrix();
 	viewProjection_ = viewProjection;
 	playerTranslation_ = playerTranslation;
 	SetCollisionAttribute(CollisionAttribute::CEnemy);
@@ -31,23 +36,20 @@ void (Enemy::* Enemy::pPhaseFuncTable[])() =
 
 void Enemy::Beam()
 {
-	if (!isStart)
+	if (beamTimer_.CountDown())
 	{
-		if (beamTimer_.CountDown())
+		if (!isStart)
 		{
 			beam_.Initialize(model_, state);
 			isStart = 1;
 		}
-	}
-	if (isStart)
-	{
-		beam_.Update();
-		if (beamTimer_.CountDown())
+		else
 		{
 			isActionEnd = 1;
 			beam_.Clear();
 		}
 	}
+	beam_.Update();
 }
 
 void Enemy::Missile()
@@ -167,9 +169,9 @@ void Enemy::BombAction()
 		{
 			if (bombTimer_.CountDown())
 			{
-				std::random_device seedGen;
-				std::mt19937_64 engine(seedGen());
-				std::uniform_real_distribution<float> bombFallPos(-74.0f, 74.0f);
+				static std::random_device seedGen;
+				static std::mt19937_64 engine(seedGen());
+				static std::uniform_real_distribution<float> bombFallPos(-74.0f, 74.0f);
 				Vector3 bombSpd = { bombFallPos(engine),0, bombFallPos(engine) };
 				bombSpd -= worldTransform_.translation_;
 				bombSpd /= 102.0f;
@@ -191,20 +193,29 @@ void Enemy::BombAction()
 
 void Enemy::Press()
 {
-	if (!isStart)
+	if (worldTransform_.translation_.y < 3.0f)
 	{
-		isStart = 1;
+		worldTransform_.translation_.y = 3.0f;
+		jumpSpd = JUMP_SPD_INIT;
+		isRippleExist = 1;
+		rippleTransform_.translation_ = worldTransform_.translation_;
+		rippleTransform_.translation_.y = -2.0f;
 	}
-	if (isStart)
+	if (!isRippleExist)
 	{
 		worldTransform_.translation_.y += jumpSpd;
 		jumpSpd -= 0.05f;
-
-		if (worldTransform_.translation_.y <= 3.0f)
+	}
+	else
+	{
+		rippleTransform_.scale_ += { 1.0f, 0, 1.0f };
+		rippleTransform_.UpdateMatrix();
+		rippleTransform_.TransferMatrix();
+		if (rippleLifeTimer.CountDown())
 		{
-			worldTransform_.translation_.y = 3.0f;
+			rippleTransform_.scale_ = { 1.0f,2.0f,1.0f };
+			isRippleExist = 0;
 			isActionEnd = 1;
-			jumpSpd = JUMP_SPD_INIT;
 		}
 	}
 }
@@ -240,7 +251,7 @@ void Enemy::Update()
 	(this->*pPhaseFuncTable[phase_])();
 	if (isActionEnd)
 	{
-		phase_ = rand()%5;
+		phase_ = Phase::beam;
 		isStart = 0;
 		isActionEnd = 0;
 	}
@@ -262,6 +273,7 @@ void Enemy::Draw()
 	for (std::unique_ptr<EnemyBullet>& bullet : missiles_) { bullet->Draw(*viewProjection_); }
 	for (std::unique_ptr<Bomb>& bomb : bomb_) { bomb->Draw(*viewProjection_); }
 	beam_.Draw(*viewProjection_);
+	if (isRippleExist) { pressRippleModel_->Draw(rippleTransform_, *viewProjection_); }
 }
 
 void Enemy::Clear()
