@@ -16,7 +16,7 @@ private:
 	DebugText* debugText_;
 	ViewProjection* viewProjection_;
 	Timer bulletInterval_;
-	float angle_;
+	Vector2 angle_;
 
 	void Move();
 	void Rotate();
@@ -25,6 +25,7 @@ private:
 public:
 	int hp_;
 	std::list<std::unique_ptr<PlayerBullet>> bullets_;
+	bool isMove = 1;
 
 	void Initialize(Model* model, ViewProjection* viewProjection);
 	void Update(Vector3 enemyTranslation);

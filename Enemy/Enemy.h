@@ -29,12 +29,13 @@ private:
 	const float JUMP_SPD_INIT = 2.0f;
 	float jumpSpd = JUMP_SPD_INIT;
 	Beam beam_;
-	State state = State::Hard;
+	State state = State::Normal;
 	Timer bombTimer_ = 75;
 	Timer idleTimer_ = 100;
 	WorldTransform rippleTransform_;
 	Timer rippleLifeTimer = 50;
 	bool isRippleExist = 0;
+	bool* isPlayerMove_;
 
 	void Beam(), Missile();
 	void BombAction();
@@ -46,7 +47,7 @@ public:
 	std::list<std::unique_ptr<Bomb>> bomb_;
 
 	WorldTransform worldTransform_;
-	void Initialize(Model* model, Vector3* playerTranslation, ViewProjection* viewProjection);
+	void Initialize(Model* model, Vector3* playerTranslation, ViewProjection* viewProjection,bool* isPlayerMove);
 	void Update(), Draw();
 	void Clear();
 	void OnCollision() { hp_--; }

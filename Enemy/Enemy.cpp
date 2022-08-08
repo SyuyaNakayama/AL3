@@ -1,14 +1,14 @@
 #include "Enemy.h"
 #include <assert.h>
 #include <stdlib.h>
-#include "function.h"
-#include "Collider/CollisionConfig.h"
 #include <DirectXMath.h>
 #include <random>
+#include "function.h"
+#include "Collider/CollisionConfig.h"
+#include "Player/Player.h"
 
-void Enemy::Initialize(Model* model, Vector3* playerTranslation, ViewProjection* viewProjection)
+void Enemy::Initialize(Model* model, Vector3* playerTranslation, ViewProjection* viewProjection, bool* isPlayerMove)
 {
-	assert(model);
 	model_ = model;
 	pressRippleModel_ = Model::CreateFromOBJ("Ripple", true);
 	textureHandle_ = TextureManager::Load("picture/enemy.png");
@@ -18,10 +18,9 @@ void Enemy::Initialize(Model* model, Vector3* playerTranslation, ViewProjection*
 	worldTransform_.Initialize();
 	rippleTransform_.scale_ = { 1.0f,2.0f,1.0f };
 	rippleTransform_.Initialize();
-	rippleTransform_.UpdateMatrix();
-	rippleTransform_.TransferMatrix();
 	viewProjection_ = viewProjection;
 	playerTranslation_ = playerTranslation;
+	isPlayerMove_ = isPlayerMove;
 	SetCollisionAttribute(CollisionAttribute::CEnemy);
 	SetRadius(4.0f);
 	SetCollisionMask(CollisionMask::CEnemyMask);
@@ -193,6 +192,16 @@ void Enemy::BombAction()
 
 void Enemy::Press()
 {
+	static Vector3 pressSpd;
+	if (state == State::Hard)
+	{
+		if (!isStart)
+		{
+			pressSpd = (*playerTranslation_ - worldTransform_.translation_) / 80.0f;
+			pressSpd.y = 0;
+			isStart = 1;
+		}
+	}
 	if (worldTransform_.translation_.y < 3.0f)
 	{
 		worldTransform_.translation_.y = 3.0f;
@@ -200,11 +209,13 @@ void Enemy::Press()
 		isRippleExist = 1;
 		rippleTransform_.translation_ = worldTransform_.translation_;
 		rippleTransform_.translation_.y = -2.0f;
+		if (playerTranslation_->y == 0) { *isPlayerMove_ = 0; }
 	}
 	if (!isRippleExist)
 	{
 		worldTransform_.translation_.y += jumpSpd;
 		jumpSpd -= 0.05f;
+		if (state == State::Hard) { worldTransform_.translation_ += pressSpd; }
 	}
 	else
 	{
@@ -244,6 +255,12 @@ void Enemy::Update()
 	missiles_.remove_if([](std::unique_ptr<EnemyBullet>& bullet) { return bullet->isDead_; });
 	bomb_.remove_if([](std::unique_ptr<Bomb>& bomb) { return (bomb->isDead_ && !bomb->isExplosion); });
 
+	if (!*isPlayerMove_)
+	{
+		static Timer bindTimer = 60;
+		if (bindTimer.CountDown()) { *isPlayerMove_ = 1; }
+	}
+
 	toPlayer_ = *playerTranslation_ - worldTransform_.translation_;
 	toPlayer_.y = 0;
 	toPlayer_.normalize();
@@ -251,7 +268,7 @@ void Enemy::Update()
 	(this->*pPhaseFuncTable[phase_])();
 	if (isActionEnd)
 	{
-		phase_ = Phase::beam;
+		phase_ = Phase::press;
 		isStart = 0;
 		isActionEnd = 0;
 	}

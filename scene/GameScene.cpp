@@ -31,7 +31,7 @@ void GameScene::Initialize()
 	viewProjection_.Initialize();
 	ground_.Initialize(model_);
 	player_->Initialize(model_, &viewProjection_);
-	enemy_->Initialize(model_, &viewProjection_.eye, &viewProjection_);
+	enemy_->Initialize(model_, &viewProjection_.eye, &viewProjection_,&player_->isMove);
 }
 
 void GameScene::Update()
