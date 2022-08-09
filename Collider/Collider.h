@@ -11,7 +11,7 @@ private:
 public:
 	virtual void OnCollision() = 0;
 	const virtual Vector3 GetWorldPosition() = 0;
-	float GetRadius() { return radius_; }
+	const virtual Vector3 GetRadius() = 0;
 	uint32_t GetCollisionAttribute() { return collisionAttribute_; }
 	uint32_t GetCollisionMask() { return collisionMask_; }
 	void SetRadius(float radius) { radius_ = radius; }

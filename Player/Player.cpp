@@ -10,7 +10,7 @@ void Player::Initialize(Model* model, ViewProjection* viewProjection)
 	input_ = Input::GetInstance();
 	debugText_ = DebugText::GetInstance();
 	viewProjection_ = viewProjection;
-	bulletInterval_ = 40;
+	bulletInterval_ = 30;
 	SetCollisionAttribute(CollisionAttribute::CPlayer);
 	SetRadius(5.0f);
 	SetCollisionMask(CollisionMask::CPlayerMask);
@@ -105,6 +105,9 @@ void Player::Update(Vector3 enemyTranslation)
 		Attack();
 	}
 	for (std::unique_ptr<PlayerBullet>& bullet : bullets_) { bullet->Update(); }
+
+	debugText_->SetPos(50, 50);
+	debugText_->Printf("PlayerHp:%d", hp_);
 }
 
 void Player::Draw()

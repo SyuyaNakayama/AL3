@@ -26,10 +26,10 @@ void Enemy::Initialize(Model* model, Vector3* playerTranslation, ViewProjection*
 	SetRadius(4.0f);
 	hp_ = 500;
 	state = State::Easy;
-	phase_ = Phase::press;
+	phase_ = Phase::beam;
 }
 
-void Enemy::Beam()
+void Enemy::BeamAction()
 {
 	if (beamTimer_.CountDown())
 	{
@@ -257,7 +257,7 @@ void Enemy::Update()
 	(this->*pPhaseFuncTable[phase_])();
 	if (isActionEnd)
 	{
-		//phase_ = Phase::press;
+		phase_ = Phase::beam;
 		isStart = 0;
 		isActionEnd = 0;
 	}
@@ -269,7 +269,7 @@ void Enemy::Update()
 	worldTransform_.TransferMatrix();
 
 	debugText_->SetPos(50, 70);
-	//debugText_->Printf("EnemyHp:%d", hp_);
+	debugText_->Printf("EnemyHp:%d", hp_);
 }
 
 void Enemy::Draw()
@@ -284,7 +284,7 @@ void Enemy::Draw()
 
 void (Enemy::* Enemy::pPhaseFuncTable[])() =
 {
-	&Enemy::Beam,&Enemy::Missile,&Enemy::BombAction,
+	&Enemy::BeamAction,&Enemy::Missile,&Enemy::BombAction,
 	&Enemy::Press,&Enemy::Tackle
 };
 

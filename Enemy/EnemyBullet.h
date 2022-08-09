@@ -19,5 +19,6 @@ public:
 
 	void OnCollision() { isDead_ = 1; };
 	const Vector3 GetWorldPosition() { return worldTransform_.translation_; };
+	const Vector3 GetRadius() { return worldTransform_.scale_; }
 	void Draw(const ViewProjection& viewProjection);
 };

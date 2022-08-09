@@ -30,4 +30,5 @@ public:
 	void Draw();
 	void OnCollision() { hp_--; };
 	const Vector3 GetWorldPosition() { return viewProjection_->eye; };
+	const Vector3 GetRadius() { return { 1.25f,2.5f,1.25f }; }
 };

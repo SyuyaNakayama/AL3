@@ -47,7 +47,7 @@ void GameScene::Update()
 	case GameScene::Play:
 		player_->Update(enemy_->worldTransform_.translation_);
 		enemy_->Update();
-		//collisionManager_->CheckAllCollisions(player_.get(), enemy_.get());
+		collisionManager_->CheckAllCollisions(player_.get(), enemy_.get());
 		//debugCamera_->Update();
 		viewProjection_.UpdateMatrix();
 
