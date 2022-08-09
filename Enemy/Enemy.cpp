@@ -22,16 +22,12 @@ void Enemy::Initialize(Model* model, Vector3* playerTranslation, ViewProjection*
 	playerTranslation_ = playerTranslation;
 	isPlayerMove_ = isPlayerMove;
 	SetCollisionAttribute(CollisionAttribute::CEnemy);
-	SetRadius(4.0f);
 	SetCollisionMask(CollisionMask::CEnemyMask);
+	SetRadius(4.0f);
 	hp_ = 500;
+	state = State::Easy;
+	phase_ = Phase::press;
 }
-
-void (Enemy::* Enemy::pPhaseFuncTable[])() =
-{
-	&Enemy::Beam,&Enemy::Missile,&Enemy::BombAction,
-	&Enemy::Press,&Enemy::Tackle
-};
 
 void Enemy::Beam()
 {
@@ -127,16 +123,19 @@ void Enemy::Missile()
 void Enemy::BombAction()
 {
 	static int bombCount = 0;
+	Vector3 bombSpd;
 
 	switch (state)
 	{
 	case Enemy::Easy:
+	case Enemy::Normal:
 		if (bombTimer_.CountDown())
 		{
-			Vector3 bombSpd = (*playerTranslation_ - worldTransform_.translation_) / 102.0f;
+			bombSpd = (*playerTranslation_ - worldTransform_.translation_) / 102.0f;
 			bombSpd.y = 1.5f;
 			std::unique_ptr<Bomb> newBomb_ = std::make_unique<Bomb>();
 			newBomb_->Initialize(model_, worldTransform_.translation_, bombSpd);
+			if (state == State::Normal) { newBomb_->SetScale({ 5.0f,5.0f,5.0f }); }
 			bomb_.push_back(std::move(newBomb_));
 			bombCount++;
 		}
@@ -144,18 +143,6 @@ void Enemy::BombAction()
 		{
 			isActionEnd = 1;
 			bombCount = 0;
-		}
-		break;
-	case Enemy::Normal:
-		if (bombTimer_.CountDown())
-		{
-			Vector3 bombSpd = (*playerTranslation_ - worldTransform_.translation_) / 102.0f;
-			bombSpd.y = 1.5f;
-			std::unique_ptr<Bomb> newBomb_ = std::make_unique<Bomb>();
-			newBomb_->Initialize(model_, worldTransform_.translation_, bombSpd);
-			newBomb_->SetScale({ 5.0f,5.0f,5.0f });
-			bomb_.push_back(std::move(newBomb_));
-			isActionEnd = 1;
 		}
 		break;
 	case Enemy::Hard:
@@ -171,7 +158,7 @@ void Enemy::BombAction()
 				static std::random_device seedGen;
 				static std::mt19937_64 engine(seedGen());
 				static std::uniform_real_distribution<float> bombFallPos(-74.0f, 74.0f);
-				Vector3 bombSpd = { bombFallPos(engine),0, bombFallPos(engine) };
+				bombSpd = { bombFallPos(engine),0, bombFallPos(engine) };
 				bombSpd -= worldTransform_.translation_;
 				bombSpd /= 102.0f;
 				bombSpd.y = 1.5f;
@@ -209,7 +196,7 @@ void Enemy::Press()
 		isRippleExist = 1;
 		rippleTransform_.translation_ = worldTransform_.translation_;
 		rippleTransform_.translation_.y = -2.0f;
-		if (playerTranslation_->y == 0) { *isPlayerMove_ = 0; }
+		if (playerTranslation_->y == 0 && state != State::Easy) { *isPlayerMove_ = 0; }
 	}
 	if (!isRippleExist)
 	{
@@ -261,6 +248,8 @@ void Enemy::Update()
 		if (bindTimer.CountDown()) { *isPlayerMove_ = 1; }
 	}
 
+	//StateChange();
+
 	toPlayer_ = *playerTranslation_ - worldTransform_.translation_;
 	toPlayer_.y = 0;
 	toPlayer_.normalize();
@@ -268,7 +257,7 @@ void Enemy::Update()
 	(this->*pPhaseFuncTable[phase_])();
 	if (isActionEnd)
 	{
-		phase_ = Phase::press;
+		//phase_ = Phase::press;
 		isStart = 0;
 		isActionEnd = 0;
 	}
@@ -280,7 +269,7 @@ void Enemy::Update()
 	worldTransform_.TransferMatrix();
 
 	debugText_->SetPos(50, 70);
-	debugText_->Printf("EnemyHp:%d", hp_);
+	//debugText_->Printf("EnemyHp:%d", hp_);
 }
 
 void Enemy::Draw()
@@ -291,6 +280,18 @@ void Enemy::Draw()
 	for (std::unique_ptr<Bomb>& bomb : bomb_) { bomb->Draw(*viewProjection_); }
 	beam_.Draw(*viewProjection_);
 	if (isRippleExist) { pressRippleModel_->Draw(rippleTransform_, *viewProjection_); }
+}
+
+void (Enemy::* Enemy::pPhaseFuncTable[])() =
+{
+	&Enemy::Beam,&Enemy::Missile,&Enemy::BombAction,
+	&Enemy::Press,&Enemy::Tackle
+};
+
+void Enemy::StateChange()
+{
+	if (hp_ < 300) { state = State::Normal; }
+	if (hp_ < 100) { state = State::Hard; }
 }
 
 void Enemy::Clear()

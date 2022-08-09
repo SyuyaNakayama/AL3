@@ -9,8 +9,6 @@
 class Player :public Collider
 {
 private:
-	const float PI = 3.141592654f;
-
 	Model* model_;
 	Input* input_;
 	DebugText* debugText_;

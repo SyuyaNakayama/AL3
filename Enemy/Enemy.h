@@ -41,6 +41,7 @@ private:
 	void BombAction();
 	void Press(), Tackle();
 	static void (Enemy::* pPhaseFuncTable[])();
+	void StateChange();
 public:
 	int hp_;
 	std::list<std::unique_ptr<EnemyBullet>> missiles_;

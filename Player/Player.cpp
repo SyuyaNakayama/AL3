@@ -6,7 +6,6 @@
 
 void Player::Initialize(Model* model, ViewProjection* viewProjection)
 {
-	assert(model);
 	model_ = model;
 	input_ = Input::GetInstance();
 	debugText_ = DebugText::GetInstance();
