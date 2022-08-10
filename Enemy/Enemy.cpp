@@ -25,26 +25,68 @@ void Enemy::Initialize(Model* model, Vector3* playerTranslation, ViewProjection*
 	SetCollisionMask(CollisionMask::CEnemyMask);
 	SetRadius(4.0f);
 	hp_ = 500;
-	state = State::Easy;
+	state = State::Normal;
 	phase_ = Phase::beam;
 }
 
 void Enemy::BeamAction()
 {
+	static bool isBeamObjectCreate = 0;
+	if (state == State::Hard && isStart)
+	{
+		beam_[0].Update(-0.5f);
+		beam_[1].Update(0.5f);
+	}
+	if (!isBeamObjectCreate)
+	{
+		Beam newBeam;
+		switch (state)
+		{
+		case Enemy::Easy:
+			for (size_t i = 0; i < 5; i++)
+			{
+				newBeam.SetScaleX();
+				newBeam.SetPositionZ(75.0f - 150.0f / 6.0f * (float)(i + 1));
+				beam_.push_back(newBeam);
+			}
+			break;
+		case Enemy::Normal:
+			for (size_t i = 0; i < 4; i++)
+			{
+				newBeam.SetScaleX();
+				newBeam.SetPositionZ(75.0f - 150.0f / 5.0f * (float)(i + 1));
+				beam_.push_back(newBeam);
+			}
+			for (size_t i = 0; i < 4; i++)
+			{
+				newBeam.SetScaleZ();
+				newBeam.SetPositionX(75.0f - 150.0f / 5.0f * (float)(i + 1));
+				beam_.push_back(newBeam);
+			}
+			break;
+		case Enemy::Hard:
+			for (size_t i = 0; i < 2; i++)
+			{
+				newBeam.SetScaleZ();
+				newBeam.SetPositionX(75.0f * NewFlag(i == 0));
+				beam_.push_back(newBeam);
+			}
+			break;
+		}
+
+		for (size_t i = 0; i < beam_.size(); i++) { beam_[i].Initialize(model_); }
+		isBeamObjectCreate = 1;
+	}
 	if (beamTimer_.CountDown())
 	{
-		if (!isStart)
-		{
-			beam_.Initialize(model_, state);
-			isStart = 1;
-		}
+		if (!isStart) { isStart = 1; }
 		else
 		{
 			isActionEnd = 1;
-			beam_.Clear();
+			isBeamObjectCreate = 0;
+			beam_.clear();
 		}
 	}
-	beam_.Update();
 }
 
 void Enemy::Missile()
@@ -275,10 +317,9 @@ void Enemy::Update()
 void Enemy::Draw()
 {
 	model_->Draw(worldTransform_, *viewProjection_, textureHandle_);
-
 	for (std::unique_ptr<EnemyBullet>& bullet : missiles_) { bullet->Draw(*viewProjection_); }
 	for (std::unique_ptr<Bomb>& bomb : bomb_) { bomb->Draw(*viewProjection_); }
-	beam_.Draw(*viewProjection_);
+	if (phase_ == Phase::beam) { for (size_t i = 0; i < beam_.size(); i++) { beam_[i].Draw(*viewProjection_, isStart); } }
 	if (isRippleExist) { pressRippleModel_->Draw(rippleTransform_, *viewProjection_); }
 }
 

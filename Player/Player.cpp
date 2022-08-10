@@ -104,6 +104,7 @@ void Player::Update(Vector3 enemyTranslation)
 		Rotate();
 		Attack();
 	}
+
 	for (std::unique_ptr<PlayerBullet>& bullet : bullets_) { bullet->Update(); }
 
 	debugText_->SetPos(50, 50);

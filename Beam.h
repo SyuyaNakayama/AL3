@@ -9,16 +9,18 @@
 class Beam :public Collider
 {
 private:
+	WorldTransform worldTransform_;
 	Model* model_;
-	uint32_t textureHandle_;
-	int enemyState_;
+	uint32_t textureHandle_[2];
 public:
-	std::vector<WorldTransform> worldTransforms_;
-	void Initialize(Model* model, int enemyState);
-	void Update();
-	void Draw(ViewProjection viewProjection);
-	void Clear() { worldTransforms_.clear(); }
+	void Initialize(Model* model);
+	void Update(float spd);
+	void Draw(ViewProjection viewProjection,int textureNumber);
 	void OnCollision() {}
-	const Vector3 GetRadius() { return {}; }
-	const Vector3 GetWorldPosition() { return {}; }
+	void SetScaleX() { worldTransform_.scale_ = { 75.0f,1,1 }; }
+	void SetScaleZ() { worldTransform_.scale_ = { 1,1,75.0f }; }
+	void SetPositionX(float posX) { worldTransform_.translation_ = { posX,0,0 }; }
+	void SetPositionZ(float posZ) { worldTransform_.translation_ = { 0,0,posZ }; }
+	const Vector3 GetRadius() { return worldTransform_.scale_; }
+	const Vector3 GetWorldPosition() { return worldTransform_.translation_; }
 };

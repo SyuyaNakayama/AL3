@@ -14,10 +14,20 @@ struct ConstBufferDataWorldTransform {
 /// ワールド変換データ
 /// </summary>
 struct WorldTransform {
+private:
 	// 定数バッファ
 	Microsoft::WRL::ComPtr<ID3D12Resource> constBuff_;
 	// マッピング済みアドレス
 	ConstBufferDataWorldTransform* constMap = nullptr;
+	/// <summary>
+	/// 定数バッファ生成
+	/// </summary>
+	void CreateConstBuffer();
+	/// <summary>
+	/// マッピングする
+	/// </summary>
+	void Map();
+public:
 	// ローカルスケール
 	Vector3 scale_ = {1, 1, 1};
 	// X,Y,Z軸回りのローカル回転角
@@ -33,14 +43,6 @@ struct WorldTransform {
 	/// 初期化
 	/// </summary>
 	void Initialize();
-	/// <summary>
-	/// 定数バッファ生成
-	/// </summary>
-	void CreateConstBuffer();
-	/// <summary>
-	/// マッピングする
-	/// </summary>
-	void Map();
 	/// <summary>
 	/// 行列を転送する
 	/// </summary>

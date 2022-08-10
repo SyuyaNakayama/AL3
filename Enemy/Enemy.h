@@ -25,7 +25,7 @@ private:
 	ViewProjection* viewProjection_;
 	Timer missileInterval_ = 40;
 	Timer beamTimer_ = 300;
-	bool isActionEnd = 0, isStart = 0;
+	bool isActionEnd = 0;
 	const float JUMP_SPD_INIT = 2.0f;
 	float jumpSpd = JUMP_SPD_INIT;
 	State state = State::Normal;
@@ -45,7 +45,8 @@ public:
 	int hp_;
 	std::list<std::unique_ptr<EnemyBullet>> missiles_;
 	std::list<std::unique_ptr<Bomb>> bomb_;
-	Beam beam_;
+	std::vector<Beam> beam_;
+	bool isStart = 0;
 
 	WorldTransform worldTransform_;
 	void Initialize(Model* model, Vector3* playerTranslation, ViewProjection* viewProjection,bool* isPlayerMove);
