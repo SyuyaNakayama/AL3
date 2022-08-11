@@ -23,7 +23,6 @@ void Enemy::Initialize(Model* model, Vector3* playerTranslation, ViewProjection*
 	isPlayerMove_ = isPlayerMove;
 	SetCollisionAttribute(CollisionAttribute::CEnemy);
 	SetCollisionMask(CollisionMask::CEnemyMask);
-	SetRadius(4.0f);
 	hp_ = 500;
 	state = State::Normal;
 	phase_ = Phase::beam;

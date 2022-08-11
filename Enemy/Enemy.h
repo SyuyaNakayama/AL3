@@ -31,9 +31,7 @@ private:
 	State state = State::Normal;
 	Timer bombTimer_ = 75;
 	Timer idleTimer_ = 100;
-	WorldTransform rippleTransform_;
 	Timer rippleLifeTimer = 50;
-	bool isRippleExist = 0;
 	bool* isPlayerMove_;
 
 	void BeamAction(), Missile();
@@ -43,12 +41,14 @@ private:
 	void StateChange();
 public:
 	int hp_;
+	WorldTransform worldTransform_;
 	std::list<std::unique_ptr<EnemyBullet>> missiles_;
 	std::list<std::unique_ptr<Bomb>> bomb_;
 	std::vector<Beam> beam_;
+	WorldTransform rippleTransform_;
+	bool isRippleExist = 0;
 	bool isStart = 0;
 
-	WorldTransform worldTransform_;
 	void Initialize(Model* model, Vector3* playerTranslation, ViewProjection* viewProjection,bool* isPlayerMove);
 	void Update(), Draw();
 	void Clear();

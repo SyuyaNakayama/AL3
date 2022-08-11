@@ -31,7 +31,6 @@ void Bomb::Update()
 	else if (isExplosion)
 	{
 		worldTransform_.scale_ += {0.1f, 0.1f, 0.1f};
-		SetRadius(worldTransform_.scale_.x);
 	}
 
 	worldTransform_.UpdateMatrix();

@@ -48,6 +48,17 @@ Vector3 Vector3::cross(const Vector3& v) const
 	return temp;
 }
 
+Vector3 Vector3::abs()
+{
+	Vector3 ans = *this;
+
+	ans.x = fabs(ans.x);
+	ans.y = fabs(ans.y);
+	ans.z = fabs(ans.z);
+
+	return ans;
+}
+
 Vector3 Vector3::operator+() const
 {
 	return *this;
@@ -90,11 +101,34 @@ Vector3& Vector3::operator/=(float s)
 	return *this;
 }
 
-void Vector3::ShowVector(Vector2 textPos)
+bool Vector3::operator<=(Vector3 vec)
 {
-	DebugText* debugText = DebugText::GetInstance();
-	debugText->SetPos(textPos.x, textPos.y);
-	debugText->Printf("(%f,%f,%f)", x, y, z);
+	if (x <= vec.x && y <= vec.y && z <= vec.z) { return true; }
+	return false;
+}
+
+bool Vector3::operator>=(Vector3 vec)
+{
+	if (x >= vec.x && y >= vec.y && z >= vec.z) { return true; }
+	return false;
+}
+
+bool Vector3::operator<(Vector3 vec)
+{
+	if (x < vec.x && y < vec.y && z < vec.z) { return true; }
+	return false;
+}
+
+bool Vector3::operator>(Vector3 vec)
+{
+	if (x > vec.x && y > vec.y && z > vec.z) { return true; }
+	return false;
+}
+
+bool Vector3::operator==(Vector3 vec)
+{
+	if (x == vec.x && y == vec.y && z == vec.z) { return true; }
+	return false;
 }
 
 const Vector3 operator+(const Vector3& v1, const Vector3& v2)

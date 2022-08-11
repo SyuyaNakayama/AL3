@@ -9,7 +9,6 @@
 class CollisionManager
 {
 private:
-	std::list<Collider*> colliders_;
 	void CheckCollisionPair(Collider* colliderA, Collider* colliderB);
 public:
 	void CheckAllCollisions(Player* player, Enemy* enemy);

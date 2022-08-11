@@ -13,6 +13,7 @@ public:
 	Vector3& normalize(); // 正規化
 	float dot(const Vector3& v) const; // 内積値
 	Vector3 cross(const Vector3& v) const; // 外積値
+	Vector3 abs();
 
 	// 単項演算子オーバーロード
 	Vector3 operator+() const;
@@ -24,7 +25,11 @@ public:
 	Vector3& operator*=(float s);
 	Vector3& operator/=(float s);
 
-	void ShowVector(Vector2 textPos);
+	bool operator<=(Vector3);
+	bool operator>=(Vector3);
+	bool operator<(Vector3);
+	bool operator>(Vector3);
+	bool operator==(Vector3);
 };
 
 // 2項演算子オーバーロード
