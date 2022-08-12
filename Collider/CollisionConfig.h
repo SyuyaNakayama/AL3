@@ -1,16 +1,25 @@
 #pragma once
 
-enum CollisionAttribute
+namespace CollisionAttribute
 {
-	CPlayer = 0b1,
-	CPlayerBullet = 0b1 << 1,
-	CEnemy = 0b1 << 2,
-	CEnemyMissile = 0b1 << 3,
-	CEnemyBomb = 0b1 << 4
-};
+	enum
+	{
+		Player = 0b1,
+		PlayerBullet = 0b1 << 1,
+		Enemy = 0b1 << 2,
+		EnemyMissile = 0b1 << 3,
+		EnemyBomb = 0b1 << 4,
+		EnemyBeam = 0b1 << 5
+	};
+}
 
-enum CollisionMask
+namespace CollisionMask
 {
-	CPlayerMask = ~(CPlayer | CPlayerBullet),
-	CEnemyMask = ~(CEnemy | CEnemyMissile | CEnemyBomb)
-};
+	enum
+	{
+		Player = ~(CollisionAttribute::Player | CollisionAttribute::PlayerBullet),
+		PlayerBullet = CollisionAttribute::Enemy,
+		EnemyMask = ~(CollisionAttribute::Enemy | CollisionAttribute::EnemyMissile |
+		CollisionAttribute::EnemyBomb | CollisionAttribute::EnemyBeam)
+	};
+}

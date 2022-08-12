@@ -21,11 +21,11 @@ void Enemy::Initialize(Model* model, Vector3* playerTranslation, ViewProjection*
 	viewProjection_ = viewProjection;
 	playerTranslation_ = playerTranslation;
 	isPlayerMove_ = isPlayerMove;
-	SetCollisionAttribute(CollisionAttribute::CEnemy);
-	SetCollisionMask(CollisionMask::CEnemyMask);
+	SetCollisionAttribute(CollisionAttribute::Enemy);
+	SetCollisionMask(CollisionMask::EnemyMask);
 	hp_ = 500;
-	state = State::Normal;
-	phase_ = Phase::beam;
+	state = State::Easy;
+	phase_ = Phase::press;
 }
 
 void Enemy::BeamAction()
@@ -298,7 +298,7 @@ void Enemy::Update()
 	(this->*pPhaseFuncTable[phase_])();
 	if (isActionEnd)
 	{
-		phase_ = Phase::beam;
+		//phase_ = Phase::beam;
 		isStart = 0;
 		isActionEnd = 0;
 	}

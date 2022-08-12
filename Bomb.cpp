@@ -14,8 +14,8 @@ void Bomb::Initialize(Model* model, const Vector3& position, const Vector3& velo
 	velocity_ = velocity;
 	isDead_ = 0;
 	isExplosion = 0;
-	SetCollisionAttribute(CollisionAttribute::CEnemy);
-	SetCollisionMask(CollisionMask::CEnemyMask);
+	SetCollisionAttribute(CollisionAttribute::Enemy);
+	SetCollisionMask(CollisionMask::EnemyMask);
 }
 
 void Bomb::Update()

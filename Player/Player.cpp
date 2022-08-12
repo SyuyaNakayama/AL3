@@ -11,8 +11,8 @@ void Player::Initialize(Model* model, ViewProjection* viewProjection)
 	debugText_ = DebugText::GetInstance();
 	viewProjection_ = viewProjection;
 	bulletInterval_ = 30;
-	SetCollisionAttribute(CollisionAttribute::CPlayer);
-	SetCollisionMask(CollisionMask::CPlayerMask);
+	SetCollisionAttribute(CollisionAttribute::Player);
+	SetCollisionMask(CollisionMask::Player);
 	hp_ = 200;
 }
 

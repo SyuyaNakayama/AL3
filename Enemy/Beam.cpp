@@ -1,4 +1,5 @@
 #include "Beam.h"
+#include "Collider/CollisionConfig.h"
 
 void Beam::Initialize(Model* model)
 {
@@ -8,6 +9,8 @@ void Beam::Initialize(Model* model)
 	worldTransform_.Initialize();
 	worldTransform_.UpdateMatrix();
 	worldTransform_.TransferMatrix();
+	SetCollisionAttribute(CollisionAttribute::EnemyBeam);
+	SetCollisionMask(CollisionMask::EnemyMask);
 }
 
 void Beam::Update(float spd)

@@ -11,8 +11,8 @@ void PlayerBullet::Initialize(Model* model, const Vector3& position, const Vecto
 	worldTransform_.Initialize();
 	worldTransform_.translation_ = position;
 	velocity_ = velocity;
-	SetCollisionAttribute(CollisionAttribute::CPlayer);
-	SetCollisionMask(CollisionMask::CPlayerMask);
+	SetCollisionAttribute(CollisionAttribute::Player);
+	SetCollisionMask(CollisionMask::PlayerBullet);
 }
 
 void PlayerBullet::Update()
