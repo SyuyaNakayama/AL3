@@ -19,7 +19,5 @@ namespace CollisionMask
 	{
 		Player = ~(CollisionAttribute::Player | CollisionAttribute::PlayerBullet),
 		PlayerBullet = CollisionAttribute::Enemy,
-		EnemyMask = ~(CollisionAttribute::Enemy | CollisionAttribute::EnemyMissile |
-		CollisionAttribute::EnemyBomb | CollisionAttribute::EnemyBeam)
 	};
 }

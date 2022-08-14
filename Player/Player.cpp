@@ -10,7 +10,7 @@ void Player::Initialize(Model* model, ViewProjection* viewProjection)
 	input_ = Input::GetInstance();
 	debugText_ = DebugText::GetInstance();
 	viewProjection_ = viewProjection;
-	bulletInterval_ = 30;
+	bulletInterval_ = 20;
 	SetCollisionAttribute(CollisionAttribute::Player);
 	SetCollisionMask(CollisionMask::Player);
 	hp_ = 200;
@@ -45,8 +45,8 @@ void Player::Move()
 
 void Player::Rotate()
 {
-	angle_.y += DirectX::XMConvertToRadians(input_->GetMouseMove().lX / 2);
-	angle_.x -= DirectX::XMConvertToRadians(input_->GetMouseMove().lY / 2);
+	angle_.y += DirectX::XMConvertToRadians(input_->GetMouseMove().lX / 3);
+	angle_.x -= DirectX::XMConvertToRadians(input_->GetMouseMove().lY / 3);
 	Clamp(angle_.x, 1, -0.5f);
 	viewProjection_->target =
 	{
@@ -83,7 +83,7 @@ void Player::Attack()
 {
 	if (!bulletInterval_.CountDown()) { return; }
 
-	const float BULLET_SPD = 1.0f;
+	const float BULLET_SPD = 1.5f;
 	Vector3 velocity = (viewProjection_->target - viewProjection_->eye) * BULLET_SPD;
 
 	std::unique_ptr<PlayerBullet> newBullet = std::make_unique<PlayerBullet>();

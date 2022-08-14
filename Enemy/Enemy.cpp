@@ -22,10 +22,9 @@ void Enemy::Initialize(Model* model, Vector3* playerTranslation, ViewProjection*
 	playerTranslation_ = playerTranslation;
 	isPlayerMove_ = isPlayerMove;
 	SetCollisionAttribute(CollisionAttribute::Enemy);
-	SetCollisionMask(CollisionMask::EnemyMask);
-	hp_ = 500;
-	state = State::Easy;
-	phase_ = Phase::press;
+	hp_ = 200;
+	state = State::Normal;
+	phase_ = Phase::beam;
 }
 
 void Enemy::BeamAction()
@@ -261,10 +260,27 @@ void Enemy::Press()
 
 void Enemy::Tackle()
 {
+	static Timer timer = 50;
 	if (!isStart)
 	{
-		tackleSpd = toPlayer_ * 1.5f;
-		isStart = 1;
+		if (timer.CountDown())
+		{
+			float tSpd = 0;
+			switch (state)
+			{
+			case Enemy::Easy:
+				tSpd = 1.5f;
+				break;
+			case Enemy::Normal:
+				tSpd = 2.0f;
+				break;
+			case Enemy::Hard:
+				tSpd = 3.0f;
+				break;
+			}
+			tackleSpd = toPlayer_ * tSpd;
+			isStart = 1;
+		}
 	}
 	if (isStart)
 	{
@@ -282,7 +298,6 @@ void Enemy::Update()
 {
 	missiles_.remove_if([](std::unique_ptr<EnemyBullet>& bullet) { return bullet->isDead_; });
 	bomb_.remove_if([](std::unique_ptr<Bomb>& bomb) { return (bomb->isDead_ && !bomb->isExplosion); });
-
 	if (!*isPlayerMove_)
 	{
 		static Timer bindTimer = 60;
@@ -330,11 +345,13 @@ void (Enemy::* Enemy::pPhaseFuncTable[])() =
 
 void Enemy::StateChange()
 {
-	if (hp_ < 300) { state = State::Normal; }
-	if (hp_ < 100) { state = State::Hard; }
+	if (hp_ < 125) { state = State::Normal; }
+	if (hp_ < 50) { state = State::Hard; }
 }
 
 void Enemy::Clear()
 {
 	missiles_.clear();
+	bomb_.clear();
+	beam_.clear();
 }

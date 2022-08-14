@@ -2,9 +2,11 @@
 #include "DebugText.h"
 #include "Input.h"
 #include "PlayerBullet.h"
+#include "Timer.h"
+#include <Sprite.h>
 #include <memory>
 #include <list>
-#include "Timer.h"
+
 
 class Player :public Collider
 {

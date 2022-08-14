@@ -15,10 +15,10 @@ GameScene::GameScene()
 	debugText_ = DebugText::GetInstance();
 	model_ = Model::Create();
 	LoadResources();
-	debugCamera_ = std::make_unique<DebugCamera>(1280, 720);
 	AxisIndicator::GetInstance()->SetVisible(1);
 	AxisIndicator::GetInstance()->SetTargetViewProjection(&debugCamera_->GetViewProjection());
 	PrimitiveDrawer::GetInstance()->SetViewProjection(&debugCamera_->GetViewProjection());
+	reticle_ = Sprite::Create(TextureManager::Load("Picture/Reticle.png"), { 640,360 }, { 1,1,1,1 }, { 0.5f,0.5f });
 
 	player_ = make_unique<Player>();
 	enemy_ = make_unique<Enemy>();
@@ -31,7 +31,7 @@ void GameScene::Initialize()
 	viewProjection_.Initialize();
 	ground_.Initialize(model_);
 	player_->Initialize(model_, &viewProjection_);
-	enemy_->Initialize(model_, &viewProjection_.eye, &viewProjection_,&player_->isMove);
+	enemy_->Initialize(model_, &viewProjection_.eye, &viewProjection_, &player_->isMove);
 }
 
 void GameScene::Update()
@@ -43,12 +43,13 @@ void GameScene::Update()
 		break;
 	case GameScene::HowToPlay:
 		if (input_->TriggerKey(DIK_SPACE)) { scene_ = GameScene::Play; }
+		player_->Update(enemy_->worldTransform_.translation_);
+		viewProjection_.UpdateMatrix();
 		break;
 	case GameScene::Play:
 		player_->Update(enemy_->worldTransform_.translation_);
 		enemy_->Update();
 		collisionManager_->CheckAllCollisions(player_.get(), enemy_.get());
-		//debugCamera_->Update();
 		viewProjection_.UpdateMatrix();
 
 		if (player_->hp_ <= 0)
@@ -89,18 +90,23 @@ void GameScene::Draw()
 	dxCommon_->ClearDepthBuffer();
 #pragma endregion
 #pragma region 3Dオブジェクト描画
+	// 3Dオブジェクト描画前処理
+	Model::PreDraw(commandList);
+
+	// ここに3Dオブジェクトの描画処理を追加できる
 	if (scene_ == Scene::Play)
 	{
-		// 3Dオブジェクト描画前処理
-		Model::PreDraw(commandList);
-
-		// ここに3Dオブジェクトの描画処理を追加できる
 		player_->Draw();
 		enemy_->Draw();
 		ground_.Draw(viewProjection_);
-		// 3Dオブジェクト描画後処理
-		Model::PostDraw();
 	}
+	if (scene_ == Scene::HowToPlay)
+	{
+		player_->Draw();
+		ground_.Draw(viewProjection_);
+	}
+	// 3Dオブジェクト描画後処理
+	Model::PostDraw();
 #pragma endregion
 #pragma region 前景スプライト描画
 	// 前景スプライト描画前処理
@@ -108,6 +114,7 @@ void GameScene::Draw()
 
 	// ここに前景スプライトの描画処理を追加できる
 	if (themeSprite_[scene_]) { themeSprite_[scene_]->Draw(); }
+	if (scene_ == Scene::Play) { reticle_->Draw(); }
 
 	// デバッグテキストの描画
 	debugText_->DrawAll(commandList);

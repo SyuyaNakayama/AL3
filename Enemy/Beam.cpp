@@ -10,7 +10,6 @@ void Beam::Initialize(Model* model)
 	worldTransform_.UpdateMatrix();
 	worldTransform_.TransferMatrix();
 	SetCollisionAttribute(CollisionAttribute::EnemyBeam);
-	SetCollisionMask(CollisionMask::EnemyMask);
 }
 
 void Beam::Update(float spd)

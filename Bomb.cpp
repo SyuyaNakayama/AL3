@@ -4,7 +4,6 @@
 
 void Bomb::Initialize(Model* model, const Vector3& position, const Vector3& velocity)
 {
-	assert(model);
 	model_ = model;
 	debugText_ = DebugText::GetInstance();
 	textureHandle_[0] = TextureManager::Load("picture/bomb.png");
@@ -14,8 +13,7 @@ void Bomb::Initialize(Model* model, const Vector3& position, const Vector3& velo
 	velocity_ = velocity;
 	isDead_ = 0;
 	isExplosion = 0;
-	SetCollisionAttribute(CollisionAttribute::Enemy);
-	SetCollisionMask(CollisionMask::EnemyMask);
+	SetCollisionAttribute(CollisionAttribute::EnemyBomb);
 }
 
 void Bomb::Update()
@@ -30,7 +28,7 @@ void Bomb::Update()
 	}
 	else if (isExplosion)
 	{
-		worldTransform_.scale_ += {0.1f, 0.1f, 0.1f};
+		worldTransform_.scale_ += {0.2f, 0.2f, 0.2f};
 	}
 
 	worldTransform_.UpdateMatrix();

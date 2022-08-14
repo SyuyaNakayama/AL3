@@ -13,7 +13,6 @@ void EnemyBullet::Initialize(Model* model, const Vector3& position, const Vector
 	worldTransform_.scale_.x = 2.0f;
 	velocity_ = velocity;
 	SetCollisionAttribute(CollisionAttribute::Enemy);
-	SetCollisionMask(CollisionMask::EnemyMask);
 }
 
 void EnemyBullet::Update()

@@ -9,7 +9,7 @@
 class CollisionManager
 {
 private:
-	void CheckCollisionPair(Collider* colliderA, Collider* colliderB);
+	bool CheckCollisionPair(Collider* colliderA, Collider* colliderB);
 public:
 	void CheckAllCollisions(Player* player, Enemy* enemy);
 };

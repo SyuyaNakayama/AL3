@@ -38,16 +38,16 @@ private:
 	DebugText* debugText_ = nullptr;
 	Model* model_ = nullptr;
 	Sprite* background_ = nullptr;
-	unique_ptr<DebugCamera> debugCamera_ = nullptr;
 	vector<Sprite*> themeSprite_;
 	vector<uint32_t> bgm_;
 	vector<uint32_t> se_;
 
 	// ゲームシーン用
-	Scene scene_ = Scene::Play;
+	Scene scene_ = Scene::Title;
 	ViewProjection viewProjection_;
 	unique_ptr<Player> player_ = nullptr;
 	unique_ptr<Enemy> enemy_ = nullptr;
 	unique_ptr<CollisionManager> collisionManager_ = nullptr;
 	Ground ground_;
+	Sprite* reticle_;
 };
