@@ -23,8 +23,11 @@ void Enemy::Initialize(Model* model, Vector3* playerTranslation, ViewProjection*
 	isPlayerMove_ = isPlayerMove;
 	SetCollisionAttribute(CollisionAttribute::Enemy);
 	hp_ = 200;
-	state = State::Normal;
-	phase_ = Phase::beam;
+	state = State::Hard;
+	phase_ = Phase::missile;
+	isActionEnd = 0;
+	isRippleExist = 0;
+	counter_ = 0;
 }
 
 void Enemy::BeamAction()
@@ -89,8 +92,6 @@ void Enemy::BeamAction()
 
 void Enemy::Missile()
 {
-	static int missileCount = 0;
-
 	switch (state)
 	{
 	case Enemy::Easy:
@@ -100,12 +101,12 @@ void Enemy::Missile()
 			std::unique_ptr<EnemyBullet> newMissile = std::make_unique<EnemyBullet>();
 			newMissile->Initialize(model_, worldTransform_.translation_, toPlayer_);
 			missiles_.push_back(std::move(newMissile));
-			missileCount++;
+			counter_++;
 		}
-		if (missileCount >= 8)
+		if (counter_ >= 8)
 		{
 			isActionEnd = 1;
-			missileCount = 0;
+			counter_ = 0;
 		}
 		break;
 	case Enemy::Normal:
@@ -122,12 +123,12 @@ void Enemy::Missile()
 				newMissile->Initialize(model_, worldTransform_.translation_, velocity);
 				missiles_.push_back(std::move(newMissile));
 			}
-			missileCount++;
+			counter_++;
 		}
-		if (missileCount >= 5)
+		if (counter_ >= 5)
 		{
 			isActionEnd = 1;
-			missileCount = 0;
+			counter_ = 0;
 		}
 		break;
 	case Enemy::Hard:
@@ -143,18 +144,18 @@ void Enemy::Missile()
 				Vector3 velocity{};
 
 				std::unique_ptr<EnemyBullet> newMissile = std::make_unique<EnemyBullet>();
-				velocity.x = sinf(DirectX::XMConvertToRadians(missileCount * 3));
-				velocity.z = cosf(DirectX::XMConvertToRadians(missileCount * 3));
+				velocity.x = sinf(DirectX::XMConvertToRadians(counter_ * 3));
+				velocity.z = cosf(DirectX::XMConvertToRadians(counter_ * 3));
 				velocity *= 2.0f;
 				newMissile->Initialize(model_, worldTransform_.translation_, velocity);
 				missiles_.push_back(std::move(newMissile));
-				missileCount++;
+				counter_++;
 			}
 		}
-		if (missileCount >= 200)
+		if (counter_ >= 200)
 		{
 			isActionEnd = 1;
-			missileCount = 0;
+			counter_ = 0;
 		}
 		break;
 	}
@@ -162,7 +163,6 @@ void Enemy::Missile()
 
 void Enemy::BombAction()
 {
-	static int bombCount = 0;
 	Vector3 bombSpd;
 
 	switch (state)
@@ -177,12 +177,12 @@ void Enemy::BombAction()
 			newBomb_->Initialize(model_, worldTransform_.translation_, bombSpd);
 			if (state == State::Normal) { newBomb_->SetScale({ 5.0f,5.0f,5.0f }); }
 			bomb_.push_back(std::move(newBomb_));
-			bombCount++;
+			counter_++;
 		}
-		if (bombCount >= 3)
+		if (counter_ >= 3)
 		{
 			isActionEnd = 1;
-			bombCount = 0;
+			counter_ = 0;
 		}
 		break;
 	case Enemy::Hard:
@@ -205,13 +205,13 @@ void Enemy::BombAction()
 				std::unique_ptr<Bomb> newBomb_ = std::make_unique<Bomb>();
 				newBomb_->Initialize(model_, worldTransform_.translation_, bombSpd);
 				bomb_.push_back(std::move(newBomb_));
-				bombCount++;
+				counter_++;
 			}
 		}
-		if (bombCount >= 30)
+		if (counter_ >= 30)
 		{
 			isActionEnd = 1;
-			bombCount = 0;
+			counter_ = 0;
 		}
 		break;
 	}
@@ -313,7 +313,7 @@ void Enemy::Update()
 	(this->*pPhaseFuncTable[phase_])();
 	if (isActionEnd)
 	{
-		//phase_ = Phase::beam;
+		phase_ = Phase::bomb;
 		isStart = 0;
 		isActionEnd = 0;
 	}
@@ -326,6 +326,10 @@ void Enemy::Update()
 
 	debugText_->SetPos(50, 70);
 	debugText_->Printf("EnemyHp:%d", hp_);
+	debugText_->SetPos(50, 90);
+	debugText_->Printf("counter_:%d", counter_);
+	debugText_->SetPos(50, 150);
+	debugText_->Printf("bombs:%d", bomb_.size());
 }
 
 void Enemy::Draw()

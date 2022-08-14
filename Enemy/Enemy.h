@@ -25,7 +25,7 @@ private:
 	ViewProjection* viewProjection_;
 	Timer missileInterval_ = 40;
 	Timer beamTimer_ = 300;
-	bool isActionEnd = 0;
+	bool isActionEnd;
 	const float JUMP_SPD_INIT = 2.0f;
 	float jumpSpd = JUMP_SPD_INIT;
 	State state = State::Normal;
@@ -33,6 +33,7 @@ private:
 	Timer idleTimer_ = 100;
 	Timer rippleLifeTimer = 50;
 	bool* isPlayerMove_;
+	int counter_;
 
 	void BeamAction(), Missile();
 	void BombAction();

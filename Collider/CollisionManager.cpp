@@ -1,4 +1,5 @@
 #include "CollisionManager.h"
+#include "Collider/CollisionConfig.h"
 
 using namespace std;
 
@@ -43,6 +44,10 @@ void CollisionManager::CheckAllCollisions(Player* player, Enemy* enemy)
 			if (CheckCollisionPair(colliderA, colliderB))
 			{
 				colliderA->OnCollision();
+				if (colliderB->GetCollisionAttribute()== CollisionAttribute::EnemyMissile)
+				{
+					colliderA->OnCollision(); colliderA->OnCollision();
+				}
 				if (!(colliderA == player && colliderB == enemy)) { colliderB->OnCollision(); }
 			}
 		}

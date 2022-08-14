@@ -16,8 +16,7 @@ GameScene::GameScene()
 	model_ = Model::Create();
 	LoadResources();
 	AxisIndicator::GetInstance()->SetVisible(1);
-	AxisIndicator::GetInstance()->SetTargetViewProjection(&debugCamera_->GetViewProjection());
-	PrimitiveDrawer::GetInstance()->SetViewProjection(&debugCamera_->GetViewProjection());
+	AxisIndicator::GetInstance()->SetTargetViewProjection(&viewProjection_);
 	reticle_ = Sprite::Create(TextureManager::Load("Picture/Reticle.png"), { 640,360 }, { 1,1,1,1 }, { 0.5f,0.5f });
 
 	player_ = make_unique<Player>();
@@ -27,7 +26,8 @@ GameScene::GameScene()
 
 void GameScene::Initialize()
 {
-	viewProjection_.eye.z = -20;
+	viewProjection_.eye = { 0,0,-20 };
+	viewProjection_.target = { 0,0,-19 };
 	viewProjection_.Initialize();
 	ground_.Initialize(model_);
 	player_->Initialize(model_, &viewProjection_);
@@ -39,15 +39,23 @@ void GameScene::Update()
 	switch (scene_)
 	{
 	case GameScene::Title:
-		if (input_->TriggerKey(DIK_SPACE)) { scene_ = GameScene::HowToPlay; }
+		if (input_->TriggerKey(DIK_SPACE)) 
+		{
+			scene_ = GameScene::HowToPlay; 
+			Initialize();
+		}
 		break;
 	case GameScene::HowToPlay:
-		if (input_->TriggerKey(DIK_SPACE)) { scene_ = GameScene::Play; }
-		player_->Update(enemy_->worldTransform_.translation_);
+		if (input_->TriggerKey(DIK_SPACE))
+		{
+			scene_ = GameScene::Play;
+			Initialize();
+		}
+		player_->Update();
 		viewProjection_.UpdateMatrix();
 		break;
 	case GameScene::Play:
-		player_->Update(enemy_->worldTransform_.translation_);
+		player_->Update();
 		enemy_->Update();
 		collisionManager_->CheckAllCollisions(player_.get(), enemy_.get());
 		viewProjection_.UpdateMatrix();
@@ -59,6 +67,7 @@ void GameScene::Update()
 			enemy_->Clear();
 		}
 		if (enemy_->hp_ <= 0) { scene_ = Scene::GameClear; }
+
 		break;
 	case GameScene::GameClear:
 		if (input_->TriggerKey(DIK_ESCAPE)) { scene_ = GameScene::Title; }
@@ -72,6 +81,10 @@ void GameScene::Update()
 		if (input_->TriggerKey(DIK_ESCAPE)) { scene_ = GameScene::Title; }
 		break;
 	}
+	debugText_->SetPos(50, 110);
+	debugText_->PrintVector3("viewProjection_.eye", viewProjection_.eye);
+	debugText_->SetPos(50, 130);
+	debugText_->PrintVector3("viewProjection_.target", viewProjection_.target);
 }
 
 void GameScene::Draw()
@@ -94,16 +107,14 @@ void GameScene::Draw()
 	Model::PreDraw(commandList);
 
 	// ここに3Dオブジェクトの描画処理を追加できる
-	if (scene_ == Scene::Play)
+	switch (scene_)
 	{
-		player_->Draw();
+	case GameScene::Play:
 		enemy_->Draw();
-		ground_.Draw(viewProjection_);
-	}
-	if (scene_ == Scene::HowToPlay)
-	{
+	case GameScene::HowToPlay:
 		player_->Draw();
 		ground_.Draw(viewProjection_);
+		break;
 	}
 	// 3Dオブジェクト描画後処理
 	Model::PostDraw();
@@ -114,7 +125,7 @@ void GameScene::Draw()
 
 	// ここに前景スプライトの描画処理を追加できる
 	if (themeSprite_[scene_]) { themeSprite_[scene_]->Draw(); }
-	if (scene_ == Scene::Play) { reticle_->Draw(); }
+	if (scene_ == Scene::Play || scene_ == Scene::HowToPlay) { reticle_->Draw(); }
 
 	// デバッグテキストの描画
 	debugText_->DrawAll(commandList);

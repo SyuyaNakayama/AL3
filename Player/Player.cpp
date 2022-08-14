@@ -14,6 +14,8 @@ void Player::Initialize(Model* model, ViewProjection* viewProjection)
 	SetCollisionAttribute(CollisionAttribute::Player);
 	SetCollisionMask(CollisionMask::Player);
 	hp_ = 200;
+	angle_ = {};
+	isMove = 1;
 }
 
 void Player::Move()
@@ -45,8 +47,14 @@ void Player::Move()
 
 void Player::Rotate()
 {
-	angle_.y += DirectX::XMConvertToRadians(input_->GetMouseMove().lX / 3);
-	angle_.x -= DirectX::XMConvertToRadians(input_->GetMouseMove().lY / 3);
+	static int sensitivity = 6;
+	for (size_t i = 0; i < 9; i++)
+	{
+		if (input_->TriggerKey(DIK_1 + i)) { sensitivity = i; }
+	}
+	int rotateSpd = (9 - sensitivity) * 2;
+	angle_.y += DirectX::XMConvertToRadians(input_->GetMouseMove().lX / rotateSpd);
+	angle_.x -= DirectX::XMConvertToRadians(input_->GetMouseMove().lY / rotateSpd);
 	Clamp(angle_.x, 1, -0.5f);
 	viewProjection_->target =
 	{
@@ -54,6 +62,8 @@ void Player::Rotate()
 		viewProjection_->eye.y + angle_.x,
 		viewProjection_->eye.z + cosf(angle_.y)
 	};
+	debugText_->SetPos(0, 0);
+	debugText_->Printf("Sensitivity = %d", sensitivity + 1);
 }
 
 void Player::Jump()
@@ -92,7 +102,7 @@ void Player::Attack()
 	bullets_.push_back(std::move(newBullet));
 }
 
-void Player::Update(Vector3 enemyTranslation)
+void Player::Update()
 {
 	bullets_.remove_if([](std::unique_ptr<PlayerBullet>& bullet) { return bullet->isDead_; });
 

@@ -28,7 +28,7 @@ public:
 	bool isMove = 1;
 
 	void Initialize(Model* model, ViewProjection* viewProjection);
-	void Update(Vector3 enemyTranslation);
+	void Update();
 	void Draw();
 	void OnCollision() { hp_--; };
 	const Vector3 GetWorldPosition() { return viewProjection_->eye; };

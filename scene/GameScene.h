@@ -43,7 +43,7 @@ private:
 	vector<uint32_t> se_;
 
 	// ゲームシーン用
-	Scene scene_ = Scene::Title;
+	Scene scene_ = Scene::Play;
 	ViewProjection viewProjection_;
 	unique_ptr<Player> player_ = nullptr;
 	unique_ptr<Enemy> enemy_ = nullptr;
