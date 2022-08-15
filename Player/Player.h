@@ -17,6 +17,8 @@ private:
 	ViewProjection* viewProjection_;
 	Timer bulletInterval_;
 	Vector2 angle_;
+	Sprite* damageEffect_;
+	int preHp_ = hp_;
 
 	void Move();
 	void Rotate();
@@ -30,6 +32,7 @@ public:
 	void Initialize(Model* model, ViewProjection* viewProjection);
 	void Update();
 	void Draw();
+	void DamageEffectDraw();
 	void OnCollision() { hp_--; };
 	const Vector3 GetWorldPosition() { return viewProjection_->eye; };
 	const Vector3 GetRadius() { return { 1.25f,2.5f,1.25f }; }

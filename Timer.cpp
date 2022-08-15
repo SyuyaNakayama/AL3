@@ -16,7 +16,7 @@ bool Timer::CountDown()
 {
 	if (--timer_ <= 0) 
 	{ 
-		Reset();
+		timer_ = timeMem_;;
 		return true; 
 	}
 	return false;

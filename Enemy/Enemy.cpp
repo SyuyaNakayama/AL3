@@ -23,11 +23,16 @@ void Enemy::Initialize(Model* model, Vector3* playerTranslation, ViewProjection*
 	isPlayerMove_ = isPlayerMove;
 	SetCollisionAttribute(CollisionAttribute::Enemy);
 	hp_ = 200;
-	state = State::Hard;
-	phase_ = Phase::missile;
-	isActionEnd = 0;
+	isActionEnd = 1;
 	isRippleExist = 0;
 	counter_ = 0;
+	missileTimer_ = 40;
+	beamTimer_ = 300;
+	bombTimer_ = 75;
+	idleTimer_ = 100;
+	rippleLifeTimer = 50;
+	bindTimer = 60;
+	state = State::Easy;
 }
 
 void Enemy::BeamAction()
@@ -95,7 +100,7 @@ void Enemy::Missile()
 	switch (state)
 	{
 	case Enemy::Easy:
-		if (missileInterval_.CountDown())
+		if (missileTimer_.CountDown())
 		{
 			toPlayer_ *= 2.0f;
 			std::unique_ptr<EnemyBullet> newMissile = std::make_unique<EnemyBullet>();
@@ -110,7 +115,7 @@ void Enemy::Missile()
 		}
 		break;
 	case Enemy::Normal:
-		if (missileInterval_.CountDown())
+		if (missileTimer_.CountDown())
 		{
 			Vector3 velocity{};
 			int offset = rand() % 360;
@@ -134,12 +139,12 @@ void Enemy::Missile()
 	case Enemy::Hard:
 		if (!isStart)
 		{
-			missileInterval_ = 2;
+			missileTimer_ = 2;
 			isStart = 1;
 		}
 		if (isStart)
 		{
-			if (missileInterval_.CountDown())
+			if (missileTimer_.CountDown())
 			{
 				Vector3 velocity{};
 
@@ -300,36 +305,31 @@ void Enemy::Update()
 	bomb_.remove_if([](std::unique_ptr<Bomb>& bomb) { return (bomb->isDead_ && !bomb->isExplosion); });
 	if (!*isPlayerMove_)
 	{
-		static Timer bindTimer = 60;
 		if (bindTimer.CountDown()) { *isPlayerMove_ = 1; }
 	}
 
-	//StateChange();
+	StateChange();
 
 	toPlayer_ = *playerTranslation_ - worldTransform_.translation_;
 	toPlayer_.y = 0;
 	toPlayer_.normalize();
 
-	(this->*pPhaseFuncTable[phase_])();
 	if (isActionEnd)
 	{
-		phase_ = Phase::bomb;
-		isStart = 0;
-		isActionEnd = 0;
+		if (idleTimer_.CountDown())
+		{
+			phase_ = rand() % 5;
+			isStart = 0;
+			isActionEnd = 0;
+		}
 	}
+	else { (this->*pPhaseFuncTable[phase_])(); }
 
 	for (std::unique_ptr<EnemyBullet>& bullet : missiles_) { bullet->Update(); }
 	for (std::unique_ptr<Bomb>& bomb : bomb_) { bomb->Update(); }
 
 	worldTransform_.UpdateMatrix();
 	worldTransform_.TransferMatrix();
-
-	debugText_->SetPos(50, 70);
-	debugText_->Printf("EnemyHp:%d", hp_);
-	debugText_->SetPos(50, 90);
-	debugText_->Printf("counter_:%d", counter_);
-	debugText_->SetPos(50, 150);
-	debugText_->Printf("bombs:%d", bomb_.size());
 }
 
 void Enemy::Draw()

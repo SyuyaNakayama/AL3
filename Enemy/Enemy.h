@@ -23,17 +23,15 @@ private:
 	Vector3* playerTranslation_;
 	Vector3 tackleSpd{};
 	ViewProjection* viewProjection_;
-	Timer missileInterval_ = 40;
-	Timer beamTimer_ = 300;
+	Timer missileTimer_, rippleLifeTimer;
+	Timer beamTimer_, bombTimer_, idleTimer_;
+	Timer bindTimer;
 	bool isActionEnd;
+	bool* isPlayerMove_;
 	const float JUMP_SPD_INIT = 2.0f;
 	float jumpSpd = JUMP_SPD_INIT;
-	State state = State::Normal;
-	Timer bombTimer_ = 75;
-	Timer idleTimer_ = 100;
-	Timer rippleLifeTimer = 50;
-	bool* isPlayerMove_;
 	int counter_;
+	State state;
 
 	void BeamAction(), Missile();
 	void BombAction();
@@ -50,7 +48,7 @@ public:
 	bool isRippleExist = 0;
 	bool isStart = 0;
 
-	void Initialize(Model* model, Vector3* playerTranslation, ViewProjection* viewProjection,bool* isPlayerMove);
+	void Initialize(Model* model, Vector3* playerTranslation, ViewProjection* viewProjection, bool* isPlayerMove);
 	void Update(), Draw();
 	void Clear();
 	void OnCollision() { hp_--; }

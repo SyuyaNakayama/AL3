@@ -96,7 +96,7 @@ void GameScene::Draw()
 	Sprite::PreDraw(commandList);
 
 	// ここに背景スプライトの描画処理を追加できる
-	//background_->Draw();
+	background_->Draw();
 	// スプライト描画後処理
 	Sprite::PostDraw();
 	// 深度バッファクリア
@@ -126,7 +126,7 @@ void GameScene::Draw()
 	// ここに前景スプライトの描画処理を追加できる
 	if (themeSprite_[scene_]) { themeSprite_[scene_]->Draw(); }
 	if (scene_ == Scene::Play || scene_ == Scene::HowToPlay) { reticle_->Draw(); }
-
+	player_->DamageEffectDraw();
 	// デバッグテキストの描画
 	debugText_->DrawAll(commandList);
 	// スプライト描画後処理
@@ -140,15 +140,18 @@ void GameScene::LoadResources()
 	background_ = Sprite::Create(TextureManager::Load("picture/BackGround.png"), {});
 	background_->SetSize({ 1280.0f,720.0f });
 	themeSprite_.push_back(Sprite::Create(TextureManager::Load("picture/Title.png"), {}));
-	themeSprite_.push_back(nullptr);
+	themeSprite_.push_back(Sprite::Create(TextureManager::Load("picture/HowToPlay.png"), {}));
 	themeSprite_.push_back(nullptr);
 	themeSprite_.push_back(Sprite::Create(TextureManager::Load("picture/GameClear.png"), {}));
 	themeSprite_.push_back(Sprite::Create(TextureManager::Load("picture/GameOver.png"), {}));
 	for (size_t i = 0; i < themeSprite_.size(); i++)
 	{
 		if (!themeSprite_[i])continue;
-		themeSprite_[i]->SetSize({ 1280.0f,720.0f });
+		if (i != Scene::HowToPlay) { themeSprite_[i]->SetSize({ 1280.0f,720.0f }); }
 	}
+
+	barIcons_->push_back(Sprite::Create(TextureManager::Load("picture/player.png"), { 20,20 }));
+	barIcons_->push_back(Sprite::Create(TextureManager::Load("picture/enemy.png"), { 670,20 }));
 #pragma endregion
 #pragma region オーディオ読み込み
 	//HANDLE hFind;

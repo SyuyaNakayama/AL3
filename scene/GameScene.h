@@ -39,11 +39,12 @@ private:
 	Model* model_ = nullptr;
 	Sprite* background_ = nullptr;
 	vector<Sprite*> themeSprite_;
+	vector<Sprite*> barIcons_[2];
 	vector<uint32_t> bgm_;
 	vector<uint32_t> se_;
 
 	// ゲームシーン用
-	Scene scene_ = Scene::Play;
+	Scene scene_ = Scene::HowToPlay;
 	ViewProjection viewProjection_;
 	unique_ptr<Player> player_ = nullptr;
 	unique_ptr<Enemy> enemy_ = nullptr;

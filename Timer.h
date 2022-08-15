@@ -8,5 +8,4 @@ public:
 	Timer();
 	Timer(int timer);
 	bool CountDown();
-	void Reset() { timer_ = timeMem_; };
 };

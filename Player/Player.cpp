@@ -14,8 +14,11 @@ void Player::Initialize(Model* model, ViewProjection* viewProjection)
 	SetCollisionAttribute(CollisionAttribute::Player);
 	SetCollisionMask(CollisionMask::Player);
 	hp_ = 200;
+	preHp_ = hp_;
 	angle_ = {};
 	isMove = 1;
+	damageEffect_ = Sprite::Create(TextureManager::Load("Picture/Beam.png"), {});
+	damageEffect_->SetSize({ 1280,720 });
 }
 
 void Player::Move()
@@ -62,8 +65,6 @@ void Player::Rotate()
 		viewProjection_->eye.y + angle_.x,
 		viewProjection_->eye.z + cosf(angle_.y)
 	};
-	debugText_->SetPos(0, 0);
-	debugText_->Printf("Sensitivity = %d", sensitivity + 1);
 }
 
 void Player::Jump()
@@ -71,7 +72,7 @@ void Player::Jump()
 	static bool isJump = 0;
 	if (!isJump)
 	{
-		if (input_->IsTriggerMouse(0)) { isJump = 1; }
+		if (input_->TriggerKey(DIK_Q)) { isJump = 1; }
 	}
 	if (isJump)
 	{
@@ -115,12 +116,15 @@ void Player::Update()
 	}
 
 	for (std::unique_ptr<PlayerBullet>& bullet : bullets_) { bullet->Update(); }
-
-	debugText_->SetPos(50, 50);
-	debugText_->Printf("PlayerHp:%d", hp_);
 }
 
 void Player::Draw()
 {
 	for (std::unique_ptr<PlayerBullet>& bullet : bullets_) { bullet->Draw(*viewProjection_); }
+}
+
+void Player::DamageEffectDraw()
+{
+	if (preHp_ != hp_) { damageEffect_->Draw(); }
+	preHp_ = hp_;
 }
