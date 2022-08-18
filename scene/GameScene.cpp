@@ -7,6 +7,13 @@
 
 using namespace DirectX;
 
+enum SE
+{
+	PlayerShot,PlayerJump,PlayerDamage,
+	EnemyDamage,Press,Missile,LaserIdle,
+	LaserShot,Tackle,Explosion
+};
+
 GameScene::GameScene()
 {
 	dxCommon_ = DirectXCommon::GetInstance();
@@ -15,8 +22,6 @@ GameScene::GameScene()
 	debugText_ = DebugText::GetInstance();
 	model_ = Model::Create();
 	LoadResources();
-	AxisIndicator::GetInstance()->SetVisible(1);
-	AxisIndicator::GetInstance()->SetTargetViewProjection(&viewProjection_);
 	reticle_ = Sprite::Create(TextureManager::Load("Picture/Reticle.png"), { 640,360 }, { 1,1,1,1 }, { 0.5f,0.5f });
 
 	player_ = make_unique<Player>();
@@ -39,9 +44,9 @@ void GameScene::Update()
 	switch (scene_)
 	{
 	case GameScene::Title:
-		if (input_->TriggerKey(DIK_SPACE)) 
+		if (input_->TriggerKey(DIK_SPACE))
 		{
-			scene_ = GameScene::HowToPlay; 
+			scene_ = GameScene::HowToPlay;
 			Initialize();
 		}
 		break;
@@ -68,6 +73,8 @@ void GameScene::Update()
 		}
 		if (enemy_->hp_ <= 0) { scene_ = Scene::GameClear; }
 
+		hpGauge_[2]->SetSize({ player_->hp_ * 2.5f,64 });
+		hpGauge_[3]->SetSize({ enemy_->hp_ * 2.5f,64 });
 		break;
 	case GameScene::GameClear:
 		if (input_->TriggerKey(DIK_ESCAPE)) { scene_ = GameScene::Title; }
@@ -81,10 +88,6 @@ void GameScene::Update()
 		if (input_->TriggerKey(DIK_ESCAPE)) { scene_ = GameScene::Title; }
 		break;
 	}
-	debugText_->SetPos(50, 110);
-	debugText_->PrintVector3("viewProjection_.eye", viewProjection_.eye);
-	debugText_->SetPos(50, 130);
-	debugText_->PrintVector3("viewProjection_.target", viewProjection_.target);
 }
 
 void GameScene::Draw()
@@ -127,6 +130,7 @@ void GameScene::Draw()
 	if (themeSprite_[scene_]) { themeSprite_[scene_]->Draw(); }
 	if (scene_ == Scene::Play || scene_ == Scene::HowToPlay) { reticle_->Draw(); }
 	player_->DamageEffectDraw();
+	if (scene_ == Scene::Play) { for (size_t i = 0; i < hpGauge_.size(); i++) { hpGauge_[i]->Draw(); } }
 	// デバッグテキストの描画
 	debugText_->DrawAll(commandList);
 	// スプライト描画後処理
@@ -150,34 +154,40 @@ void GameScene::LoadResources()
 		if (i != Scene::HowToPlay) { themeSprite_[i]->SetSize({ 1280.0f,720.0f }); }
 	}
 
-	barIcons_->push_back(Sprite::Create(TextureManager::Load("picture/player.png"), { 20,20 }));
-	barIcons_->push_back(Sprite::Create(TextureManager::Load("picture/enemy.png"), { 670,20 }));
+	float leftSpace = 44;
+
+	hpGauge_.push_back(Sprite::Create(TextureManager::Load("picture/player.png"), { leftSpace,20 }));
+	hpGauge_[0]->SetSize({ 32,64 });
+	hpGauge_.push_back(Sprite::Create(TextureManager::Load("picture/enemy.png"), { 640 + leftSpace,20 }));
+	hpGauge_[1]->SetSize({ 32,64 });
+	hpGauge_.push_back(Sprite::Create(TextureManager::Load("picture/HpGauge.png"), { leftSpace + 42,20 }, { 0,0,0.95f,1 }));
+	hpGauge_.push_back(Sprite::Create(TextureManager::Load("picture/HpGauge.png"), { 640 + leftSpace + 42,20 }, { 0.95f,0,0,1 }));
 #pragma endregion
 #pragma region オーディオ読み込み
-	//HANDLE hFind;
-	//WIN32_FIND_DATAA findData;
-	//string fileName;
-	//string pass;
-	//const char STR[2][2][22]
-	//{
-	//	{"Sound/BGM/","Resources/Sound/BGM/*"},
-	//	{"Sound/SE/","Resources/Sound/SE/*"},
-	//};
-	//
-	//for (size_t i = 0; i < 2; i++)
-	//{
-	//	fileName = STR[i][0];
-	//	pass = STR[i][1];
-	//	hFind = FindFirstFileA(pass.c_str(), &findData);
-	//	if (hFind == INVALID_HANDLE_VALUE) { return; }
-	//	for (; FindNextFileA(hFind, &findData);)
-	//	{
-	//		if (strstr(findData.cFileName, ".mp3") == nullptr) { continue; }
-	//		if (i == 0) { bgm_.push_back(audio_->LoadWave(fileName + findData.cFileName)); }
-	//		else{ se_.push_back(audio_->LoadWave(fileName + findData.cFileName)); }
-	//	}
-	//}
-	//
-	//FindClose(hFind);
+	HANDLE hFind;
+	WIN32_FIND_DATAA findData;
+	string fileName;
+	string pass;
+	const char STR[2][2][22]
+	{
+		{"Sound/BGM/","Resources/Sound/BGM/*"},
+		{"Sound/SE/","Resources/Sound/SE/*"},
+	};
+	
+	for (size_t i = 1; i < 2; i++)
+	{
+		fileName = STR[i][0];
+		pass = STR[i][1];
+		hFind = FindFirstFileA(pass.c_str(), &findData);
+		if (hFind == INVALID_HANDLE_VALUE) { return; }
+		for (; FindNextFileA(hFind, &findData);)
+		{
+			if (strstr(findData.cFileName, ".mp3") == nullptr) { continue; }
+			if (i == 0) { bgm_.push_back(audio_->LoadWave(fileName + findData.cFileName)); }
+			else{ se_.push_back(audio_->LoadWave(fileName + findData.cFileName)); }
+		}
+	}
+	
+	FindClose(hFind);
 #pragma endregion
 }

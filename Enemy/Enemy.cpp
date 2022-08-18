@@ -11,7 +11,8 @@ void Enemy::Initialize(Model* model, Vector3* playerTranslation, ViewProjection*
 {
 	model_ = model;
 	pressRippleModel_ = Model::CreateFromOBJ("Ripple", true);
-	textureHandle_ = TextureManager::Load("picture/enemy.png");
+	textureHandle_[0] = TextureManager::Load("picture/enemy.png");
+	textureHandle_[1] = TextureManager::Load("picture/beam.png");
 	debugText_ = DebugText::GetInstance();
 	worldTransform_.translation_ = { 0, 3.0f, 0 };
 	worldTransform_.scale_ = { 2.5f,5.0f,2.5f };
@@ -33,6 +34,7 @@ void Enemy::Initialize(Model* model, Vector3* playerTranslation, ViewProjection*
 	rippleLifeTimer = 50;
 	bindTimer = 60;
 	state = State::Easy;
+	preHp_ = hp_;
 }
 
 void Enemy::BeamAction()
@@ -334,11 +336,12 @@ void Enemy::Update()
 
 void Enemy::Draw()
 {
-	model_->Draw(worldTransform_, *viewProjection_, textureHandle_);
+	model_->Draw(worldTransform_, *viewProjection_, textureHandle_[preHp_ != hp_]);
 	for (std::unique_ptr<EnemyBullet>& bullet : missiles_) { bullet->Draw(*viewProjection_); }
 	for (std::unique_ptr<Bomb>& bomb : bomb_) { bomb->Draw(*viewProjection_); }
 	if (phase_ == Phase::beam) { for (size_t i = 0; i < beam_.size(); i++) { beam_[i].Draw(*viewProjection_, isStart); } }
 	if (isRippleExist) { pressRippleModel_->Draw(rippleTransform_, *viewProjection_); }
+	preHp_ = hp_;
 }
 
 void (Enemy::* Enemy::pPhaseFuncTable[])() =

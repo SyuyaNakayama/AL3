@@ -7,7 +7,6 @@
 #include <memory>
 #include <list>
 
-
 class Player :public Collider
 {
 private:

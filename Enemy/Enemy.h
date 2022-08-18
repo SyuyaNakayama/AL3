@@ -16,7 +16,7 @@ private:
 
 	Model* model_;
 	Model* pressRippleModel_;
-	uint32_t textureHandle_;
+	uint32_t textureHandle_[2];
 	DebugText* debugText_;
 	size_t phase_ = Phase::bomb;
 	Vector3 velocity_, toPlayer_;
@@ -32,6 +32,7 @@ private:
 	float jumpSpd = JUMP_SPD_INIT;
 	int counter_;
 	State state;
+	int preHp_;
 
 	void BeamAction(), Missile();
 	void BombAction();

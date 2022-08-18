@@ -39,7 +39,7 @@ private:
 	Model* model_ = nullptr;
 	Sprite* background_ = nullptr;
 	vector<Sprite*> themeSprite_;
-	vector<Sprite*> barIcons_[2];
+	vector<Sprite*> hpGauge_;
 	vector<uint32_t> bgm_;
 	vector<uint32_t> se_;
 
