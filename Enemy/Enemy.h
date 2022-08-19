@@ -7,6 +7,7 @@
 #include "Timer.h"
 #include "Bomb.h"
 #include "Beam.h"
+#include "Audio.h"
 
 class Enemy :public Collider
 {
@@ -31,8 +32,10 @@ private:
 	const float JUMP_SPD_INIT = 2.0f;
 	float jumpSpd = JUMP_SPD_INIT;
 	int counter_;
-	State state;
 	int preHp_;
+	State state;
+	Audio* audio_;
+	std::vector<uint32_t> seHandle_;
 
 	void BeamAction(), Missile();
 	void BombAction();
@@ -52,7 +55,7 @@ public:
 	void Initialize(Model* model, Vector3* playerTranslation, ViewProjection* viewProjection, bool* isPlayerMove);
 	void Update(), Draw();
 	void Clear();
-	void OnCollision() { hp_--; }
+	void OnCollision() { hp_--; audio_->PlayWave(seHandle_[0], false, 0.5f); }
 	const Vector3 GetRadius() { return worldTransform_.scale_; }
 	const Vector3 GetWorldPosition() { return worldTransform_.translation_; }
 };

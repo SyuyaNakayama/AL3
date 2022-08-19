@@ -35,11 +35,19 @@ void Enemy::Initialize(Model* model, Vector3* playerTranslation, ViewProjection*
 	bindTimer = 60;
 	state = State::Easy;
 	preHp_ = hp_;
+	audio_ = Audio::GetInstance();
+	seHandle_.push_back(audio_->LoadWave("sound/SE/EnemyDamage.mp3"));
+	seHandle_.push_back(audio_->LoadWave("sound/SE/Missile.mp3"));
+	seHandle_.push_back(audio_->LoadWave("sound/SE/Press.mp3"));
+	seHandle_.push_back(audio_->LoadWave("sound/SE/Tackle.mp3"));
+	seHandle_.push_back(audio_->LoadWave("sound/SE/LaserIdle.mp3"));
+	seHandle_.push_back(audio_->LoadWave("sound/SE/LaserShot.mp3"));
 }
 
 void Enemy::BeamAction()
 {
 	static bool isBeamObjectCreate = 0;
+	static uint32_t stopHandle = 0;
 	if (state == State::Hard && isStart)
 	{
 		beam_[0].Update(-0.5f);
@@ -81,18 +89,24 @@ void Enemy::BeamAction()
 			}
 			break;
 		}
-
 		for (size_t i = 0; i < beam_.size(); i++) { beam_[i].Initialize(model_); }
 		isBeamObjectCreate = 1;
+		stopHandle = audio_->PlayWave(seHandle_[4], true);
 	}
 	if (beamTimer_.CountDown())
 	{
-		if (!isStart) { isStart = 1; }
+		if (!isStart)
+		{
+			isStart = 1;
+			audio_->StopWave(stopHandle);
+			stopHandle = audio_->PlayWave(seHandle_[4], true);
+		}
 		else
 		{
 			isActionEnd = 1;
 			isBeamObjectCreate = 0;
 			beam_.clear();
+			audio_->StopWave(stopHandle);
 		}
 	}
 }
@@ -109,6 +123,7 @@ void Enemy::Missile()
 			newMissile->Initialize(model_, worldTransform_.translation_, toPlayer_);
 			missiles_.push_back(std::move(newMissile));
 			counter_++;
+			audio_->PlayWave(seHandle_[1]);
 		}
 		if (counter_ >= 8)
 		{
@@ -131,6 +146,7 @@ void Enemy::Missile()
 				missiles_.push_back(std::move(newMissile));
 			}
 			counter_++;
+			audio_->PlayWave(seHandle_[1]);
 		}
 		if (counter_ >= 5)
 		{
@@ -157,6 +173,7 @@ void Enemy::Missile()
 				newMissile->Initialize(model_, worldTransform_.translation_, velocity);
 				missiles_.push_back(std::move(newMissile));
 				counter_++;
+				audio_->PlayWave(seHandle_[1]);
 			}
 		}
 		if (counter_ >= 200)
@@ -244,6 +261,7 @@ void Enemy::Press()
 		rippleTransform_.translation_ = worldTransform_.translation_;
 		rippleTransform_.translation_.y = -2.0f;
 		if (playerTranslation_->y == 0 && state != State::Easy) { *isPlayerMove_ = 0; }
+		audio_->PlayWave(seHandle_[2]);
 	}
 	if (!isRippleExist)
 	{
@@ -287,6 +305,7 @@ void Enemy::Tackle()
 			}
 			tackleSpd = toPlayer_ * tSpd;
 			isStart = 1;
+			audio_->PlayWave(seHandle_[3]);
 		}
 	}
 	if (isStart)

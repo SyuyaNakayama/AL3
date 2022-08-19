@@ -8,17 +8,18 @@ void Player::Initialize(Model* model, ViewProjection* viewProjection)
 {
 	model_ = model;
 	input_ = Input::GetInstance();
+	audio_ = Audio::GetInstance();
 	debugText_ = DebugText::GetInstance();
 	viewProjection_ = viewProjection;
-	bulletInterval_ = 20;
+	bulletInterval_ = 15;
 	SetCollisionAttribute(CollisionAttribute::Player);
 	SetCollisionMask(CollisionMask::Player);
-	hp_ = 200;
-	preHp_ = hp_;
-	angle_ = {};
-	isMove = 1;
+	hp_ = 200; preHp_ = hp_; angle_ = {}; isMove = 1;
 	damageEffect_ = Sprite::Create(TextureManager::Load("Picture/Beam.png"), {});
 	damageEffect_->SetSize({ 1280,720 });
+	seHandle_.push_back(audio_->LoadWave("sound/SE/PlayerShot.mp3"));
+	seHandle_.push_back(audio_->LoadWave("sound/SE/PlayerJump.mp3"));
+	seHandle_.push_back(audio_->LoadWave("sound/SE/PlayerDamage.mp3"));
 }
 
 void Player::Move()
@@ -72,7 +73,11 @@ void Player::Jump()
 	static bool isJump = 0;
 	if (!isJump)
 	{
-		if (input_->TriggerKey(DIK_Q)) { isJump = 1; }
+		if (input_->TriggerKey(DIK_Q))
+		{
+			isJump = 1;
+			audio_->PlayWave(seHandle_[1]);
+		}
 	}
 	if (isJump)
 	{
@@ -98,9 +103,10 @@ void Player::Attack()
 	Vector3 velocity = (viewProjection_->target - viewProjection_->eye) * BULLET_SPD;
 
 	std::unique_ptr<PlayerBullet> newBullet = std::make_unique<PlayerBullet>();
-	newBullet->Initialize(model_, viewProjection_->eye, velocity);
+	newBullet->Initialize(model_, viewProjection_->target, velocity);
 
 	bullets_.push_back(std::move(newBullet));
+	audio_->PlayWave(seHandle_[0],false,0.25f);
 }
 
 void Player::Update()

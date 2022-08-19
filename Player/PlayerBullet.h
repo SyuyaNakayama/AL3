@@ -11,8 +11,6 @@ private:
 	Model* model_;
 	uint32_t textureHandle_;
 	Vector3 velocity_;
-	static const int LIFE_TIME = 60 * 5;
-	int deathTimer_ = LIFE_TIME;
 public:
 	bool isDead_ = 0;
 

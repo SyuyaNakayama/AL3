@@ -14,11 +14,17 @@ void Bomb::Initialize(Model* model, const Vector3& position, const Vector3& velo
 	isDead_ = 0;
 	isExplosion = 0;
 	SetCollisionAttribute(CollisionAttribute::EnemyBomb);
+	audio_ = Audio::GetInstance();
+	seHandle_ = audio_->LoadWave("sound/SE/Explosion.mp3");
 }
 
 void Bomb::Update()
 {
-	if (worldTransform_.translation_.y <= 0) { isDead_ = 1, isExplosion = 1; }
+	if (worldTransform_.translation_.y <= 0) 
+	{ 
+		isDead_ = 1, isExplosion = 1; 
+		audio_->PlayWave(seHandle_);
+	}
 	if (isExplosion) { if (lifeTimer_.CountDown()) { isExplosion = 0; } }
 
 	if (!isDead_)

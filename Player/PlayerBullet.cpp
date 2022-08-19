@@ -5,10 +5,10 @@
 
 void PlayerBullet::Initialize(Model* model, const Vector3& position, const Vector3& velocity)
 {
-	assert(model);
 	model_ = model;
 	textureHandle_ = TextureManager::Load("picture/playerBullet.png");
 	worldTransform_.Initialize();
+	worldTransform_.scale_ = { 0.5f,0.5f,0.5f };
 	worldTransform_.translation_ = position;
 	velocity_ = velocity;
 	SetCollisionAttribute(CollisionAttribute::Player);
