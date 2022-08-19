@@ -35,7 +35,7 @@ public:
 	void Update();
 	void Draw();
 	void DamageEffectDraw();
-	void OnCollision() { hp_--; audio_->PlayWave(seHandle_[2], false, 0.5f); };
+	void OnCollision() { hp_--; /*audio_->PlayWave(seHandle_[2], false, 0.5f);*/ };
 	const Vector3 GetWorldPosition() { return viewProjection_->eye; };
 	const Vector3 GetRadius() { return { 1.25f,2.5f,1.25f }; }
 	void Clear() { bullets_.clear(); }

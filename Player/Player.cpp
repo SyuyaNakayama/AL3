@@ -76,7 +76,7 @@ void Player::Jump()
 		if (input_->TriggerKey(DIK_Q))
 		{
 			isJump = 1;
-			audio_->PlayWave(seHandle_[1]);
+			//audio_->PlayWave(seHandle_[1]);
 		}
 	}
 	if (isJump)
@@ -106,7 +106,7 @@ void Player::Attack()
 	newBullet->Initialize(model_, viewProjection_->target, velocity);
 
 	bullets_.push_back(std::move(newBullet));
-	audio_->PlayWave(seHandle_[0],false,0.25f);
+	//audio_->PlayWave(seHandle_[0],false,0.25f);
 }
 
 void Player::Update()

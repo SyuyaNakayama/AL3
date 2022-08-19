@@ -65,6 +65,9 @@ void GameScene::Update()
 		enemy_->Update();
 		collisionManager_->CheckAllCollisions(player_.get(), enemy_.get());
 		viewProjection_.UpdateMatrix();
+		if (input_->TriggerKey(DIK_U)) { enemy_->state = Enemy::State::Easy; }
+		if (input_->TriggerKey(DIK_I)) { enemy_->state = Enemy::State::Normal; }
+		if (input_->TriggerKey(DIK_O)) { enemy_->state = Enemy::State::Hard; }
 
 		if (player_->hp_ <= 0)
 		{
@@ -73,7 +76,7 @@ void GameScene::Update()
 			enemy_->Clear();
 			enemy_->StopAudio();
 		}
-		if (enemy_->hp_ <= 0) { scene_ = Scene::GameClear; enemy_->StopAudio();		}
+		if (enemy_->hp_ <= 0) { scene_ = Scene::GameClear; enemy_->StopAudio();	}
 
 		hpGauge_[2]->SetSize({ player_->hp_ * 2.5f,64 });
 		hpGauge_[3]->SetSize({ enemy_->hp_ * 2.5f,64 });

@@ -28,7 +28,7 @@ void Bomb::Update()
 		if (worldTransform_.translation_.y <= 0)
 		{
 			phase_ = Phase::Explosion;
-			audio_->PlayWave(seHandle_);
+			//audio_->PlayWave(seHandle_);
 		}
 		break;
 	case Bomb::Explosion:
@@ -36,23 +36,6 @@ void Bomb::Update()
 		if (lifeTimer_.CountDown()) { phase_ = Phase::Dead; }
 		break;
 	}
-
-	//if (worldTransform_.translation_.y <= 0) 
-	//{ 
-	//	isDead_ = 1, isExplosion = 1; 
-	//	audio_->PlayWave(seHandle_);
-	//}
-	//if (isExplosion) { if (lifeTimer_.CountDown()) { isExplosion = 0; } }
-	//
-	//if (!isDead_)
-	//{
-	//	worldTransform_.translation_ += velocity_;
-	//	velocity_.y -= 0.03f;
-	//}
-	//else if (isExplosion)
-	//{
-	//	worldTransform_.scale_ += {0.2f, 0.2f, 0.2f};
-	//}
 
 	worldTransform_.UpdateMatrix();
 	worldTransform_.TransferMatrix();

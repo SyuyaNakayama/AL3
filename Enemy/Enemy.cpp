@@ -92,22 +92,22 @@ void Enemy::BeamAction()
 		}
 		for (size_t i = 0; i < beam_.size(); i++) { beam_[i].Initialize(model_); }
 		isBeamObjectCreate = 1;
-		stopHandle = audio_->PlayWave(seHandle_[4], true);
+		//stopHandle = audio_->PlayWave(seHandle_[4], true);
 	}
 	if (beamTimer_.CountDown())
 	{
 		if (!isStart)
 		{
 			isStart = 1;
-			audio_->StopWave(seHandle_[4]);
-			stopHandle = audio_->PlayWave(seHandle_[5], true);
+			//audio_->StopWave(seHandle_[4]);
+			//stopHandle = audio_->PlayWave(seHandle_[5], true);
 		}
 		else
 		{
 			isActionEnd = 1;
 			isBeamObjectCreate = 0;
 			beam_.clear();
-			audio_->StopWave(stopHandle);
+			//audio_->StopWave(stopHandle);
 		}
 	}
 }
@@ -124,7 +124,7 @@ void Enemy::Missile()
 			newMissile->Initialize(model_, worldTransform_.translation_, toPlayer_);
 			missiles_.push_back(std::move(newMissile));
 			counter_++;
-			audio_->PlayWave(seHandle_[1]);
+			//audio_->PlayWave(seHandle_[1]);
 		}
 		if (counter_ >= 8)
 		{
@@ -147,7 +147,7 @@ void Enemy::Missile()
 				missiles_.push_back(std::move(newMissile));
 			}
 			counter_++;
-			audio_->PlayWave(seHandle_[1]);
+			//audio_->PlayWave(seHandle_[1]);
 		}
 		if (counter_ >= 5)
 		{
@@ -174,7 +174,7 @@ void Enemy::Missile()
 				newMissile->Initialize(model_, worldTransform_.translation_, velocity);
 				missiles_.push_back(std::move(newMissile));
 				counter_++;
-				audio_->PlayWave(seHandle_[1]);
+				//audio_->PlayWave(seHandle_[1]);
 			}
 		}
 		if (counter_ >= 200)
@@ -262,7 +262,7 @@ void Enemy::Press()
 		rippleTransform_.translation_ = worldTransform_.translation_;
 		rippleTransform_.translation_.y = -2.0f;
 		if (playerTranslation_->y == 0 && state != State::Easy) { *isPlayerMove_ = 0; }
-		audio_->PlayWave(seHandle_[2]);
+		//audio_->PlayWave(seHandle_[2]);
 	}
 	if (!isRippleExist)
 	{
@@ -287,7 +287,7 @@ void Enemy::Press()
 void Enemy::Warp()
 {
 	worldTransform_.translation_ = { 0, 3.0f, 0 };
-	audio_->PlayWave(seHandle_[6]);
+	//audio_->PlayWave(seHandle_[6]);
 	isActionEnd = 1;
 }
 
@@ -313,7 +313,7 @@ void Enemy::Tackle()
 			}
 			tackleSpd = toPlayer_ * tSpd;
 			isStart = 1;
-			audio_->PlayWave(seHandle_[3]);
+			//audio_->PlayWave(seHandle_[3]);
 		}
 	}
 	if (isStart)
@@ -353,8 +353,8 @@ void Enemy::Update()
 				nextPhase = rand() % (5 + (worldTransform_.translation_.x != 0));
 			} while (phase_ == nextPhase);
 
-			phase_ = nextPhase;
-			phase_ = 0;
+			//phase_ = nextPhase;
+			phase_ = Phase::missile;
 			isStart = 0;
 			isActionEnd = 0;
 		}
