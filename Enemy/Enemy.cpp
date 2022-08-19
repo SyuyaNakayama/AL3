@@ -28,12 +28,13 @@ void Enemy::Initialize(Model* model, Vector3* playerTranslation, ViewProjection*
 	isRippleExist = 0;
 	counter_ = 0;
 	missileTimer_ = 40;
-	beamTimer_ = 300;
+	beamTimer_ = 150;
 	bombTimer_ = 75;
-	idleTimer_ = 100;
+	idleTimer_ = 80;
 	rippleLifeTimer = 50;
 	bindTimer = 60;
 	state = State::Easy;
+	stopHandle = 0;
 	preHp_ = hp_;
 	audio_ = Audio::GetInstance();
 	seHandle_.push_back(audio_->LoadWave("sound/SE/EnemyDamage.mp3"));
@@ -42,16 +43,16 @@ void Enemy::Initialize(Model* model, Vector3* playerTranslation, ViewProjection*
 	seHandle_.push_back(audio_->LoadWave("sound/SE/Tackle.mp3"));
 	seHandle_.push_back(audio_->LoadWave("sound/SE/LaserIdle.mp3"));
 	seHandle_.push_back(audio_->LoadWave("sound/SE/LaserShot.mp3"));
+	seHandle_.push_back(audio_->LoadWave("sound/SE/Warp.mp3"));
 }
 
 void Enemy::BeamAction()
 {
 	static bool isBeamObjectCreate = 0;
-	static uint32_t stopHandle = 0;
 	if (state == State::Hard && isStart)
 	{
-		beam_[0].Update(-0.5f);
-		beam_[1].Update(0.5f);
+		beam_[0].Update(-1.0f);
+		beam_[1].Update(1.0f);
 	}
 	if (!isBeamObjectCreate)
 	{
@@ -98,8 +99,8 @@ void Enemy::BeamAction()
 		if (!isStart)
 		{
 			isStart = 1;
-			audio_->StopWave(stopHandle);
-			stopHandle = audio_->PlayWave(seHandle_[4], true);
+			audio_->StopWave(seHandle_[4]);
+			stopHandle = audio_->PlayWave(seHandle_[5], true);
 		}
 		else
 		{
@@ -212,7 +213,7 @@ void Enemy::BombAction()
 	case Enemy::Hard:
 		if (!isStart)
 		{
-			bombTimer_ = 5;
+			bombTimer_ = 3;
 			isStart = 1;
 		}
 		if (isStart)
@@ -232,7 +233,7 @@ void Enemy::BombAction()
 				counter_++;
 			}
 		}
-		if (counter_ >= 30)
+		if (counter_ >= 50)
 		{
 			isActionEnd = 1;
 			counter_ = 0;
@@ -283,6 +284,13 @@ void Enemy::Press()
 	}
 }
 
+void Enemy::Warp()
+{
+	worldTransform_.translation_ = { 0, 3.0f, 0 };
+	audio_->PlayWave(seHandle_[6]);
+	isActionEnd = 1;
+}
+
 void Enemy::Tackle()
 {
 	static Timer timer = 50;
@@ -323,7 +331,7 @@ void Enemy::Tackle()
 void Enemy::Update()
 {
 	missiles_.remove_if([](std::unique_ptr<EnemyBullet>& bullet) { return bullet->isDead_; });
-	bomb_.remove_if([](std::unique_ptr<Bomb>& bomb) { return (bomb->isDead_ && !bomb->isExplosion); });
+	bomb_.remove_if([](std::unique_ptr<Bomb>& bomb) { return bomb->phase_ == Bomb::Phase::Dead; });
 	if (!*isPlayerMove_)
 	{
 		if (bindTimer.CountDown()) { *isPlayerMove_ = 1; }
@@ -339,7 +347,14 @@ void Enemy::Update()
 	{
 		if (idleTimer_.CountDown())
 		{
-			phase_ = rand() % 5;
+			int nextPhase = 0;
+			do
+			{
+				nextPhase = rand() % (5 + (worldTransform_.translation_.x != 0));
+			} while (phase_ == nextPhase);
+
+			phase_ = nextPhase;
+			phase_ = 0;
 			isStart = 0;
 			isActionEnd = 0;
 		}
@@ -366,13 +381,13 @@ void Enemy::Draw()
 void (Enemy::* Enemy::pPhaseFuncTable[])() =
 {
 	&Enemy::BeamAction,&Enemy::Missile,&Enemy::BombAction,
-	&Enemy::Press,&Enemy::Tackle
+	&Enemy::Press,&Enemy::Tackle,&Enemy::Warp
 };
 
 void Enemy::StateChange()
 {
-	if (hp_ < 125) { state = State::Normal; }
-	if (hp_ < 50) { state = State::Hard; }
+	if (hp_ < 133) { state = State::Normal; }
+	if (hp_ < 67) { state = State::Hard; }
 }
 
 void Enemy::Clear()
@@ -380,4 +395,9 @@ void Enemy::Clear()
 	missiles_.clear();
 	bomb_.clear();
 	beam_.clear();
+}
+
+void Enemy::StopAudio()
+{
+	audio_->StopWave(stopHandle);
 }

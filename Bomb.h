@@ -19,12 +19,13 @@ private:
 	Audio* audio_;
 	uint32_t seHandle_;
 public:
-	bool isDead_ = 1, isExplosion = 0;
+	enum Phase { Alive, Explosion, Dead };
+	Phase phase_;
 	void Initialize(Model* model, const Vector3& position, const Vector3& velocity);
 	void Update();
 	void SetScale(Vector3 scale) { worldTransform_.scale_ = scale; }
 	void Draw(const ViewProjection& viewProjection);
-	void OnCollision() { if (!isDead_) { isDead_ = 1; isExplosion = 1; } }
+	void OnCollision() { if (phase_ == Phase::Alive) { phase_ = Phase::Explosion; } }
 	const Vector3 GetRadius() { return worldTransform_.scale_; }
 	const Vector3 GetWorldPosition() { return worldTransform_.translation_; }
 };

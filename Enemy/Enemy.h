@@ -27,6 +27,7 @@ private:
 	Timer missileTimer_, rippleLifeTimer;
 	Timer beamTimer_, bombTimer_, idleTimer_;
 	Timer bindTimer;
+	Timer timer_;
 	bool isActionEnd;
 	bool* isPlayerMove_;
 	const float JUMP_SPD_INIT = 2.0f;
@@ -36,10 +37,11 @@ private:
 	State state;
 	Audio* audio_;
 	std::vector<uint32_t> seHandle_;
+	uint32_t stopHandle;
 
 	void BeamAction(), Missile();
-	void BombAction();
-	void Press(), Tackle();
+	void BombAction(), Press();
+	void Tackle(), Warp();
 	static void (Enemy::* pPhaseFuncTable[])();
 	void StateChange();
 public:
@@ -58,4 +60,5 @@ public:
 	void OnCollision() { hp_--; audio_->PlayWave(seHandle_[0], false, 0.5f); }
 	const Vector3 GetRadius() { return worldTransform_.scale_; }
 	const Vector3 GetWorldPosition() { return worldTransform_.translation_; }
+	void StopAudio();
 };

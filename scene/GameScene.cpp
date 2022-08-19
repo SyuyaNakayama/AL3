@@ -55,6 +55,7 @@ void GameScene::Update()
 		{
 			scene_ = GameScene::Play;
 			Initialize();
+			player_->Clear();
 		}
 		player_->Update();
 		viewProjection_.UpdateMatrix();
@@ -70,8 +71,9 @@ void GameScene::Update()
 			scene_ = Scene::GameOver;
 			player_->bullets_.clear();
 			enemy_->Clear();
+			enemy_->StopAudio();
 		}
-		if (enemy_->hp_ <= 0) { scene_ = Scene::GameClear; }
+		if (enemy_->hp_ <= 0) { scene_ = Scene::GameClear; enemy_->StopAudio();		}
 
 		hpGauge_[2]->SetSize({ player_->hp_ * 2.5f,64 });
 		hpGauge_[3]->SetSize({ enemy_->hp_ * 2.5f,64 });

@@ -11,31 +11,48 @@ void Bomb::Initialize(Model* model, const Vector3& position, const Vector3& velo
 	worldTransform_.Initialize();
 	worldTransform_.translation_ = position;
 	velocity_ = velocity;
-	isDead_ = 0;
-	isExplosion = 0;
 	SetCollisionAttribute(CollisionAttribute::EnemyBomb);
 	audio_ = Audio::GetInstance();
 	seHandle_ = audio_->LoadWave("sound/SE/Explosion.mp3");
+	phase_ = Phase::Alive;
 }
 
 void Bomb::Update()
 {
-	if (worldTransform_.translation_.y <= 0) 
-	{ 
-		isDead_ = 1, isExplosion = 1; 
-		audio_->PlayWave(seHandle_);
-	}
-	if (isExplosion) { if (lifeTimer_.CountDown()) { isExplosion = 0; } }
-
-	if (!isDead_)
+	switch (phase_)
 	{
+	case Bomb::Alive:
 		worldTransform_.translation_ += velocity_;
 		velocity_.y -= 0.03f;
-	}
-	else if (isExplosion)
-	{
+
+		if (worldTransform_.translation_.y <= 0)
+		{
+			phase_ = Phase::Explosion;
+			audio_->PlayWave(seHandle_);
+		}
+		break;
+	case Bomb::Explosion:
 		worldTransform_.scale_ += {0.2f, 0.2f, 0.2f};
+		if (lifeTimer_.CountDown()) { phase_ = Phase::Dead; }
+		break;
 	}
+
+	//if (worldTransform_.translation_.y <= 0) 
+	//{ 
+	//	isDead_ = 1, isExplosion = 1; 
+	//	audio_->PlayWave(seHandle_);
+	//}
+	//if (isExplosion) { if (lifeTimer_.CountDown()) { isExplosion = 0; } }
+	//
+	//if (!isDead_)
+	//{
+	//	worldTransform_.translation_ += velocity_;
+	//	velocity_.y -= 0.03f;
+	//}
+	//else if (isExplosion)
+	//{
+	//	worldTransform_.scale_ += {0.2f, 0.2f, 0.2f};
+	//}
 
 	worldTransform_.UpdateMatrix();
 	worldTransform_.TransferMatrix();
@@ -43,5 +60,5 @@ void Bomb::Update()
 
 void Bomb::Draw(const ViewProjection& viewProjection)
 {
-	model_->Draw(worldTransform_, viewProjection, textureHandle_[isExplosion]);
+	model_->Draw(worldTransform_, viewProjection, textureHandle_[phase_ == Phase::Explosion]);
 }
