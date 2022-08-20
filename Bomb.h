@@ -14,7 +14,6 @@ private:
 	Model* model_;
 	uint32_t textureHandle_[2];
 	Vector3 velocity_;
-	DebugText* debugText_;
 	Timer lifeTimer_ = 20;
 	Audio* audio_;
 	uint32_t seHandle_;

@@ -24,9 +24,9 @@ private:
 	Vector3 tackleSpd{};
 	ViewProjection* viewProjection_;
 	Timer rippleLifeTimer;
-	Timer beamTimer_, bombTimer_, idleTimer_;
+	Timer beamTimer_, idleTimer_;
 	Timer bindTimer;
-	Timer timer_;
+	Timer actionTimer_;
 	bool isActionEnd;
 	bool* isPlayerMove_;
 	const float JUMP_SPD_INIT = 2.0f;

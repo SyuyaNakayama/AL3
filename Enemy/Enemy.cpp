@@ -28,7 +28,6 @@ void Enemy::Initialize(Model* model, Vector3* playerTranslation, ViewProjection*
 	isRippleExist = 0;
 	counter_ = 0;
 	beamTimer_ = 150;
-	bombTimer_ = 75;
 	idleTimer_ = 80;
 	rippleLifeTimer = 50;
 	bindTimer = 60;
@@ -56,13 +55,24 @@ void Enemy::BeamAction()
 	if (!isBeamObjectCreate)
 	{
 		Beam newBeam;
+		int	pattern;
 		switch (state)
 		{
 		case Enemy::Easy:
+			pattern = rand() % 2;
 			for (size_t i = 0; i < 5; i++)
 			{
-				newBeam.SetScaleX();
-				newBeam.SetPositionZ(75.0f - 150.0f / 6.0f * (float)(i + 1));
+				float position = 75.0f - 150.0f / 6.0f * (float)(i + 1);
+				if (pattern == 0)
+				{
+					newBeam.SetScaleX();
+					newBeam.SetPositionZ(position);
+				}
+				else
+				{
+					newBeam.SetScaleZ();
+					newBeam.SetPositionX(position);
+				}
 				beam_.push_back(newBeam);
 			}
 			break;
@@ -119,32 +129,19 @@ void Enemy::Missile()
 		switch (state)
 		{
 		case Enemy::Easy:
+			actionTimer_ = 30;
+			break;
 		case Enemy::Normal:
-			timer_ = 40;
+			actionTimer_ = 40;
 			break;
 		case Enemy::Hard:
-			timer_ = 2;
+			actionTimer_ = 2;
 			break;
 		}
 		isStart = 1;
 	}
-	else
-	{
-		switch (state)
-		{
-		case Enemy::Easy:
-			isEnd = counter_ >= 8;
-			break;
-		case Enemy::Normal:
-			isEnd = counter_ >= 5;
-			break;
-		case Enemy::Hard:
-			isEnd = counter_ >= 150;
-			break;
-		}
-	}
 
-	if (timer_.CountDown())
+	if (actionTimer_.CountDown())
 	{
 		std::unique_ptr<EnemyBullet> newMissile = std::make_unique<EnemyBullet>();
 		Vector3 velocity{};
@@ -180,6 +177,19 @@ void Enemy::Missile()
 		counter_++;
 		//audio_->PlayWave(seHandle_[1]);
 	}
+
+	switch (state)
+	{
+	case Enemy::Easy:
+		isEnd = counter_ >= 8;
+		break;
+	case Enemy::Normal:
+		isEnd = counter_ >= 5;
+		break;
+	case Enemy::Hard:
+		isEnd = counter_ >= 150;
+		break;
+	}
 	if (isEnd)
 	{
 		isActionEnd = 1;
@@ -189,7 +199,7 @@ void Enemy::Missile()
 
 void Enemy::BombAction()
 {
-	Vector3 bombSpd;
+	bool isEnd = 0;
 
 	if (!isStart)
 	{
@@ -197,64 +207,55 @@ void Enemy::BombAction()
 		{
 		case Enemy::Easy:
 		case Enemy::Normal:
-			bombTimer_ = 3;
+			actionTimer_ = 50;
 			break;
 		case Enemy::Hard:
-			bombTimer_ = 3;
+			actionTimer_ = 3;
 			break;
 		}
 		isStart = 1;
+	}
+
+	if (actionTimer_.CountDown())
+	{
+		std::unique_ptr<Bomb> newBomb_ = std::make_unique<Bomb>();
+		Vector3 bombSpd{};
+		switch (state)
+		{
+		case Enemy::Normal:
+			newBomb_->SetScale({ 5.0f,5.0f,5.0f });
+		case Enemy::Easy:
+			bombSpd = (*playerTranslation_ - worldTransform_.translation_) / 102.0f;
+			bombSpd.y = 1.5f;
+			break;
+		case Enemy::Hard:
+			static std::random_device seedGen;
+			static std::mt19937_64 engine(seedGen());
+			static std::uniform_real_distribution<float> bombFallPos(-74.0f, 74.0f);
+			bombSpd = { bombFallPos(engine),0, bombFallPos(engine) };
+			bombSpd = (bombSpd - worldTransform_.translation_) / 102.0f;
+			bombSpd.y = 1.5f;
+			break;
+		}
+		counter_++;
+		newBomb_->Initialize(model_, worldTransform_.translation_, bombSpd);
+		bomb_.push_back(std::move(newBomb_));
 	}
 
 	switch (state)
 	{
 	case Enemy::Easy:
 	case Enemy::Normal:
-		if (bombTimer_.CountDown())
-		{
-			bombSpd = (*playerTranslation_ - worldTransform_.translation_) / 102.0f;
-			bombSpd.y = 1.5f;
-			std::unique_ptr<Bomb> newBomb_ = std::make_unique<Bomb>();
-			newBomb_->Initialize(model_, worldTransform_.translation_, bombSpd);
-			if (state == State::Normal) { newBomb_->SetScale({ 5.0f,5.0f,5.0f }); }
-			bomb_.push_back(std::move(newBomb_));
-			counter_++;
-		}
-		if (counter_ >= 3)
-		{
-			isActionEnd = 1;
-			counter_ = 0;
-		}
+		isEnd = counter_ >= 3;
 		break;
 	case Enemy::Hard:
-		if (!isStart)
-		{
-			bombTimer_ = 3;
-			isStart = 1;
-		}
-		if (isStart)
-		{
-			if (bombTimer_.CountDown())
-			{
-				static std::random_device seedGen;
-				static std::mt19937_64 engine(seedGen());
-				static std::uniform_real_distribution<float> bombFallPos(-74.0f, 74.0f);
-				bombSpd = { bombFallPos(engine),0, bombFallPos(engine) };
-				bombSpd -= worldTransform_.translation_;
-				bombSpd /= 102.0f;
-				bombSpd.y = 1.5f;
-				std::unique_ptr<Bomb> newBomb_ = std::make_unique<Bomb>();
-				newBomb_->Initialize(model_, worldTransform_.translation_, bombSpd);
-				bomb_.push_back(std::move(newBomb_));
-				counter_++;
-			}
-		}
-		if (counter_ >= 50)
-		{
-			isActionEnd = 1;
-			counter_ = 0;
-		}
+		isEnd = counter_ >= 50;
 		break;
+	}
+	if (isEnd)
+	{
+		isActionEnd = 1;
+		counter_ = 0;
 	}
 }
 
@@ -348,10 +349,7 @@ void Enemy::Update()
 {
 	missiles_.remove_if([](std::unique_ptr<EnemyBullet>& bullet) { return bullet->isDead_; });
 	bomb_.remove_if([](std::unique_ptr<Bomb>& bomb) { return bomb->phase_ == Bomb::Phase::Dead; });
-	if (!*isPlayerMove_)
-	{
-		if (bindTimer.CountDown()) { *isPlayerMove_ = 1; }
-	}
+	if (!*isPlayerMove_) { if (bindTimer.CountDown()) { *isPlayerMove_ = 1; } }
 
 	StateChange();
 
@@ -370,7 +368,7 @@ void Enemy::Update()
 			} while (phase_ == nextPhase);
 
 			//phase_ = nextPhase;
-			phase_ = Phase::tackle;
+			phase_ = Phase::beam;
 			isStart = 0;
 			isActionEnd = 0;
 		}

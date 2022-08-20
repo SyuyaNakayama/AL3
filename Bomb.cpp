@@ -5,7 +5,6 @@
 void Bomb::Initialize(Model* model, const Vector3& position, const Vector3& velocity)
 {
 	model_ = model;
-	debugText_ = DebugText::GetInstance();
 	textureHandle_[0] = TextureManager::Load("picture/bomb.png");
 	textureHandle_[1] = TextureManager::Load("picture/explosion.png");
 	worldTransform_.Initialize();
