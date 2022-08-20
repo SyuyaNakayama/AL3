@@ -27,7 +27,6 @@ void Enemy::Initialize(Model* model, Vector3* playerTranslation, ViewProjection*
 	isActionEnd = 1;
 	isRippleExist = 0;
 	counter_ = 0;
-	missileTimer_ = 40;
 	beamTimer_ = 150;
 	bombTimer_ = 75;
 	idleTimer_ = 80;
@@ -114,81 +113,98 @@ void Enemy::BeamAction()
 
 void Enemy::Missile()
 {
-	switch (state)
+	bool isEnd = 0;
+	if (!isStart)
 	{
-	case Enemy::Easy:
-		if (missileTimer_.CountDown())
+		switch (state)
 		{
+		case Enemy::Easy:
+		case Enemy::Normal:
+			timer_ = 40;
+			break;
+		case Enemy::Hard:
+			timer_ = 2;
+			break;
+		}
+		isStart = 1;
+	}
+	else
+	{
+		switch (state)
+		{
+		case Enemy::Easy:
+			isEnd = counter_ >= 8;
+			break;
+		case Enemy::Normal:
+			isEnd = counter_ >= 5;
+			break;
+		case Enemy::Hard:
+			isEnd = counter_ >= 150;
+			break;
+		}
+	}
+
+	if (timer_.CountDown())
+	{
+		std::unique_ptr<EnemyBullet> newMissile = std::make_unique<EnemyBullet>();
+		Vector3 velocity{};
+		int offset;
+		const int MISSILE_NUM = 12;
+		switch (state)
+		{
+		case Enemy::Easy:
 			toPlayer_ *= 2.0f;
-			std::unique_ptr<EnemyBullet> newMissile = std::make_unique<EnemyBullet>();
 			newMissile->Initialize(model_, worldTransform_.translation_, toPlayer_);
 			missiles_.push_back(std::move(newMissile));
-			counter_++;
-			//audio_->PlayWave(seHandle_[1]);
-		}
-		if (counter_ >= 8)
-		{
-			isActionEnd = 1;
-			counter_ = 0;
-		}
-		break;
-	case Enemy::Normal:
-		if (missileTimer_.CountDown())
-		{
-			Vector3 velocity{};
-			int offset = rand() % 360;
-			for (size_t i = 0; i < 8; i++)
+			break;
+		case Enemy::Normal:
+			offset = rand() % 360;
+			for (size_t i = 0; i < MISSILE_NUM; i++)
 			{
-				std::unique_ptr<EnemyBullet> newMissile = std::make_unique<EnemyBullet>();
-				velocity.x = sinf(DirectX::XM_2PI / 8.0f * (float)i + DirectX::XMConvertToRadians(offset));
-				velocity.z = cosf(DirectX::XM_2PI / 8.0f * (float)i + DirectX::XMConvertToRadians(offset));
+				velocity.x = sinf(DirectX::XM_2PI / (float)MISSILE_NUM * (float)i + DirectX::XMConvertToRadians(offset));
+				velocity.z = cosf(DirectX::XM_2PI / (float)MISSILE_NUM * (float)i + DirectX::XMConvertToRadians(offset));
 				velocity *= 2.0f;
 				newMissile->Initialize(model_, worldTransform_.translation_, velocity);
 				missiles_.push_back(std::move(newMissile));
+				newMissile = std::make_unique<EnemyBullet>();
 			}
-			counter_++;
-			//audio_->PlayWave(seHandle_[1]);
+			break;
+		case Enemy::Hard:
+			velocity.x = sinf(DirectX::XMConvertToRadians(counter_ * 12));
+			velocity.z = cosf(DirectX::XMConvertToRadians(counter_ * 12));
+			velocity *= 2.0f;
+			newMissile->Initialize(model_, worldTransform_.translation_, velocity);
+			missiles_.push_back(std::move(newMissile));
+			break;
 		}
-		if (counter_ >= 5)
-		{
-			isActionEnd = 1;
-			counter_ = 0;
-		}
-		break;
-	case Enemy::Hard:
-		if (!isStart)
-		{
-			missileTimer_ = 2;
-			isStart = 1;
-		}
-		if (isStart)
-		{
-			if (missileTimer_.CountDown())
-			{
-				Vector3 velocity{};
-
-				std::unique_ptr<EnemyBullet> newMissile = std::make_unique<EnemyBullet>();
-				velocity.x = sinf(DirectX::XMConvertToRadians(counter_ * 3));
-				velocity.z = cosf(DirectX::XMConvertToRadians(counter_ * 3));
-				velocity *= 2.0f;
-				newMissile->Initialize(model_, worldTransform_.translation_, velocity);
-				missiles_.push_back(std::move(newMissile));
-				counter_++;
-				//audio_->PlayWave(seHandle_[1]);
-			}
-		}
-		if (counter_ >= 200)
-		{
-			isActionEnd = 1;
-			counter_ = 0;
-		}
-		break;
+		counter_++;
+		//audio_->PlayWave(seHandle_[1]);
+	}
+	if (isEnd)
+	{
+		isActionEnd = 1;
+		counter_ = 0;
 	}
 }
 
 void Enemy::BombAction()
 {
 	Vector3 bombSpd;
+
+	if (!isStart)
+	{
+		switch (state)
+		{
+		case Enemy::Easy:
+		case Enemy::Normal:
+			bombTimer_ = 3;
+			break;
+		case Enemy::Hard:
+			bombTimer_ = 3;
+			break;
+		}
+		isStart = 1;
+	}
 
 	switch (state)
 	{
@@ -354,7 +370,7 @@ void Enemy::Update()
 			} while (phase_ == nextPhase);
 
 			//phase_ = nextPhase;
-			phase_ = Phase::missile;
+			phase_ = Phase::tackle;
 			isStart = 0;
 			isActionEnd = 0;
 		}

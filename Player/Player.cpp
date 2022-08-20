@@ -118,7 +118,7 @@ void Player::Update()
 		Move();
 		Jump();
 		Rotate();
-		Attack();
+		//Attack();
 	}
 
 	for (std::unique_ptr<PlayerBullet>& bullet : bullets_) { bullet->Update(); }

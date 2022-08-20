@@ -19,11 +19,11 @@ private:
 	uint32_t textureHandle_[2];
 	DebugText* debugText_;
 	size_t phase_ = Phase::bomb;
-	Vector3 velocity_, toPlayer_;
+	Vector3 toPlayer_;
 	Vector3* playerTranslation_;
 	Vector3 tackleSpd{};
 	ViewProjection* viewProjection_;
-	Timer missileTimer_, rippleLifeTimer;
+	Timer rippleLifeTimer;
 	Timer beamTimer_, bombTimer_, idleTimer_;
 	Timer bindTimer;
 	Timer timer_;

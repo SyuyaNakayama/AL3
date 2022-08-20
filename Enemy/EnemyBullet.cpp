@@ -5,7 +5,6 @@
 
 void EnemyBullet::Initialize(Model* model, const Vector3& position, const Vector3& velocity)
 {
-	assert(model);
 	model_ = model;
 	textureHandle_ = TextureManager::Load("picture/missile.png");
 	worldTransform_.Initialize();
