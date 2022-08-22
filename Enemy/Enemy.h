@@ -8,11 +8,12 @@
 #include "Bomb.h"
 #include "Beam.h"
 #include "Audio.h"
+#include <random>
 
 class Enemy :public Collider
 {
 private:
-	enum Phase { beam, missile, bomb, press, tackle };
+	enum Phase { beam, missile, bomb, press, tackle, warp };
 
 	Model* model_;
 	Model* pressRippleModel_;
@@ -34,6 +35,7 @@ private:
 	int preHp_;
 	Audio* audio_;
 	std::vector<uint32_t> seHandle_;
+	std::random_device seedGen;
 
 	void BeamAction(), Missile();
 	void BombAction(), Press();

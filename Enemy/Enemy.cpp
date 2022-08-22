@@ -12,7 +12,8 @@ void Enemy::Initialize(Model* model, Vector3* playerTranslation,
 {
 	model_ = model;
 	pressRippleModel_ = Model::CreateFromOBJ("Ripple", true);
-	textureHandle_[0] = TextureManager::Load("picture/enemy.png");
+	if (!isHardMode) { textureHandle_[0] = TextureManager::Load("picture/enemy.png"); }
+	else { textureHandle_[0] = TextureManager::Load("picture/enemyhard.png"); }
 	textureHandle_[1] = TextureManager::Load("picture/beam.png");
 	debugText_ = DebugText::GetInstance();
 	worldTransform_.translation_ = { 0, 3.0f, 0 };
@@ -232,7 +233,6 @@ void Enemy::BombAction()
 			bombSpd.y = 1.5f;
 			break;
 		case Enemy::Hard:
-			static std::random_device seedGen;
 			static std::mt19937_64 engine(seedGen());
 			static std::uniform_real_distribution<float> bombFallPos(-74.0f, 74.0f);
 			bombSpd = { bombFallPos(engine),0, bombFallPos(engine) };
@@ -344,7 +344,9 @@ void Enemy::Tackle()
 
 void Enemy::Warp()
 {
-	worldTransform_.translation_ = { 0, 3.0f, 0 };
+	static std::mt19937_64 engine(seedGen());
+	static std::uniform_real_distribution<float> warpPos(-75.0f, 75.0f);
+	worldTransform_.translation_ = { warpPos(engine), 3.0f, warpPos(engine) };
 	audio_->PlayWave(seHandle_[6]);
 	isActionEnd = 1;
 }
