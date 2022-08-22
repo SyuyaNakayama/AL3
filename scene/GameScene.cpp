@@ -7,13 +7,6 @@
 
 using namespace DirectX;
 
-enum SE
-{
-	PlayerShot,PlayerJump,PlayerDamage,
-	EnemyDamage,Press,Missile,LaserIdle,
-	LaserShot,Tackle,Explosion
-};
-
 GameScene::GameScene()
 {
 	dxCommon_ = DirectXCommon::GetInstance();
@@ -27,16 +20,18 @@ GameScene::GameScene()
 	player_ = make_unique<Player>();
 	enemy_ = make_unique<Enemy>();
 	collisionManager_ = make_unique<CollisionManager>();
+	scene_ = Scene::HowToPlay;
 }
 
 void GameScene::Initialize()
 {
-	viewProjection_.eye = { 0,0,-20 };
-	viewProjection_.target = { 0,0,-19 };
+	viewProjection_.eye = { 0,0,-50 };
+	viewProjection_.target = { 0,0,-49 };
 	viewProjection_.Initialize();
 	ground_.Initialize(model_);
 	player_->Initialize(model_, &viewProjection_);
-	enemy_->Initialize(model_, &viewProjection_.eye, &viewProjection_, &player_->isMove);
+	enemy_->Initialize(model_, &viewProjection_.eye, &viewProjection_, &player_->isMove, isHardMode);
+	player_->Clear();
 }
 
 void GameScene::Update()
@@ -48,14 +43,15 @@ void GameScene::Update()
 		{
 			scene_ = GameScene::HowToPlay;
 			Initialize();
+			isHardMode = 0;
 		}
 		break;
 	case GameScene::HowToPlay:
 		if (input_->TriggerKey(DIK_SPACE))
 		{
 			scene_ = GameScene::Play;
+			if (input_->PushKey(DIK_LSHIFT)) { isHardMode = 1; }
 			Initialize();
-			player_->Clear();
 		}
 		player_->Update();
 		viewProjection_.UpdateMatrix();
@@ -76,13 +72,39 @@ void GameScene::Update()
 			enemy_->Clear();
 			enemy_->StopAudio();
 		}
-		if (enemy_->hp_ <= 0) { scene_ = Scene::GameClear; enemy_->StopAudio();	}
+		if (enemy_->hp_ <= 0) { scene_ = Scene::GameClear; enemy_->StopAudio(); }
 
 		hpGauge_[2]->SetSize({ player_->hp_ * 2.5f,64 });
 		hpGauge_[3]->SetSize({ enemy_->hp_ * 2.5f,64 });
 		break;
 	case GameScene::GameClear:
-		if (input_->TriggerKey(DIK_ESCAPE)) { scene_ = GameScene::Title; }
+		if (input_->TriggerKey(DIK_ESCAPE)) { scene_ = GameScene::Title; isGetLink = 0; }
+		if (input_->TriggerKey(DIK_SPACE))
+		{
+			FILE* file;
+			if (!isHardMode)
+			{
+				if (fopen_s(&file, "エンディングリンク.txt", "w") == 0)
+				{
+					fprintf(file, "クリアおめでとうございます。こちらがエンディングを見るためのリンクです。\n");
+					fprintf(file, "検索エンジンで下記URLを貼り付けて下さい。\n\n");
+					fprintf(file, "https://drive.google.com/file/d/1baJpTZh645Fu9sv8loQcIi_KjeRuPLEa/view?usp=sharing");
+					fprintf(file, "\n\n追記:チュートリアルで左SHIFTキーを押しながらゲームを開始すると...？");
+				}
+			}
+			else
+			{
+				if (fopen_s(&file, "真エンディングリンク.txt", "w") == 0)
+				{
+					fprintf(file, "ハードモードクリアおめでとうございます。ここまで遊んで頂きありがとうございます。\n");
+					fprintf(file, "検索エンジンで下記URLを貼り付けて下さい。\n\n");
+					fprintf(file, "https://drive.google.com/file/d/1baJpTZh645Fu9sv8loQcIi_KjeRuPLEa/view?usp=sharing");
+					fprintf(file, "\n\nこれは真エンディングを見るためのリンクです。");
+				}
+			}
+			fclose(file);
+			isGetLink = 1;
+		}
 		break;
 	case GameScene::GameOver:
 		if (input_->TriggerKey(DIK_SPACE))
@@ -133,6 +155,7 @@ void GameScene::Draw()
 
 	// ここに前景スプライトの描画処理を追加できる
 	if (themeSprite_[scene_]) { themeSprite_[scene_]->Draw(); }
+	if (isGetLink) { themeSprite_[themeSprite_.size() - 1]->Draw(); }
 	if (scene_ == Scene::Play || scene_ == Scene::HowToPlay) { reticle_->Draw(); }
 	player_->DamageEffectDraw();
 	if (scene_ == Scene::Play) { for (size_t i = 0; i < hpGauge_.size(); i++) { hpGauge_[i]->Draw(); } }
@@ -153,6 +176,7 @@ void GameScene::LoadResources()
 	themeSprite_.push_back(nullptr);
 	themeSprite_.push_back(Sprite::Create(TextureManager::Load("picture/GameClear.png"), {}));
 	themeSprite_.push_back(Sprite::Create(TextureManager::Load("picture/GameOver.png"), {}));
+	themeSprite_.push_back(Sprite::Create(TextureManager::Load("picture/GetLink.png"), {}));
 	for (size_t i = 0; i < themeSprite_.size(); i++)
 	{
 		if (!themeSprite_[i])continue;
@@ -169,7 +193,7 @@ void GameScene::LoadResources()
 	hpGauge_.push_back(Sprite::Create(TextureManager::Load("picture/HpGauge.png"), { 640 + leftSpace + 42,20 }, { 0.95f,0,0,1 }));
 #pragma endregion
 #pragma region オーディオ読み込み
-	HANDLE hFind;
+	/*HANDLE hFind;
 	WIN32_FIND_DATAA findData;
 	string fileName;
 	string pass;
@@ -178,7 +202,7 @@ void GameScene::LoadResources()
 		{"Sound/BGM/","Resources/Sound/BGM/*"},
 		{"Sound/SE/","Resources/Sound/SE/*"},
 	};
-	
+
 	for (size_t i = 1; i < 2; i++)
 	{
 		fileName = STR[i][0];
@@ -189,10 +213,10 @@ void GameScene::LoadResources()
 		{
 			if (strstr(findData.cFileName, ".mp3") == nullptr) { continue; }
 			if (i == 0) { bgm_.push_back(audio_->LoadWave(fileName + findData.cFileName)); }
-			else{ se_.push_back(audio_->LoadWave(fileName + findData.cFileName)); }
+			else { se_.push_back(audio_->LoadWave(fileName + findData.cFileName)); }
 		}
 	}
-	
-	FindClose(hFind);
+
+	FindClose(hFind);*/
 #pragma endregion
 }

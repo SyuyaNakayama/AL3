@@ -27,7 +27,7 @@ void Bomb::Update()
 		if (worldTransform_.translation_.y <= 0)
 		{
 			phase_ = Phase::Explosion;
-			//audio_->PlayWave(seHandle_);
+			audio_->PlayWave(seHandle_);
 		}
 		break;
 	case Bomb::Explosion:

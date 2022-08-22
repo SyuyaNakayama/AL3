@@ -40,8 +40,8 @@ private:
 	Sprite* background_ = nullptr;
 	vector<Sprite*> themeSprite_;
 	vector<Sprite*> hpGauge_;
-	vector<uint32_t> bgm_;
-	vector<uint32_t> se_;
+	vector<uint32_t> bgm_, se_;
+	bool isGetLink = 0, isHardMode = 0;
 
 	// ゲームシーン用
 	Scene scene_ = Scene::Play;

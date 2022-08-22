@@ -13,9 +13,11 @@ private:
 	Model* model_;
 	uint32_t textureHandle_[2];
 public:
-	void Initialize(Model* model);
+	int* phase_;
+
+	void Initialize(Model* model,int* phase);
 	void Update(float spd);
-	void Draw(ViewProjection viewProjection,int textureNumber);
+	void Draw(ViewProjection viewProjection);
 	void OnCollision() {}
 	void SetScaleX() { worldTransform_.scale_ = { 75.0f,1,1 }; }
 	void SetScaleZ() { worldTransform_.scale_ = { 1,1,75.0f }; }

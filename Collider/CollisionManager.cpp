@@ -28,7 +28,7 @@ void CollisionManager::CheckAllCollisions(Player* player, Enemy* enemy)
 	colliders_.push_back(enemy);
 	for (unique_ptr<EnemyBullet>& bullet : enemy->missiles_) { colliders_.push_back(bullet.get()); }
 	for (unique_ptr<Bomb>& bomb : enemy->bomb_) { colliders_.push_back(bomb.get()); }
-	if (enemy->isStart) { for (size_t i = 0; i < enemy->beam_.size(); i++) { colliders_.push_back(&enemy->beam_[i]); } }
+	for (size_t i = 0; i < enemy->beam_.size(); i++) { if (*enemy->beam_[i].phase_ == 2) { colliders_.push_back(&enemy->beam_[i]); } }
 
 	list<Collider*>::iterator itrA = colliders_.begin();
 	for (; itrA != colliders_.end(); ++itrA)
@@ -43,8 +43,9 @@ void CollisionManager::CheckAllCollisions(Player* player, Enemy* enemy)
 			Collider* colliderB = *itrB;
 			if (CheckCollisionPair(colliderA, colliderB))
 			{
+
 				colliderA->OnCollision();
-				if (colliderB->GetCollisionAttribute()== CollisionAttribute::EnemyMissile)
+				if (colliderB->GetCollisionAttribute() & CollisionAttribute::EnemyMissile)
 				{
 					colliderA->OnCollision(); colliderA->OnCollision();
 				}
@@ -60,6 +61,6 @@ void CollisionManager::CheckAllCollisions(Player* player, Enemy* enemy)
 		float dis = vecAB.length();
 		float radAB = player->GetRadius().x + enemy->rippleTransform_.scale_.x;
 
-		if (player->GetWorldPosition().y == 0 && dis <= radAB && dis >= radAB - 15.0f) { player->OnCollision(); }
+		if (player->GetWorldPosition().y == 0 && dis <= radAB && dis >= radAB - 20.0f) { player->OnCollision(); }
 	}
 }

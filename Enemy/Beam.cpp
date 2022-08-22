@@ -1,7 +1,7 @@
 #include "Beam.h"
 #include "Collider/CollisionConfig.h"
 
-void Beam::Initialize(Model* model)
+void Beam::Initialize(Model* model, int* phase)
 {
 	model_ = model;
 	textureHandle_[0] = TextureManager::Load("Picture/beam2.png");
@@ -10,6 +10,7 @@ void Beam::Initialize(Model* model)
 	worldTransform_.UpdateMatrix();
 	worldTransform_.TransferMatrix();
 	SetCollisionAttribute(CollisionAttribute::EnemyBeam);
+	phase_ = phase;
 }
 
 void Beam::Update(float spd)
@@ -19,7 +20,7 @@ void Beam::Update(float spd)
 	worldTransform_.TransferMatrix();
 }
 
-void Beam::Draw(ViewProjection viewProjection, int textureNumber)
+void Beam::Draw(ViewProjection viewProjection)
 {
-	model_->Draw(worldTransform_, viewProjection, textureHandle_[textureNumber]);
+	model_->Draw(worldTransform_, viewProjection, textureHandle_[*phase_ == 2]);
 }

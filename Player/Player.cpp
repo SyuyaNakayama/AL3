@@ -14,7 +14,7 @@ void Player::Initialize(Model* model, ViewProjection* viewProjection)
 	bulletInterval_ = 15;
 	SetCollisionAttribute(CollisionAttribute::Player);
 	SetCollisionMask(CollisionMask::Player);
-	hp_ = 200; preHp_ = hp_; angle_ = {}; isMove = 1;
+	hp_ = 150; preHp_ = hp_; angle_ = {}; isMove = 1;
 	damageEffect_ = Sprite::Create(TextureManager::Load("Picture/Beam.png"), {});
 	damageEffect_->SetSize({ 1280,720 });
 	seHandle_.push_back(audio_->LoadWave("sound/SE/PlayerShot.mp3"));
@@ -76,7 +76,7 @@ void Player::Jump()
 		if (input_->TriggerKey(DIK_Q))
 		{
 			isJump = 1;
-			//audio_->PlayWave(seHandle_[1]);
+			audio_->PlayWave(seHandle_[1]);
 		}
 	}
 	if (isJump)
@@ -106,7 +106,7 @@ void Player::Attack()
 	newBullet->Initialize(model_, viewProjection_->target, velocity);
 
 	bullets_.push_back(std::move(newBullet));
-	//audio_->PlayWave(seHandle_[0],false,0.25f);
+	audio_->PlayWave(seHandle_[0],false,0.25f);
 }
 
 void Player::Update()
@@ -118,7 +118,7 @@ void Player::Update()
 		Move();
 		Jump();
 		Rotate();
-		//Attack();
+		Attack();
 	}
 
 	for (std::unique_ptr<PlayerBullet>& bullet : bullets_) { bullet->Update(); }

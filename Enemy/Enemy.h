@@ -18,13 +18,12 @@ private:
 	Model* pressRippleModel_;
 	uint32_t textureHandle_[2];
 	DebugText* debugText_;
-	size_t phase_ = Phase::bomb;
+	size_t phase_,phase2_;
 	Vector3 toPlayer_;
 	Vector3* playerTranslation_;
 	Vector3 tackleSpd{};
 	ViewProjection* viewProjection_;
-	Timer rippleLifeTimer;
-	Timer beamTimer_, idleTimer_;
+	Timer idleTimer_;
 	Timer bindTimer;
 	Timer actionTimer_;
 	bool isActionEnd;
@@ -35,7 +34,6 @@ private:
 	int preHp_;
 	Audio* audio_;
 	std::vector<uint32_t> seHandle_;
-	uint32_t stopHandle;
 
 	void BeamAction(), Missile();
 	void BombAction(), Press();
@@ -53,11 +51,12 @@ public:
 	bool isRippleExist = 0;
 	bool isStart = 0;
 	State state;
+	bool isHardMode_;
 
-	void Initialize(Model* model, Vector3* playerTranslation, ViewProjection* viewProjection, bool* isPlayerMove);
+	void Initialize(Model* model, Vector3* playerTranslation, ViewProjection* viewProjection, bool* isPlayerMove, bool isHardMode_);
 	void Update(), Draw();
 	void Clear();
-	void OnCollision() { hp_--; /*audio_->PlayWave(seHandle_[0], false, 0.5f);*/ }
+	void OnCollision() { hp_--; audio_->PlayWave(seHandle_[0], false, 0.5f); }
 	const Vector3 GetRadius() { return worldTransform_.scale_; }
 	const Vector3 GetWorldPosition() { return worldTransform_.translation_; }
 	void StopAudio();
