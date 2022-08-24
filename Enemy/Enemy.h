@@ -13,13 +13,13 @@
 class Enemy :public Collider
 {
 private:
-	enum Phase { beam, missile, bomb, press, tackle, warp };
+	enum Phase { missile, bomb, press, beam, tackle, warp };
 
 	Model* model_;
 	Model* pressRippleModel_;
 	uint32_t textureHandle_[2];
 	DebugText* debugText_;
-	size_t phase_,phase2_;
+	size_t phase_;
 	Vector3 toPlayer_;
 	Vector3* playerTranslation_;
 	Vector3 tackleSpd{};
@@ -27,7 +27,7 @@ private:
 	Timer idleTimer_;
 	Timer bindTimer;
 	Timer actionTimer_;
-	bool isActionEnd;
+	bool isActionEnd, isTackle_;
 	bool* isPlayerMove_;
 	const float JUMP_SPD_INIT = 2.0f;
 	float jumpSpd = JUMP_SPD_INIT;
@@ -42,6 +42,7 @@ private:
 	void Tackle(), Warp();
 	static void (Enemy::* pPhaseFuncTable[])();
 	void StateChange();
+	int PhaseChange();
 public:
 	enum State { Easy, Normal, Hard };
 	int hp_;

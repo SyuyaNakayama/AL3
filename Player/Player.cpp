@@ -73,7 +73,7 @@ void Player::Jump()
 	static bool isJump = 0;
 	if (!isJump)
 	{
-		if (input_->TriggerKey(DIK_Q))
+		if (input_->IsTriggerMouse(0))
 		{
 			isJump = 1;
 			audio_->PlayWave(seHandle_[1]);
@@ -120,6 +120,9 @@ void Player::Update()
 		Rotate();
 		Attack();
 	}
+	
+	if (input_->IsTriggerMouse(1)) { cursolMode = !cursolMode; }
+	if (cursolMode) { SetCursorPos(760, 480); }
 
 	for (std::unique_ptr<PlayerBullet>& bullet : bullets_) { bullet->Update(); }
 }

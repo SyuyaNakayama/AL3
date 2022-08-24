@@ -30,7 +30,7 @@ public:
 	void Draw();
 	void LoadResources();
 
-	enum Scene { Title, HowToPlay, Play, GameClear, GameOver };
+	enum Scene { Title, HowToPlay, Play, GameClear, GameOver, Pause };
 private:
 	DirectXCommon* dxCommon_ = nullptr;
 	Input* input_ = nullptr;

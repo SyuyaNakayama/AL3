@@ -21,6 +21,7 @@ private:
 	Audio* audio_;
 	std::vector<uint32_t> seHandle_;
 	int preHp_ = hp_;
+	bool cursolMode = 0;
 
 	void Move();
 	void Rotate();

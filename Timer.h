@@ -5,7 +5,8 @@ private:
 	int timer_;
 	int timeMem_;
 public:
-	Timer();
-	Timer(int timer);
+	Timer() { timer_ = timeMem_ = 0; }
+	Timer(int timer) { timer_ = timeMem_ = timer; }
 	bool CountDown();
+	int GetPassTime() { return timeMem_ - timer_; }
 };

@@ -1,11 +1,13 @@
 #include "Enemy.h"
-#include <assert.h>
 #include <stdlib.h>
 #include <DirectXMath.h>
 #include <random>
 #include "function.h"
 #include "Collider/CollisionConfig.h"
 #include "Player/Player.h"
+#include <cassert>
+
+using namespace std;
 
 void Enemy::Initialize(Model* model, Vector3* playerTranslation,
 	ViewProjection* viewProjection, bool* isPlayerMove, bool isHardMode)
@@ -29,12 +31,13 @@ void Enemy::Initialize(Model* model, Vector3* playerTranslation,
 	isActionEnd = 1;
 	isRippleExist = 0;
 	counter_ = 0;
-	idleTimer_ = 80;
+	idleTimer_ = 80 * !isHardMode;
 	bindTimer = 60;
 	state = State::Easy;
 	preHp_ = hp_;
 	audio_ = Audio::GetInstance();
 	isHardMode_ = isHardMode;
+	isTackle_ = 0;
 	seHandle_.push_back(audio_->LoadWave("sound/SE/EnemyDamage.mp3"));
 	seHandle_.push_back(audio_->LoadWave("sound/SE/Missile.mp3"));
 	seHandle_.push_back(audio_->LoadWave("sound/SE/Press.mp3"));
@@ -147,7 +150,7 @@ void Enemy::Missile()
 
 	if (actionTimer_.CountDown())
 	{
-		std::unique_ptr<EnemyBullet> newMissile = std::make_unique<EnemyBullet>();
+		unique_ptr<EnemyBullet> newMissile = make_unique<EnemyBullet>();
 		Vector3 velocity{};
 		int offset;
 		const int MISSILE_NUM = 12;
@@ -156,7 +159,7 @@ void Enemy::Missile()
 		case Enemy::Easy:
 			toPlayer_ *= 2.0f;
 			newMissile->Initialize(model_, worldTransform_.translation_, toPlayer_);
-			missiles_.push_back(std::move(newMissile));
+			missiles_.push_back(move(newMissile));
 			break;
 		case Enemy::Normal:
 			offset = rand() % 360;
@@ -166,8 +169,8 @@ void Enemy::Missile()
 				velocity.z = cosf(DirectX::XM_2PI / (float)MISSILE_NUM * (float)i + DirectX::XMConvertToRadians(offset));
 				velocity *= 2.0f;
 				newMissile->Initialize(model_, worldTransform_.translation_, velocity);
-				missiles_.push_back(std::move(newMissile));
-				newMissile = std::make_unique<EnemyBullet>();
+				missiles_.push_back(move(newMissile));
+				newMissile = make_unique<EnemyBullet>();
 			}
 			break;
 		case Enemy::Hard:
@@ -175,7 +178,7 @@ void Enemy::Missile()
 			velocity.z = cosf(DirectX::XMConvertToRadians(counter_ * 12));
 			velocity *= 2.0f;
 			newMissile->Initialize(model_, worldTransform_.translation_, velocity);
-			missiles_.push_back(std::move(newMissile));
+			missiles_.push_back(move(newMissile));
 			break;
 		}
 		counter_++;
@@ -222,7 +225,7 @@ void Enemy::BombAction()
 
 	if (actionTimer_.CountDown())
 	{
-		std::unique_ptr<Bomb> newBomb_ = std::make_unique<Bomb>();
+		unique_ptr<Bomb> newBomb_ = make_unique<Bomb>();
 		Vector3 bombSpd{};
 		switch (state)
 		{
@@ -233,8 +236,8 @@ void Enemy::BombAction()
 			bombSpd.y = 1.5f;
 			break;
 		case Enemy::Hard:
-			static std::mt19937_64 engine(seedGen());
-			static std::uniform_real_distribution<float> bombFallPos(-74.0f, 74.0f);
+			static mt19937_64 engine(seedGen());
+			static uniform_real_distribution<float> bombFallPos(-74.0f, 74.0f);
 			bombSpd = { bombFallPos(engine),0, bombFallPos(engine) };
 			bombSpd = (bombSpd - worldTransform_.translation_) / 102.0f;
 			bombSpd.y = 1.5f;
@@ -242,7 +245,7 @@ void Enemy::BombAction()
 		}
 		counter_++;
 		newBomb_->Initialize(model_, worldTransform_.translation_, bombSpd);
-		bomb_.push_back(std::move(newBomb_));
+		bomb_.push_back(move(newBomb_));
 	}
 
 	switch (state)
@@ -307,10 +310,17 @@ void Enemy::Press()
 
 void Enemy::Tackle()
 {
-	static Timer timer = 50;
+	static float posX;
+
 	if (!isStart)
 	{
-		if (timer.CountDown())
+		isStart = 1;
+		posX = worldTransform_.translation_.x;
+		actionTimer_ = 50;
+	}
+	if (!isTackle_)
+	{
+		if (actionTimer_.CountDown())
 		{
 			float tSpd = 0;
 			switch (state)
@@ -326,11 +336,16 @@ void Enemy::Tackle()
 				break;
 			}
 			tackleSpd = toPlayer_ * tSpd;
-			isStart = 1;
 			audio_->PlayWave(seHandle_[3]);
+			isTackle_ = 1;
 		}
+		if (actionTimer_.GetPassTime() <= 40)
+		{
+			worldTransform_.translation_.x = posX + sinf(DirectX::XM_2PI / 10.0f * actionTimer_.GetPassTime());
+		}
+		else { worldTransform_.translation_.x = posX; }
 	}
-	if (isStart)
+	if (isTackle_)
 	{
 		worldTransform_.translation_ += tackleSpd;
 
@@ -338,14 +353,15 @@ void Enemy::Tackle()
 		{
 			worldTransform_.translation_ -= tackleSpd;
 			isActionEnd = 1;
+			isTackle_ = 0;
 		}
 	}
 }
 
 void Enemy::Warp()
 {
-	static std::mt19937_64 engine(seedGen());
-	static std::uniform_real_distribution<float> warpPos(-75.0f, 75.0f);
+	static mt19937_64 engine(seedGen());
+	static uniform_real_distribution<float> warpPos(-75.0f, 75.0f);
 	worldTransform_.translation_ = { warpPos(engine), 3.0f, warpPos(engine) };
 	audio_->PlayWave(seHandle_[6]);
 	isActionEnd = 1;
@@ -353,37 +369,38 @@ void Enemy::Warp()
 
 void Enemy::Update()
 {
-	missiles_.remove_if([](std::unique_ptr<EnemyBullet>& bullet) { return bullet->isDead_; });
-	bomb_.remove_if([](std::unique_ptr<Bomb>& bomb) { return bomb->phase_ == Bomb::Phase::Dead; });
+	missiles_.remove_if([](unique_ptr<EnemyBullet>& bullet) { return bullet->isDead_; });
+	bomb_.remove_if([](unique_ptr<Bomb>& bomb) { return bomb->phase_ == Bomb::Phase::Dead; });
 	if (!*isPlayerMove_) { if (bindTimer.CountDown()) { *isPlayerMove_ = 1; } }
-
-	StateChange();
 
 	toPlayer_ = *playerTranslation_ - worldTransform_.translation_;
 	toPlayer_.y = 0;
-	toPlayer_.normalize();
 
 	if (isActionEnd)
 	{
 		if (idleTimer_.CountDown())
 		{
+			StateChange();
+
 			int nextPhase = 0;
 			do
 			{
-				nextPhase = rand() % (5 + (worldTransform_.translation_.x != 0));
+				nextPhase = PhaseChange();
 			} while (phase_ == nextPhase);
 
 			phase_ = nextPhase;
+			phase_ = tackle;
+
 			isStart = 0;
 			isActionEnd = 0;
 
-			if (isHardMode_) { idleTimer_ = 0; }
 		}
 	}
+	toPlayer_.normalize();
 	if (!isActionEnd) { (this->*pPhaseFuncTable[phase_])(); }
 
-	for (std::unique_ptr<EnemyBullet>& bullet : missiles_) { bullet->Update(); }
-	for (std::unique_ptr<Bomb>& bomb : bomb_) { bomb->Update(); }
+	for (unique_ptr<EnemyBullet>& bullet : missiles_) { bullet->Update(); }
+	for (unique_ptr<Bomb>& bomb : bomb_) { bomb->Update(); }
 
 	worldTransform_.UpdateMatrix();
 	worldTransform_.TransferMatrix();
@@ -392,8 +409,8 @@ void Enemy::Update()
 void Enemy::Draw()
 {
 	model_->Draw(worldTransform_, *viewProjection_, textureHandle_[preHp_ != hp_]);
-	for (std::unique_ptr<EnemyBullet>& bullet : missiles_) { bullet->Draw(*viewProjection_); }
-	for (std::unique_ptr<Bomb>& bomb : bomb_) { bomb->Draw(*viewProjection_); }
+	for (unique_ptr<EnemyBullet>& bullet : missiles_) { bullet->Draw(*viewProjection_); }
+	for (unique_ptr<Bomb>& bomb : bomb_) { bomb->Draw(*viewProjection_); }
 	if (phase_ == Phase::beam) { for (size_t i = 0; i < beam_.size(); i++) { beam_[i].Draw(*viewProjection_); } }
 	if (isRippleExist) { pressRippleModel_->Draw(rippleTransform_, *viewProjection_); }
 	preHp_ = hp_;
@@ -401,8 +418,8 @@ void Enemy::Draw()
 
 void (Enemy::* Enemy::pPhaseFuncTable[])() =
 {
-	&Enemy::BeamAction,&Enemy::Missile,&Enemy::BombAction,
-	&Enemy::Press,&Enemy::Tackle,&Enemy::Warp
+	&Enemy::Missile,&Enemy::BombAction,&Enemy::Press,
+	&Enemy::BeamAction,&Enemy::Tackle,&Enemy::Warp
 };
 
 void Enemy::StateChange()
@@ -415,6 +432,38 @@ void Enemy::StateChange()
 	else
 	{
 		state = State::Hard;
+	}
+}
+
+int Enemy::PhaseChange()
+{
+	// RATE_TABLE[ãóó£][èÛë‘][çsìÆ]
+	static const vector<vector<vector<int>>> RATE_TABLE =
+	{
+		{	// missile, bomb, press, beam, tackle, warp
+			{10,20,30,15,10,15},
+			{20,20,10,20,10,20}
+		},
+		{
+			{15,20, 0,15,20,30},
+			{15,15,15,10,20,25}
+		}
+	};
+
+	bool dis = toPlayer_.length() >= 40.0f;
+	int number = rand() % 100 + 1;
+
+	int rateSum = 0;
+	for (size_t i = 0; i < RATE_TABLE[dis][state == State::Hard].size(); i++)
+	{
+		rateSum += RATE_TABLE[dis][state == State::Hard][i];
+	}
+	if (rateSum != 100) { assert(0); return -1; }
+
+	for (size_t i = 0; i < RATE_TABLE[dis][state == State::Hard].size(); i++)
+	{
+		number -= RATE_TABLE[dis][state == State::Hard][i];
+		if (number <= 0) { return i; }
 	}
 }
 

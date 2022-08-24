@@ -32,6 +32,7 @@ void GameScene::Initialize()
 	player_->Initialize(model_, &viewProjection_);
 	enemy_->Initialize(model_, &viewProjection_.eye, &viewProjection_, &player_->isMove, isHardMode);
 	player_->Clear();
+	enemy_->Clear();
 }
 
 void GameScene::Update()
@@ -61,9 +62,6 @@ void GameScene::Update()
 		enemy_->Update();
 		collisionManager_->CheckAllCollisions(player_.get(), enemy_.get());
 		viewProjection_.UpdateMatrix();
-		if (input_->TriggerKey(DIK_U)) { enemy_->state = Enemy::State::Easy; }
-		if (input_->TriggerKey(DIK_I)) { enemy_->state = Enemy::State::Normal; }
-		if (input_->TriggerKey(DIK_O)) { enemy_->state = Enemy::State::Hard; }
 
 		if (player_->hp_ <= 0)
 		{
@@ -102,7 +100,7 @@ void GameScene::Update()
 					fprintf(file, "\n\nこれは真エンディングを見るためのリンクです。");
 				}
 			}
-			fclose(file);
+			if (file) { fclose(file); }
 			isGetLink = 1;
 		}
 		break;
@@ -155,7 +153,7 @@ void GameScene::Draw()
 
 	// ここに前景スプライトの描画処理を追加できる
 	if (themeSprite_[scene_]) { themeSprite_[scene_]->Draw(); }
-	if (isGetLink) { themeSprite_[themeSprite_.size() - 1]->Draw(); }
+	if (isGetLink) { themeSprite_[themeSprite_.size() - 2 + isHardMode]->Draw(); }
 	if (scene_ == Scene::Play || scene_ == Scene::HowToPlay) { reticle_->Draw(); }
 	player_->DamageEffectDraw();
 	if (scene_ == Scene::Play) { for (size_t i = 0; i < hpGauge_.size(); i++) { hpGauge_[i]->Draw(); } }
@@ -177,6 +175,7 @@ void GameScene::LoadResources()
 	themeSprite_.push_back(Sprite::Create(TextureManager::Load("picture/GameClear.png"), {}));
 	themeSprite_.push_back(Sprite::Create(TextureManager::Load("picture/GameOver.png"), {}));
 	themeSprite_.push_back(Sprite::Create(TextureManager::Load("picture/GetLink.png"), {}));
+	themeSprite_.push_back(Sprite::Create(TextureManager::Load("picture/GetLink2.png"), {}));
 	for (size_t i = 0; i < themeSprite_.size(); i++)
 	{
 		if (!themeSprite_[i])continue;

@@ -44,15 +44,15 @@ class Matrix4 {
 		Matrix4 matRot, rotX, rotY, rotZ;
 
 		rotX = Matrix4(
-		  1.0f, 0, 0, 0, 0, cos(rot.x), sin(rot.x), 0, 0, -sin(rot.x), cos(rot.x), 0, 0, 0, 0,
+		  1.0f, 0, 0, 0, 0, cosf(rot.x), sinf(rot.x), 0, 0, -sinf(rot.x), cosf(rot.x), 0, 0, 0, 0,
 		  1.0f);
 
 		rotY = Matrix4(
-		  cos(rot.y), 0, -sin(rot.y), 0, 0, 1.0f, 0, 0, sin(rot.y), 0, cos(rot.y), 0, 0, 0, 0,
+		  cosf(rot.y), 0, -sinf(rot.y), 0, 0, 1.0f, 0, 0, sinf(rot.y), 0, cosf(rot.y), 0, 0, 0, 0,
 		  1.0f);
 
 		rotZ = Matrix4(
-		  cos(rot.z), sin(rot.z), 0, 0, -sin(rot.z), cos(rot.z), 0, 0, 0, 0, 1.0f, 0, 0, 0, 0,
+		  cosf(rot.z), sinf(rot.z), 0, 0, -sinf(rot.z), cosf(rot.z), 0, 0, 0, 0, 1.0f, 0, 0, 0, 0,
 		  1.0f);
 
 		rotZ *= rotX;

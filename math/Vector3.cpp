@@ -52,9 +52,9 @@ Vector3 Vector3::abs()
 {
 	Vector3 ans = *this;
 
-	ans.x = fabs(ans.x);
-	ans.y = fabs(ans.y);
-	ans.z = fabs(ans.z);
+	ans.x = fabsf(ans.x);
+	ans.y = fabsf(ans.y);
+	ans.z = fabsf(ans.z);
 
 	return ans;
 }
