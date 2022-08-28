@@ -17,6 +17,7 @@ void Player::Initialize(Model* model, ViewProjection* viewProjection)
 	hp_ = 150; preHp_ = hp_; angle_ = {}; isMove = 1;
 	damageEffect_ = Sprite::Create(TextureManager::Load("Picture/Beam.png"), {});
 	damageEffect_->SetSize({ 1280,720 });
+	cursolMode = 0;
 	seHandle_.push_back(audio_->LoadWave("sound/SE/PlayerShot.mp3"));
 	seHandle_.push_back(audio_->LoadWave("sound/SE/PlayerJump.mp3"));
 	seHandle_.push_back(audio_->LoadWave("sound/SE/PlayerDamage.mp3"));

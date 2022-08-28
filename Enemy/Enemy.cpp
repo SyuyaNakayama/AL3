@@ -31,7 +31,7 @@ void Enemy::Initialize(Model* model, Vector3* playerTranslation,
 	isActionEnd = 1;
 	isRippleExist = 0;
 	counter_ = 0;
-	idleTimer_ = 80 * !isHardMode;
+	idleTimer_ = 80;
 	bindTimer = 60;
 	state = State::Easy;
 	preHp_ = hp_;
@@ -46,6 +46,9 @@ void Enemy::Initialize(Model* model, Vector3* playerTranslation,
 	seHandle_.push_back(audio_->LoadWave("sound/SE/LaserShot.mp3"));
 	seHandle_.push_back(audio_->LoadWave("sound/SE/Warp.mp3"));
 	seHandle_.push_back(0);
+	bgm_.push_back(audio_->LoadWave("sound/bgm/battlemusic1.mp3"));
+	bgm_.push_back(audio_->LoadWave("sound/bgm/battlemusic2.mp3"));
+	bgm_.push_back(audio_->LoadWave("sound/bgm/battlemusic3.mp3"));
 }
 
 void Enemy::BeamAction()
@@ -389,11 +392,10 @@ void Enemy::Update()
 			} while (phase_ == nextPhase);
 
 			phase_ = nextPhase;
-			phase_ = tackle;
 
 			isStart = 0;
 			isActionEnd = 0;
-
+			if (isHardMode_) { idleTimer_ = 0; }
 		}
 	}
 	toPlayer_.normalize();

@@ -34,7 +34,7 @@ private:
 	int counter_;
 	int preHp_;
 	Audio* audio_;
-	std::vector<uint32_t> seHandle_;
+	std::vector<uint32_t> seHandle_,bgm_;
 	std::random_device seedGen;
 
 	void BeamAction(), Missile();
@@ -56,7 +56,7 @@ public:
 	State state;
 	bool isHardMode_;
 
-	void Initialize(Model* model, Vector3* playerTranslation, ViewProjection* viewProjection, bool* isPlayerMove, bool isHardMode_);
+	void Initialize(Model*, Vector3*, ViewProjection*, bool*, bool);
 	void Update(), Draw();
 	void Clear();
 	void OnCollision() { hp_--; audio_->PlayWave(seHandle_[0], false, 0.5f); }

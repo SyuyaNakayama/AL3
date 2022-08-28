@@ -58,6 +58,8 @@ void GameScene::Update()
 		viewProjection_.UpdateMatrix();
 		break;
 	case GameScene::Play:
+		if (input_->TriggerKey(DIK_RETURN)) { scene_ = Scene::Pause; }
+
 		player_->Update();
 		enemy_->Update();
 		collisionManager_->CheckAllCollisions(player_.get(), enemy_.get());
@@ -72,8 +74,11 @@ void GameScene::Update()
 		}
 		if (enemy_->hp_ <= 0) { scene_ = Scene::GameClear; enemy_->StopAudio(); }
 
-		hpGauge_[2]->SetSize({ player_->hp_ * 2.5f,64 });
+		hpGauge_[2]->SetSize({ player_->hp_ * 2.5f * 4.0f / 3.0f,64 });
 		hpGauge_[3]->SetSize({ enemy_->hp_ * 2.5f,64 });
+		break;
+	case GameScene::Pause:
+		if (input_->TriggerKey(DIK_RETURN)) { scene_ = Scene::Play; }
 		break;
 	case GameScene::GameClear:
 		if (input_->TriggerKey(DIK_ESCAPE)) { scene_ = GameScene::Title; isGetLink = 0; }
@@ -138,6 +143,7 @@ void GameScene::Draw()
 	switch (scene_)
 	{
 	case GameScene::Play:
+	case GameScene::Pause:
 		enemy_->Draw();
 	case GameScene::HowToPlay:
 		player_->Draw();
@@ -153,10 +159,17 @@ void GameScene::Draw()
 
 	// ここに前景スプライトの描画処理を追加できる
 	if (themeSprite_[scene_]) { themeSprite_[scene_]->Draw(); }
-	if (isGetLink) { themeSprite_[themeSprite_.size() - 2 + isHardMode]->Draw(); }
-	if (scene_ == Scene::Play || scene_ == Scene::HowToPlay) { reticle_->Draw(); }
+	if (isGetLink) { themeSprite_[Scene::Pause + 2 + isHardMode]->Draw(); }
+	switch (scene_)
+	{
+	case Scene::Play: for (size_t i = 0; i < hpGauge_.size(); i++) { hpGauge_[i]->Draw(); }
+	case Scene::HowToPlay: reticle_->Draw();
+		break;
+	case Scene::Pause: themeSprite_[Scene::Pause + 1]->Draw();
+		break;
+	}
+
 	player_->DamageEffectDraw();
-	if (scene_ == Scene::Play) { for (size_t i = 0; i < hpGauge_.size(); i++) { hpGauge_[i]->Draw(); } }
 	// デバッグテキストの描画
 	debugText_->DrawAll(commandList);
 	// スプライト描画後処理
@@ -174,48 +187,30 @@ void GameScene::LoadResources()
 	themeSprite_.push_back(nullptr);
 	themeSprite_.push_back(Sprite::Create(TextureManager::Load("picture/GameClear.png"), {}));
 	themeSprite_.push_back(Sprite::Create(TextureManager::Load("picture/GameOver.png"), {}));
+	themeSprite_.push_back(Sprite::Create(TextureManager::Load("white1x1.png"), { 128,72 }, { 0,0,0,0.95f }));
+	themeSprite_.push_back(Sprite::Create(TextureManager::Load("picture/pausemenu.png"), { 138,72 }));
 	themeSprite_.push_back(Sprite::Create(TextureManager::Load("picture/GetLink.png"), {}));
 	themeSprite_.push_back(Sprite::Create(TextureManager::Load("picture/GetLink2.png"), {}));
 	for (size_t i = 0; i < themeSprite_.size(); i++)
 	{
-		if (!themeSprite_[i])continue;
+		if (!themeSprite_[i]) { continue; }
 		if (i != Scene::HowToPlay) { themeSprite_[i]->SetSize({ 1280.0f,720.0f }); }
+		if (i == Scene::Pause) { themeSprite_[i]->SetSize({ 1024.0f,576.0f }); }
 	}
+	themeSprite_[Scene::Pause + 1]->SetSize(Vector2(480, 240) * 2.1f);
 
 	float leftSpace = 44;
 
 	hpGauge_.push_back(Sprite::Create(TextureManager::Load("picture/player.png"), { leftSpace,20 }));
-	hpGauge_[0]->SetSize({ 32,64 });
 	hpGauge_.push_back(Sprite::Create(TextureManager::Load("picture/enemy.png"), { 640 + leftSpace,20 }));
+	hpGauge_.push_back(Sprite::Create(TextureManager::Load("white1x1.png"), { leftSpace + 42,20 }, { 0,0,0.95f,1 }));
+	hpGauge_.push_back(Sprite::Create(TextureManager::Load("white1x1.png"), { 640 + leftSpace + 42,20 }, { 0.95f,0,0,1 }));
+	hpGauge_[0]->SetSize({ 32,64 });
 	hpGauge_[1]->SetSize({ 32,64 });
-	hpGauge_.push_back(Sprite::Create(TextureManager::Load("picture/HpGauge.png"), { leftSpace + 42,20 }, { 0,0,0.95f,1 }));
-	hpGauge_.push_back(Sprite::Create(TextureManager::Load("picture/HpGauge.png"), { 640 + leftSpace + 42,20 }, { 0.95f,0,0,1 }));
 #pragma endregion
 #pragma region オーディオ読み込み
-	/*HANDLE hFind;
-	WIN32_FIND_DATAA findData;
-	string fileName;
-	string pass;
-	const char STR[2][2][22]
-	{
-		{"Sound/BGM/","Resources/Sound/BGM/*"},
-		{"Sound/SE/","Resources/Sound/SE/*"},
-	};
-
-	for (size_t i = 1; i < 2; i++)
-	{
-		fileName = STR[i][0];
-		pass = STR[i][1];
-		hFind = FindFirstFileA(pass.c_str(), &findData);
-		if (hFind == INVALID_HANDLE_VALUE) { return; }
-		for (; FindNextFileA(hFind, &findData);)
-		{
-			if (strstr(findData.cFileName, ".mp3") == nullptr) { continue; }
-			if (i == 0) { bgm_.push_back(audio_->LoadWave(fileName + findData.cFileName)); }
-			else { se_.push_back(audio_->LoadWave(fileName + findData.cFileName)); }
-		}
-	}
-
-	FindClose(hFind);*/
+	bgm_.push_back(audio_->LoadWave("sound/bgm/title.mp3"));
+	bgm_.push_back(audio_->LoadWave("sound/bgm/tutorial.mp3"));
+	bgm_.push_back(audio_->LoadWave("sound/bgm/stageclear.mp3"));
 #pragma endregion
 }

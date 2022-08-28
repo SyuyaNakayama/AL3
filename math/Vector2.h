@@ -1,25 +1,32 @@
-ï»¿#pragma once
+#pragma once
+class Vector2
+{
+public:
+	float x, y;
 
-/// <summary>
-/// 2æ¬¡å…ƒãƒ™ã‚¯ãƒˆãƒ«
-/// </summary>
-class Vector2 {
-  public:
-	float x; // xæˆåˆ†
-	float y; // yæˆåˆ†
+public:
+	Vector2();
+	Vector2(float x, float y);
 
-  public:
-	// ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
-	Vector2();                          // é›¶ãƒ™ã‚¯ãƒˆãƒ«ã¨ã™ã‚‹
-	Vector2(float x, float y); // xæˆåˆ†, yæˆåˆ† ã‚’æŒ‡å®šã—ã¦ã®ç”Ÿæˆ
+	float length() const; // ƒmƒ‹ƒ€(’·‚³)
+	Vector2& normalize(); // ³‹K‰»
+	float dot(const Vector2& v) const; // “àÏ’l
+	float cross(const Vector2& v) const; // ŠOÏ’l
 
-	// å˜é …æ¼”ç®—å­ã‚ªãƒ¼ãƒãƒ¼ãƒ­ãƒ¼ãƒ‰
+	// ’P€‰‰ZqƒI[ƒo[ƒ[ƒh
 	Vector2 operator+() const;
 	Vector2 operator-() const;
 
-	// ä»£å…¥æ¼”ç®—å­ã‚ªãƒ¼ãƒãƒ¼ãƒ­ãƒ¼ãƒ‰
+	// ‘ã“ü‰‰ZqƒI[ƒo[ƒ[ƒh
 	Vector2& operator+=(const Vector2& v);
 	Vector2& operator-=(const Vector2& v);
 	Vector2& operator*=(float s);
 	Vector2& operator/=(float s);
 };
+
+// 2€‰‰ZqƒI[ƒo[ƒ[ƒh
+const Vector2 operator+(const Vector2& v1, const Vector2& v2);
+const Vector2 operator-(const Vector2& v1, const Vector2& v2);
+const Vector2 operator*(const Vector2& v, float s);
+const Vector2 operator*(float s, const Vector2& v);
+const Vector2 operator/(const Vector2& v, float s);
