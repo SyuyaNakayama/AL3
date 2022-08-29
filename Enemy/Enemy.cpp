@@ -17,7 +17,6 @@ void Enemy::Initialize(Model* model, Vector3* playerTranslation,
 	if (!isHardMode) { textureHandle_[0] = TextureManager::Load("picture/enemy.png"); }
 	else { textureHandle_[0] = TextureManager::Load("picture/enemyhard.png"); }
 	textureHandle_[1] = TextureManager::Load("picture/beam.png");
-	debugText_ = DebugText::GetInstance();
 	worldTransform_.translation_ = { 0, 3.0f, 0 };
 	worldTransform_.scale_ = { 2.5f,5.0f,2.5f };
 	worldTransform_.Initialize();
@@ -28,6 +27,7 @@ void Enemy::Initialize(Model* model, Vector3* playerTranslation,
 	isPlayerMove_ = isPlayerMove;
 	SetCollisionAttribute(CollisionAttribute::Enemy);
 	hp_ = 200;
+	isStart = 0;
 	isActionEnd = 1;
 	isRippleExist = 0;
 	counter_ = 0;
@@ -38,6 +38,7 @@ void Enemy::Initialize(Model* model, Vector3* playerTranslation,
 	audio_ = Audio::GetInstance();
 	isHardMode_ = isHardMode;
 	isTackle_ = 0;
+	seHandle_.clear();
 	seHandle_.push_back(audio_->LoadWave("sound/SE/EnemyDamage.mp3"));
 	seHandle_.push_back(audio_->LoadWave("sound/SE/Missile.mp3"));
 	seHandle_.push_back(audio_->LoadWave("sound/SE/Press.mp3"));
@@ -46,9 +47,13 @@ void Enemy::Initialize(Model* model, Vector3* playerTranslation,
 	seHandle_.push_back(audio_->LoadWave("sound/SE/LaserShot.mp3"));
 	seHandle_.push_back(audio_->LoadWave("sound/SE/Warp.mp3"));
 	seHandle_.push_back(0);
+	bgm_.clear();
 	bgm_.push_back(audio_->LoadWave("sound/bgm/battlemusic1.mp3"));
 	bgm_.push_back(audio_->LoadWave("sound/bgm/battlemusic2.mp3"));
 	bgm_.push_back(audio_->LoadWave("sound/bgm/battlemusic3.mp3"));
+	bgm_.push_back(audio_->LoadWave("sound/bgm/battlemusic4.mp3"));
+	playBGMHandle = -1;
+	preState = -1;
 }
 
 void Enemy::BeamAction()
@@ -406,6 +411,7 @@ void Enemy::Update()
 
 	worldTransform_.UpdateMatrix();
 	worldTransform_.TransferMatrix();
+	AudioManage();
 }
 
 void Enemy::Draw()
@@ -469,6 +475,27 @@ int Enemy::PhaseChange()
 	}
 }
 
+void Enemy::AudioManage()
+{
+	if (!isHardMode_)
+	{
+		if (state != preState)
+		{
+			audio_->StopWave(playBGMHandle);
+			playBGMHandle = audio_->PlayWave(bgm_[state], true);
+		}
+
+		preState = state;
+	}
+	else
+	{
+		if (playBGMHandle == -1)
+		{
+			playBGMHandle = audio_->PlayWave(bgm_[3], true);
+		}
+	}
+}
+
 void Enemy::Clear()
 {
 	missiles_.clear();
@@ -479,4 +506,5 @@ void Enemy::Clear()
 void Enemy::StopAudio()
 {
 	audio_->StopWave(seHandle_[7]);
+	audio_->StopWave(playBGMHandle);
 }

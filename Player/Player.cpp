@@ -9,7 +9,6 @@ void Player::Initialize(Model* model, ViewProjection* viewProjection)
 	model_ = model;
 	input_ = Input::GetInstance();
 	audio_ = Audio::GetInstance();
-	debugText_ = DebugText::GetInstance();
 	viewProjection_ = viewProjection;
 	bulletInterval_ = 15;
 	SetCollisionAttribute(CollisionAttribute::Player);

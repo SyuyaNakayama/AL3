@@ -29,22 +29,23 @@ public:
 	void Update();
 	void Draw();
 	void LoadResources();
+	void AudioManage();
 
 	enum Scene { Title, HowToPlay, Play, GameClear, GameOver, Pause };
 private:
 	DirectXCommon* dxCommon_ = nullptr;
 	Input* input_ = nullptr;
 	Audio* audio_ = nullptr;
-	DebugText* debugText_ = nullptr;
 	Model* model_ = nullptr;
 	Sprite* background_ = nullptr;
 	vector<Sprite*> themeSprite_;
 	vector<Sprite*> hpGauge_;
 	vector<uint32_t> bgm_, se_;
 	bool isGetLink = 0, isHardMode = 0;
+	uint32_t playBGMHandle = 0;
 
 	// ゲームシーン用
-	Scene scene_ = Scene::Play;
+	Scene scene_ = Scene::Title;
 	ViewProjection viewProjection_;
 	unique_ptr<Player> player_ = nullptr;
 	unique_ptr<Enemy> enemy_ = nullptr;

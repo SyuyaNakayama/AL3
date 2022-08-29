@@ -3,8 +3,6 @@
 #include "GameScene.h"
 #include "TextureManager.h"
 #include "WinApp.h"
-#include "AxisIndicator.h"
-#include "PrimitiveDrawer.h"
 #include <time.h>
 #include <memory>
 
@@ -16,18 +14,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Input* input = nullptr;
 	Audio* audio = nullptr;
 	DebugText* debugText = nullptr;
-	AxisIndicator* axisIndicator = nullptr;
-	PrimitiveDrawer* primitiveDrawer = nullptr;
 	std::unique_ptr<GameScene> gameScene = nullptr;
 
 	// ゲームウィンドウの作成
 	win = WinApp::GetInstance();
-	win->CreateGameWindow("LE2A_16_ナカヤマ_シュウヤ_AL3");
+	win->CreateGameWindow("LE2A_16_ナカヤマ_シュウヤ_AL3_ンボスの侵略2");
 
 	// DirectX初期化処理
 	dxCommon = DirectXCommon::GetInstance();
 	dxCommon->Initialize(win);
-
 #pragma region 汎用機能初期化
 	// 入力の初期化
 	input = Input::GetInstance();
@@ -49,15 +44,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	// 3Dモデル静的初期化
 	Model::StaticInitialize();
-
-	// 軸方向表示初期化
-	axisIndicator = AxisIndicator::GetInstance();
-	axisIndicator->Initialize();
-
-	primitiveDrawer = PrimitiveDrawer::GetInstance();
-	primitiveDrawer->Initialize();
 #pragma endregion
-
 	// ゲームシーンの初期化
 	gameScene = std::make_unique<GameScene>();
 	gameScene->Initialize();
@@ -66,30 +53,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// メインループ
 	while (!win->ProcessMessage())
 	{
-		// 入力関連の毎フレーム処理
-		input->Update();
-		// ゲームシーンの毎フレーム処理
-		gameScene->Update();
-		// 軸表示の更新
-		axisIndicator->Update();
-
-		// 描画開始
-		dxCommon->PreDraw();
-		// ゲームシーンの描画
-		gameScene->Draw();
-		// 軸表示の描画
-		axisIndicator->Draw();
-		// プリミティブ描画のリセット
-		primitiveDrawer->Reset();
-		// 描画終了
-		dxCommon->PostDraw();
+		input->Update();		// 入力関連の毎フレーム処理
+		gameScene->Update();	// ゲームシーンの毎フレーム処理
+		dxCommon->PreDraw();	// 描画開始
+		gameScene->Draw();		// ゲームシーンの描画
+		dxCommon->PostDraw();	// 描画終了
 	}
 
-	// 各種解放
-	audio->Finalize();
-
-	// ゲームウィンドウの破棄
-	win->TerminateGameWindow();
+	audio->Finalize(); // 各種解放
+	win->TerminateGameWindow(); // ゲームウィンドウの破棄
 
 	return 0;
 }

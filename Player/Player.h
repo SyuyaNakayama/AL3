@@ -1,5 +1,4 @@
 #pragma once
-#include "DebugText.h"
 #include "Input.h"
 #include "PlayerBullet.h"
 #include "Timer.h"
@@ -13,7 +12,6 @@ class Player :public Collider
 private:
 	Model* model_;
 	Input* input_;
-	DebugText* debugText_;
 	ViewProjection* viewProjection_;
 	Timer bulletInterval_;
 	Vector2 angle_;

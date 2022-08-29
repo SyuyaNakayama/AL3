@@ -12,7 +12,6 @@ GameScene::GameScene()
 	dxCommon_ = DirectXCommon::GetInstance();
 	input_ = Input::GetInstance();
 	audio_ = Audio::GetInstance();
-	debugText_ = DebugText::GetInstance();
 	model_ = Model::Create();
 	LoadResources();
 	reticle_ = Sprite::Create(TextureManager::Load("Picture/Reticle.png"), { 640,360 }, { 1,1,1,1 }, { 0.5f,0.5f });
@@ -20,7 +19,6 @@ GameScene::GameScene()
 	player_ = make_unique<Player>();
 	enemy_ = make_unique<Enemy>();
 	collisionManager_ = make_unique<CollisionManager>();
-	scene_ = Scene::HowToPlay;
 }
 
 void GameScene::Initialize()
@@ -53,6 +51,7 @@ void GameScene::Update()
 			scene_ = GameScene::Play;
 			if (input_->PushKey(DIK_LSHIFT)) { isHardMode = 1; }
 			Initialize();
+			audio_->StopWave(playBGMHandle);
 		}
 		player_->Update();
 		viewProjection_.UpdateMatrix();
@@ -101,7 +100,7 @@ void GameScene::Update()
 				{
 					fprintf(file, "ハードモードクリアおめでとうございます。ここまで遊んで頂きありがとうございます。\n");
 					fprintf(file, "検索エンジンで下記URLを貼り付けて下さい。\n\n");
-					fprintf(file, "https://drive.google.com/file/d/1baJpTZh645Fu9sv8loQcIi_KjeRuPLEa/view?usp=sharing");
+					fprintf(file, "https://drive.google.com/file/d/1dvZLAf-0L9Kxhf1NkmYfMowHyXQCt1Uc/view?usp=sharing");
 					fprintf(file, "\n\nこれは真エンディングを見るためのリンクです。");
 				}
 			}
@@ -118,6 +117,7 @@ void GameScene::Update()
 		if (input_->TriggerKey(DIK_ESCAPE)) { scene_ = GameScene::Title; }
 		break;
 	}
+	AudioManage();
 }
 
 void GameScene::Draw()
@@ -160,6 +160,7 @@ void GameScene::Draw()
 	// ここに前景スプライトの描画処理を追加できる
 	if (themeSprite_[scene_]) { themeSprite_[scene_]->Draw(); }
 	if (isGetLink) { themeSprite_[Scene::Pause + 2 + isHardMode]->Draw(); }
+	player_->DamageEffectDraw();
 	switch (scene_)
 	{
 	case Scene::Play: for (size_t i = 0; i < hpGauge_.size(); i++) { hpGauge_[i]->Draw(); }
@@ -169,9 +170,6 @@ void GameScene::Draw()
 		break;
 	}
 
-	player_->DamageEffectDraw();
-	// デバッグテキストの描画
-	debugText_->DrawAll(commandList);
 	// スプライト描画後処理
 	Sprite::PostDraw();
 #pragma endregion
@@ -213,4 +211,27 @@ void GameScene::LoadResources()
 	bgm_.push_back(audio_->LoadWave("sound/bgm/tutorial.mp3"));
 	bgm_.push_back(audio_->LoadWave("sound/bgm/stageclear.mp3"));
 #pragma endregion
+}
+
+void GameScene::AudioManage()
+{
+	static int preScene = -1;
+	if (scene_ != preScene)
+	{
+		audio_->StopWave(playBGMHandle);
+		switch (scene_)
+		{
+		case GameScene::Title:
+			playBGMHandle = audio_->PlayWave(bgm_[0],true);
+			break;
+		case GameScene::HowToPlay:
+			playBGMHandle = audio_->PlayWave(bgm_[1], true);
+			break;
+		case GameScene::GameClear:
+			audio_->PlayWave(bgm_[2]);
+			break;
+		}
+	}
+
+	preScene = scene_;
 }

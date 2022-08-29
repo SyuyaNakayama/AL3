@@ -1,5 +1,4 @@
 #pragma once
-#include "DebugText.h"
 #include "Model.h"
 #include "ViewProjection.h"
 #include "WorldTransform.h"
@@ -18,7 +17,6 @@ private:
 	Model* model_;
 	Model* pressRippleModel_;
 	uint32_t textureHandle_[2];
-	DebugText* debugText_;
 	size_t phase_;
 	Vector3 toPlayer_;
 	Vector3* playerTranslation_;
@@ -36,6 +34,8 @@ private:
 	Audio* audio_;
 	std::vector<uint32_t> seHandle_,bgm_;
 	std::random_device seedGen;
+	uint32_t playBGMHandle = 0;
+	int preState;
 
 	void BeamAction(), Missile();
 	void BombAction(), Press();
@@ -43,6 +43,7 @@ private:
 	static void (Enemy::* pPhaseFuncTable[])();
 	void StateChange();
 	int PhaseChange();
+	void AudioManage();
 public:
 	enum State { Easy, Normal, Hard };
 	int hp_;
