@@ -80,33 +80,7 @@ void GameScene::Update()
 		if (input_->TriggerKey(DIK_RETURN)) { scene_ = Scene::Play; }
 		break;
 	case GameScene::GameClear:
-		if (input_->TriggerKey(DIK_ESCAPE)) { scene_ = GameScene::Title; isGetLink = 0; }
-		if (input_->TriggerKey(DIK_SPACE))
-		{
-			FILE* file;
-			if (!isHardMode)
-			{
-				if (fopen_s(&file, "エンディングリンク.txt", "w") == 0)
-				{
-					fprintf(file, "クリアおめでとうございます。こちらがエンディングを見るためのリンクです。\n");
-					fprintf(file, "検索エンジンで下記URLを貼り付けて下さい。\n\n");
-					fprintf(file, "https://drive.google.com/file/d/1baJpTZh645Fu9sv8loQcIi_KjeRuPLEa/view?usp=sharing");
-					fprintf(file, "\n\n追記:チュートリアルで左SHIFTキーを押しながらゲームを開始すると...？");
-				}
-			}
-			else
-			{
-				if (fopen_s(&file, "真エンディングリンク.txt", "w") == 0)
-				{
-					fprintf(file, "ハードモードクリアおめでとうございます。ここまで遊んで頂きありがとうございます。\n");
-					fprintf(file, "検索エンジンで下記URLを貼り付けて下さい。\n\n");
-					fprintf(file, "https://drive.google.com/file/d/1dvZLAf-0L9Kxhf1NkmYfMowHyXQCt1Uc/view?usp=sharing");
-					fprintf(file, "\n\nこれは真エンディングを見るためのリンクです。");
-				}
-			}
-			if (file) { fclose(file); }
-			isGetLink = 1;
-		}
+		if (input_->TriggerKey(DIK_ESCAPE)) { scene_ = GameScene::Title; }
 		break;
 	case GameScene::GameOver:
 		if (input_->TriggerKey(DIK_SPACE))
@@ -159,11 +133,10 @@ void GameScene::Draw()
 
 	// ここに前景スプライトの描画処理を追加できる
 	if (themeSprite_[scene_]) { themeSprite_[scene_]->Draw(); }
-	if (isGetLink) { themeSprite_[Scene::Pause + 2 + isHardMode]->Draw(); }
 	player_->DamageEffectDraw();
 	switch (scene_)
 	{
-	case Scene::Play: for (size_t i = 0; i < hpGauge_.size(); i++) { hpGauge_[i]->Draw(); }
+	case Scene::Play: for (size_t i = 0; i < hpGauge_.size() - !isHardMode; i++) { hpGauge_[i]->Draw(); }
 	case Scene::HowToPlay: reticle_->Draw();
 		break;
 	case Scene::Pause: themeSprite_[Scene::Pause + 1]->Draw();
@@ -187,8 +160,6 @@ void GameScene::LoadResources()
 	themeSprite_.push_back(Sprite::Create(TextureManager::Load("picture/GameOver.png"), {}));
 	themeSprite_.push_back(Sprite::Create(TextureManager::Load("white1x1.png"), { 128,72 }, { 0,0,0,0.95f }));
 	themeSprite_.push_back(Sprite::Create(TextureManager::Load("picture/pausemenu.png"), { 138,72 }));
-	themeSprite_.push_back(Sprite::Create(TextureManager::Load("picture/GetLink.png"), {}));
-	themeSprite_.push_back(Sprite::Create(TextureManager::Load("picture/GetLink2.png"), {}));
 	for (size_t i = 0; i < themeSprite_.size(); i++)
 	{
 		if (!themeSprite_[i]) { continue; }
@@ -203,8 +174,10 @@ void GameScene::LoadResources()
 	hpGauge_.push_back(Sprite::Create(TextureManager::Load("picture/enemy.png"), { 640 + leftSpace,20 }));
 	hpGauge_.push_back(Sprite::Create(TextureManager::Load("white1x1.png"), { leftSpace + 42,20 }, { 0,0,0.95f,1 }));
 	hpGauge_.push_back(Sprite::Create(TextureManager::Load("white1x1.png"), { 640 + leftSpace + 42,20 }, { 0.95f,0,0,1 }));
+	hpGauge_.push_back(Sprite::Create(TextureManager::Load("picture/enemyhard.png"), { 640 + leftSpace,20 }));
 	hpGauge_[0]->SetSize({ 32,64 });
-	hpGauge_[1]->SetSize({ 32,64 });
+	hpGauge_[1]->SetSize(hpGauge_[0]->GetSize());
+	hpGauge_[4]->SetSize(hpGauge_[0]->GetSize());
 #pragma endregion
 #pragma region オーディオ読み込み
 	bgm_.push_back(audio_->LoadWave("sound/bgm/title.mp3"));
@@ -222,7 +195,7 @@ void GameScene::AudioManage()
 		switch (scene_)
 		{
 		case GameScene::Title:
-			playBGMHandle = audio_->PlayWave(bgm_[0],true);
+			playBGMHandle = audio_->PlayWave(bgm_[0], true);
 			break;
 		case GameScene::HowToPlay:
 			playBGMHandle = audio_->PlayWave(bgm_[1], true);

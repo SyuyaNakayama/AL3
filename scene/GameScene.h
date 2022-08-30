@@ -41,7 +41,7 @@ private:
 	vector<Sprite*> themeSprite_;
 	vector<Sprite*> hpGauge_;
 	vector<uint32_t> bgm_, se_;
-	bool isGetLink = 0, isHardMode = 0;
+	bool isHardMode = 0;
 	uint32_t playBGMHandle = 0;
 
 	// ゲームシーン用
